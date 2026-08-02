@@ -1514,38 +1514,39 @@
     }
     .map-dot-popup .leaflet-popup-content {
       margin: 0;
-      min-width: 220px;
+      min-width: 196px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     /* Mobile: compact map action menus (area info / links) */
     html.layout-phone .map-dot-popup .leaflet-popup-content {
       min-width: 0;
-      max-width: min(248px, calc(100vw - 36px));
+      max-width: min(228px, calc(100vw - 40px));
     }
     html.layout-phone .map-dot-menu {
       min-width: 0;
-      max-width: min(248px, calc(100vw - 36px));
-      padding: 10px 10px 9px;
-      gap: 5px;
+      max-width: min(228px, calc(100vw - 40px));
+      padding: 8px 9px 8px;
+      gap: 4px;
     }
     html.layout-phone .map-dot-menu .mdm-title {
       font-size: 12px;
-      margin: 0 24px 2px 0;
+      margin: 0 22px 1px 0;
     }
     html.layout-phone .map-dot-menu .mdm-sub {
       font-size: 11px;
       margin: -2px 0 2px;
     }
     html.layout-phone .map-dot-menu .mdm-btn {
-      padding: 8px 10px;
+      padding: 8px 9px;
       font-size: 13px;
       border-radius: 7px;
+      min-height: 36px;
     }
     html.layout-phone .map-dot-menu .mdm-hunt-status {
-      padding: 8px 9px;
-      margin: 0 0 4px;
+      padding: 7px 8px;
+      margin: 0 0 3px;
     }
-    html.layout-phone .map-dot-menu .mdm-hunt-status .mhs-title { font-size: 13px; }
+    html.layout-phone .map-dot-menu .mdm-hunt-status .mhs-title { font-size: 12px; }
     html.layout-phone .map-dot-menu .mdm-hunt-status .mhs-line { font-size: 11px; }
     html.layout-phone .map-dot-menu .mdm-hunt-status .mhs-sub { font-size: 10px; }
     html.layout-phone .map-dot-popup .leaflet-popup-close-button {
@@ -1588,36 +1589,38 @@
     }
     .map-dot-popup .leaflet-popup-close-button:hover { opacity: 1; color: #e59a18 !important; }
     .map-dot-menu {
-      min-width: 220px;
+      min-width: 196px;
+      max-width: 248px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      padding: 14px 14px 12px;
+      gap: 5px;
+      padding: 10px 11px 9px;
       box-sizing: border-box;
     }
     .map-dot-menu .mdm-title {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 800;
       color: #ffffff;
       letter-spacing: 0.02em;
-      margin: 0 28px 4px 0;
-      line-height: 1.3;
+      margin: 0 26px 2px 0;
+      line-height: 1.25;
     }
     .map-dot-menu .mdm-sub {
-      font-size: 12px;
+      font-size: 11px;
       color: #c5d0be;
-      margin: -2px 0 4px;
-      line-height: 1.35;
+      margin: -2px 0 2px;
+      line-height: 1.3;
     }
     .map-dot-menu .mdm-btn {
       display: block;
       width: 100%;
       text-align: center;
-      padding: 12px 14px;
-      border-radius: 8px;
+      padding: 9px 11px;
+      min-height: 38px;
+      border-radius: 7px;
       border: none;
       cursor: pointer;
-      font-size: 15px;
+      font-size: 13.5px;
       font-weight: 700;
       letter-spacing: 0.01em;
       line-height: 1.2;
@@ -1629,11 +1632,11 @@
     .map-dot-menu .mdm-btn.weather { background: #3f6b2a; }
     /* Hunt status strip at top of map-dot popup */
     .map-dot-menu .mdm-hunt-status {
-      border-radius: 8px;
-      padding: 10px 12px;
-      margin: 0 0 6px;
+      border-radius: 7px;
+      padding: 8px 9px;
+      margin: 0 0 3px;
       border: 1px solid var(--border);
-      line-height: 1.35;
+      line-height: 1.3;
     }
     .map-dot-menu .mdm-hunt-status.closed {
       background: rgba(185, 28, 28, 0.28);
@@ -1648,10 +1651,10 @@
       border-color: var(--accent);
     }
     .map-dot-menu .mdm-hunt-status .mhs-title {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 900;
       letter-spacing: 0.02em;
-      margin: 0 0 4px;
+      margin: 0 0 3px;
     }
     .map-dot-menu .mdm-hunt-status.closed .mhs-title { color: #fecaca; }
     .map-dot-menu .mdm-hunt-status.open .mhs-title { color: #bbf7d0; }
@@ -11078,8 +11081,12 @@
      * opts.addChooser: show Pin / Hunt / Stand picker (from compact "Add Pin" button).
      * Status banner already has land / owner / zone / peak rut — no duplicate black-space copy.
      */
+    /** Which marker owns the map-dot action menu: 'dot' | 'gps' */
+    var mapDotMenuSource = 'dot';
+
     function buildMapDotActionsHtml(opts) {
       opts = opts || {};
+      var fromGps = !!(opts.fromGps || mapDotMenuSource === 'gps');
       var pl = lastClickPublicLand;
       var st = null;
       try {
@@ -11110,6 +11117,7 @@
       var weatherHandler = hasPublicLand
         ? "window.handleMapDotPublicLandAction('weather')"
         : "window.handleMapDotAction('weather')";
+      var shareLabel = fromGps ? 'Share my location' : 'Share location';
 
       // Sub-menu: pick pin vs hunt vs stand (one button on main menu)
       if (opts.addChooser) {
@@ -11126,7 +11134,7 @@
         );
       }
 
-      // Main menu: status once → actions (regs above weather; single Add Pin → chooser)
+      // Main menu: share always last (bottom). GPS uses same actions, different share label.
       return (
         '<div class="map-dot-menu" onclick="event.stopPropagation();">' +
           statusBlock +
@@ -11135,10 +11143,23 @@
           '<button type="button" class="mdm-btn weather" onclick="event.preventDefault();event.stopPropagation();' + weatherHandler + ';return false;">Get weather</button>' +
           areaMapBtn +
           '<button type="button" class="mdm-btn pin" onclick="event.preventDefault();event.stopPropagation();window.handleMapDotAction(\'add-menu\');return false;">Add Pin</button>' +
-          '<button type="button" class="mdm-btn share" onclick="event.preventDefault();event.stopPropagation();window.handleMapDotAction(\'share\');return false;">Share location</button>' +
           '<button type="button" class="mdm-btn" style="background:#1a4a5c;" onclick="event.preventDefault();event.stopPropagation();window.handleMapDotAction(\'offline-save\');return false;">Save map offline (2 mi)</button>' +
+          '<button type="button" class="mdm-btn share" onclick="event.preventDefault();event.stopPropagation();window.handleMapDotAction(\'share\');return false;">' + shareLabel + '</button>' +
         '</div>'
       );
+    }
+
+    /** Refresh open map-dot menu on orange dot or GPS arrow. */
+    function setMapDotMenuContent(opts) {
+      opts = opts || {};
+      var html = buildMapDotActionsHtml(opts);
+      if (mapDotMenuSource === 'gps' && gpsMarker && typeof gpsMarker.setPopupContent === 'function') {
+        try { gpsMarker.setPopupContent(html); } catch (eG) {}
+        return;
+      }
+      if (tempClickMarker && typeof tempClickMarker.setPopupContent === 'function') {
+        try { tempClickMarker.setPopupContent(html); } catch (eD) {}
+      }
     }
 
     function handleMapDotPublicLandAction(act) {
@@ -11449,8 +11470,9 @@
 
       function refreshDotPopup(openIt) {
         if (!tempClickMarker) return;
+        mapDotMenuSource = 'dot';
         try {
-          tempClickMarker.setPopupContent(buildMapDotActionsHtml());
+          tempClickMarker.setPopupContent(buildMapDotActionsHtml({ fromGps: false }));
         } catch (eSet) {}
         if (openIt) {
           try { tempClickMarker.openPopup(); } catch (eO) {}
@@ -11462,11 +11484,11 @@
         refreshDotPopup(false);
       } else {
         tempClickMarker = L.marker(latlng, { icon: icon, keyboard: true }).addTo(map);
-        tempClickMarker.bindPopup(buildMapDotActionsHtml(), {
+        tempClickMarker.bindPopup(buildMapDotActionsHtml({ fromGps: false }), {
           className: 'map-dot-popup',
           closeButton: true,
           autoPan: false,
-          maxWidth: 300,
+          maxWidth: 260,
           offset: L.point(0, 0),
           closeOnClick: false
         });
@@ -11476,9 +11498,11 @@
             L.DomEvent.stopPropagation(ev.originalEvent);
             L.DomEvent.preventDefault(ev.originalEvent);
           }
+          mapDotMenuSource = 'dot';
           refreshDotPopup(true);
         });
         tempClickMarker.on('popupopen', function() {
+          mapDotMenuSource = 'dot';
           var el = tempClickMarker.getPopup() && tempClickMarker.getPopup().getElement();
           if (!el) return;
           L.DomEvent.disableClickPropagation(el);
@@ -11529,15 +11553,11 @@
       try {
         // Compact "Add Pin" → show Pin / Hunt / Stand chooser in the same popup
         if (act === 'add-menu') {
-          if (tempClickMarker && typeof tempClickMarker.setPopupContent === 'function') {
-            try { tempClickMarker.setPopupContent(buildMapDotActionsHtml({ addChooser: true })); } catch (eM) {}
-          }
+          setMapDotMenuContent({ addChooser: true, fromGps: mapDotMenuSource === 'gps' });
           return false;
         }
         if (act === 'add-back') {
-          if (tempClickMarker && typeof tempClickMarker.setPopupContent === 'function') {
-            try { tempClickMarker.setPopupContent(buildMapDotActionsHtml()); } catch (eB) {}
-          }
+          setMapDotMenuContent({ fromGps: mapDotMenuSource === 'gps' });
           return false;
         }
 
@@ -11651,7 +11671,10 @@
         }
 
         if (act === 'share') {
-          shareLocationLink(clickLat, clickLng, detected.name || 'Map spot');
+          var shareName = mapDotMenuSource === 'gps'
+            ? 'My location'
+            : (detected.name || 'Map spot');
+          shareLocationLink(clickLat, clickLng, shareName);
           return false;
         }
 
@@ -14155,6 +14178,61 @@
       });
     }
 
+    /**
+     * Open the same map-dot action menu on the GPS arrow (share label = Share my location).
+     */
+    function openGpsMapDotMenu() {
+      if (!map || !gpsMarker || userLat == null || userLng == null) return;
+      if (typeof mapRadarActive !== 'undefined' && mapRadarActive) return;
+      if (mapDrawMode === 'measure' || mapDrawMode === 'draw') return;
+      if (standPlaceMode) {
+        placeStandAt(userLat, userLng);
+        return;
+      }
+      mapDotMenuSource = 'gps';
+      clickLat = userLat;
+      clickLng = userLng;
+      lastClickTva = null;
+      lastClickParcel = null;
+      lastClickPublicLand = null; // same as free map-dot: unit context only from public-land click
+      try {
+        if (gpsMarker.isPopupOpen && gpsMarker.isPopupOpen()) {
+          /* keep open and refresh */
+        } else if (map) {
+          try { map.closePopup(); } catch (eCp) {}
+        }
+      } catch (eCl) {}
+
+      function refreshGpsPopup(openIt) {
+        if (!gpsMarker) return;
+        mapDotMenuSource = 'gps';
+        try {
+          gpsMarker.setPopupContent(buildMapDotActionsHtml({ fromGps: true }));
+        } catch (eSet) {}
+        if (openIt) {
+          try { gpsMarker.openPopup(); } catch (eO) {}
+        }
+      }
+
+      refreshGpsPopup(true);
+
+      // Parcel owner for status banner (async), same as free map-dot
+      var lat0 = userLat, lng0 = userLng;
+      queryParcelAt(lat0, lng0).then(function(parcel) {
+        if (clickLat !== lat0 || clickLng !== lng0 || mapDotMenuSource !== 'gps') return;
+        lastClickParcel = parcel;
+        if (gpsMarker && gpsMarker.isPopupOpen && gpsMarker.isPopupOpen()) {
+          refreshGpsPopup(false);
+        }
+      }).catch(function() {});
+
+      queryTvaLand(lat0, lng0).then(function(tva) {
+        if (clickLat !== lat0 || clickLng !== lng0 || mapDotMenuSource !== 'gps') return;
+        lastClickTva = tva;
+      }).catch(function() {});
+    }
+    window.openGpsMapDotMenu = openGpsMapDotMenu;
+
     function setGpsMarker(lat, lng, headingDeg) {
       if (!map || typeof L === 'undefined') return;
       if (headingDeg == null && typeof deviceHeadingDeg !== 'undefined') headingDeg = deviceHeadingDeg;
@@ -14162,11 +14240,42 @@
       if (gpsMarker) {
         gpsMarker.setLatLng([lat, lng]);
         try { gpsMarker.setIcon(icon); } catch (eI) {}
+        // Keep menu actions pointed at live GPS if that menu is open
+        if (mapDotMenuSource === 'gps' && gpsMarker.isPopupOpen && gpsMarker.isPopupOpen()) {
+          clickLat = lat;
+          clickLng = lng;
+        }
       } else {
-        // Location only — no auto popup
-        gpsMarker = L.marker([lat, lng], { icon: icon, interactive: false, keyboard: false }).addTo(map);
+        // Clickable GPS arrow — same action menu as orange map-dot (no auto-open)
+        gpsMarker = L.marker([lat, lng], {
+          icon: icon,
+          interactive: true,
+          keyboard: true,
+          zIndexOffset: 1200
+        }).addTo(map);
+        gpsMarker.bindPopup(buildMapDotActionsHtml({ fromGps: true }), {
+          className: 'map-dot-popup',
+          closeButton: true,
+          autoPan: false,
+          maxWidth: 260,
+          offset: L.point(0, 0),
+          closeOnClick: false
+        });
+        gpsMarker.on('click', function(ev) {
+          if (ev && ev.originalEvent) {
+            L.DomEvent.stopPropagation(ev.originalEvent);
+            L.DomEvent.preventDefault(ev.originalEvent);
+          }
+          openGpsMapDotMenu();
+        });
+        gpsMarker.on('popupopen', function() {
+          mapDotMenuSource = 'gps';
+          var el = gpsMarker.getPopup() && gpsMarker.getPopup().getElement();
+          if (!el) return;
+          L.DomEvent.disableClickPropagation(el);
+          L.DomEvent.disableScrollPropagation(el);
+        });
       }
-      if (map) map.closePopup();
     }
 
     /** Lightweight GPS marker rotation without rebuilding the whole icon (smooth heading). */
