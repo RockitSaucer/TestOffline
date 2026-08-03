@@ -3538,8 +3538,8 @@
     }
 
     /*
-     * Date + weapon — reserved footprint so they never jump when tools
-     * or other bar buttons show/hide. Always visible.
+     * Date + weapon — far left. Date is always full (never ellipsis-abbreviated);
+     * font size scales to fit the reserved slot via fitMbbDateText().
      */
     .mbb-context {
       display: flex;
@@ -3547,28 +3547,29 @@
       align-items: flex-start;
       justify-content: center;
       gap: 1px;
-      flex: 0 0 auto;
-      width: 72px;
-      min-width: 72px;
-      max-width: 72px;
+      flex: 0 1 auto;
+      width: auto;
+      min-width: 88px;
+      max-width: min(38vw, 168px);
       height: var(--mbb-h) !important;
       max-height: var(--mbb-h) !important;
       overflow: hidden;
       box-sizing: border-box;
-      padding: 0 2px 0 0;
+      padding: 0 4px 0 0;
       color: var(--ink);
     }
     .mbb-date {
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 800;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.01em;
       white-space: nowrap;
       overflow: hidden;
-      text-overflow: ellipsis;
+      text-overflow: clip; /* never "…" — shrink font instead */
       color: #e8efe4;
       font-variant-numeric: tabular-nums;
       line-height: 1.1;
       max-width: 100%;
+      width: 100%;
       display: block;
     }
     .mbb-date.is-empty { color: var(--muted); font-weight: 700; }
@@ -3775,23 +3776,24 @@
       height: var(--mbb-h) !important;
       max-height: var(--mbb-h) !important;
     }
-    /* Reserved date + weapon slot — far left, always readable */
+    /* Reserved date + weapon slot — far left; date scales to fit, never abbreviated with … */
     html.layout-phone .mbb-context {
-      width: 56px;
-      min-width: 56px;
-      max-width: 56px;
+      width: auto;
+      min-width: 72px;
+      max-width: min(42vw, 140px);
       height: var(--mbb-h) !important;
       gap: 1px;
-      padding: 0 2px 0 0;
-      flex: 0 0 56px;
+      padding: 0 3px 0 0;
+      flex: 0 1 auto;
       overflow: hidden;
       justify-content: center;
     }
     html.layout-phone .mbb-date {
-      font-size: 9px;
-      letter-spacing: 0.01em;
-      line-height: 1.1;
+      font-size: 10px;
+      letter-spacing: 0;
+      line-height: 1.05;
       font-weight: 800;
+      text-overflow: clip;
     }
     html.layout-phone .mbb-weapon {
       height: 13px;
@@ -3897,12 +3899,11 @@
         column-gap: 3px !important;
       }
       html.layout-phone .mbb-context {
-        width: 52px;
-        min-width: 52px;
-        max-width: 52px;
-        flex: 0 0 52px;
+        min-width: 64px;
+        max-width: min(40vw, 128px);
+        flex: 0 1 auto;
       }
-      html.layout-phone .mbb-date { font-size: 8.5px; }
+      html.layout-phone .mbb-date { font-size: 9px; }
       html.layout-phone .mbb-weapon { height: 12px; font-size: 7.5px; padding: 0 3px; }
       html.layout-phone .mbb-left .map-draw-tools { padding-left: 4px; }
       html.layout-phone .mbb-icon-btn svg,
@@ -3930,10 +3931,9 @@
         column-gap: 2px !important;
       }
       html.layout-phone .mbb-context {
-        width: 46px;
-        min-width: 46px;
-        max-width: 46px;
-        flex: 0 0 46px;
+        min-width: 56px;
+        max-width: min(38vw, 110px);
+        flex: 0 1 auto;
       }
       html.layout-phone .mbb-date { font-size: 8px; }
       html.layout-phone .mbb-weapon { height: 11px; font-size: 7px; padding: 0 2px; }
@@ -15640,43 +15640,44 @@
     window.selectPinColor = selectPinColor;
     window.selectHuntColor = selectHuntColor;
 
-    // ---- Custom pin icons: only assets from HuntApp/button icons (normalized 128×128) ----
-    // id = filename slug; name = display name from original file
+    // ---- Custom pin icons from HuntApp/button icons/Layers naked ----
+    // White/background stripped → transparent PNG; name = photo name; defaultColor = image color
     var PIN_ICON_CATALOG = [
-      { id: 'alligator', name: 'Alligator', src: 'icons/pins/alligator.png' },
-      { id: 'arrow', name: 'Arrow', src: 'icons/pins/arrow.png' },
-      { id: 'beaver_dam', name: 'Beaver Dam', src: 'icons/pins/beaver_dam.png' },
-      { id: 'blood', name: 'Blood', src: 'icons/pins/blood.png' },
-      { id: 'boat', name: 'Boat', src: 'icons/pins/boat.png' },
-      { id: 'bow', name: 'Bow', src: 'icons/pins/bow.png' },
-      { id: 'bow_stand', name: 'Bow Stand', src: 'icons/pins/bow_stand.png' },
-      { id: 'bridge', name: 'Bridge', src: 'icons/pins/bridge.png' },
-      { id: 'buck', name: 'Buck', src: 'icons/pins/buck.png' },
-      { id: 'camera', name: 'Camera', src: 'icons/pins/camera.png' },
-      { id: 'crossing', name: 'Crossing', src: 'icons/pins/crossing.png' },
-      { id: 'deadhead', name: 'Deadhead', src: 'icons/pins/deadhead.png' },
-      { id: 'doe', name: 'Doe', src: 'icons/pins/doe.png' },
-      { id: 'feeder', name: 'Feeder', src: 'icons/pins/feeder.png' },
-      { id: 'food', name: 'Food', src: 'icons/pins/food.png' },
-      { id: 'muzzleloader', name: 'Muzzleloader', src: 'icons/pins/muzzleloader.png' },
-      { id: 'prints', name: 'Prints', src: 'icons/pins/prints.png' },
-      { id: 'rifle', name: 'Rifle', src: 'icons/pins/rifle.png' },
-      { id: 'rifle_stand', name: 'Rifle Stand', src: 'icons/pins/rifle_stand.png' },
-      { id: 'rub', name: 'Rub', src: 'icons/pins/rub.png' },
-      { id: 'salt', name: 'Salt', src: 'icons/pins/salt.png' },
-      { id: 'scrape', name: 'Scrape', src: 'icons/pins/scrape.png' },
-      { id: 'shed', name: 'Shed', src: 'icons/pins/shed.png' },
-      { id: 'tent', name: 'Tent', src: 'icons/pins/tent.png' },
-      { id: 'tree', name: 'Tree', src: 'icons/pins/tree.png' },
-      { id: 'truck', name: 'Truck', src: 'icons/pins/truck.png' }
+      { id: 'alligator', name: 'Alligator', src: 'icons/pins/alligator.png', defaultColor: '#1a1a1a' },
+      { id: 'arrow', name: 'Arrow', src: 'icons/pins/arrow.png', defaultColor: '#1a1a1a' },
+      { id: 'beaver_dam', name: 'Beaver Dam', src: 'icons/pins/beaver_dam.png', defaultColor: '#1a1a1a' },
+      { id: 'blood', name: 'Blood', src: 'icons/pins/blood.png', defaultColor: '#e43844' },
+      { id: 'boat', name: 'Boat', src: 'icons/pins/boat.png', defaultColor: '#1a1a1a' },
+      { id: 'bow', name: 'Bow', src: 'icons/pins/bow.png', defaultColor: '#1a1a1a' },
+      { id: 'bow_stand', name: 'Bow Stand', src: 'icons/pins/bow_stand.png', defaultColor: '#1a1a1a' },
+      { id: 'bridge', name: 'Bridge', src: 'icons/pins/bridge.png', defaultColor: '#1a1a1a' },
+      { id: 'buck', name: 'Buck', src: 'icons/pins/buck.png', defaultColor: '#1a1a1a' },
+      { id: 'camera', name: 'Camera', src: 'icons/pins/camera.png', defaultColor: '#1a1a1a' },
+      { id: 'crossing', name: 'Crossing', src: 'icons/pins/crossing.png', defaultColor: '#1a1a1a' },
+      { id: 'deadhead', name: 'Dead Head', src: 'icons/pins/deadhead.png', defaultColor: '#1a1a1a' },
+      { id: 'doe', name: 'Doe', src: 'icons/pins/doe.png', defaultColor: '#1a1a1a' },
+      { id: 'feeder', name: 'Feeder', src: 'icons/pins/feeder.png', defaultColor: '#1a1a1a' },
+      { id: 'food', name: 'Food', src: 'icons/pins/food.png', defaultColor: '#1a1a1a' },
+      { id: 'muzzleloader', name: 'Muzzleloader', src: 'icons/pins/muzzleloader.png', defaultColor: '#1a1a1a' },
+      { id: 'prints', name: 'Prints', src: 'icons/pins/prints.png', defaultColor: '#1a1a1a' },
+      { id: 'rifle', name: 'Rifle', src: 'icons/pins/rifle.png', defaultColor: '#1a1a1a' },
+      { id: 'rifle_stand', name: 'Rifle Stand', src: 'icons/pins/rifle_stand.png', defaultColor: '#1a1a1a' },
+      { id: 'rub', name: 'Rub', src: 'icons/pins/rub.png', defaultColor: '#1a1a1a' },
+      { id: 'salt', name: 'Salt', src: 'icons/pins/salt.png', defaultColor: '#1a1a1a' },
+      { id: 'scrape', name: 'Scrape', src: 'icons/pins/scrape.png', defaultColor: '#1a1a1a' },
+      { id: 'shed', name: 'Shed', src: 'icons/pins/shed.png', defaultColor: '#1a1a1a' },
+      { id: 'tent', name: 'Tent', src: 'icons/pins/tent.png', defaultColor: '#1a1a1a' },
+      { id: 'tree', name: 'Tree', src: 'icons/pins/tree.png', defaultColor: '#1a1a1a' },
+      { id: 'truck', name: 'Truck', src: 'icons/pins/truck.png', defaultColor: '#1a1a1a' }
     ].sort(function(a, b) { return a.name.localeCompare(b.name); });
 
     var selectedPinIconId = null;
     var selectedPinInnerColor = '#f5f5f5';
-    var selectedPinGlyphColor = '#000000';
+    // 'natural' = show PNG as-is (no recolor filter)
+    var selectedPinGlyphColor = 'natural';
     var selectedHuntStandType = 'rifle_stand';
     var PIN_ICON_RECENT_KEY = 'reg_slayer_pin_icon_recent_v1';
-    var PIN_ICON_SCHEME_KEY = 'reg_slayer_pin_icon_schemes_v1';
+    var PIN_ICON_SCHEME_KEY = 'reg_slayer_pin_icon_schemes_v2';
 
     function loadPinIconRecent() {
       try {
@@ -15699,10 +15700,6 @@
     function savePinIconScheme(id, scheme) {
       if (!id || !scheme) return;
       var o = loadPinIconSchemes();
-      // Never persist custom icon color for blood — icon is always red
-      if (id === 'blood' && scheme) {
-        scheme = Object.assign({}, scheme, { icon: '#dc2626' });
-      }
       o[id] = scheme;
       try { localStorage.setItem(PIN_ICON_SCHEME_KEY, JSON.stringify(o)); } catch (e3) {}
     }
@@ -15712,43 +15709,48 @@
       }
       return null;
     }
+    function pinIconDefaultColor(iconId) {
+      var ic = getPinIconById(iconId);
+      return (ic && ic.defaultColor) ? ic.defaultColor : '#1a1a1a';
+    }
     function pinIconImageSrc(iconId) {
       if (!iconId) return null;
       var ic = getPinIconById(iconId);
-      return (ic && ic.src) ? ic.src : ('icons/pins/' + iconId + '.png');
+      // cache-bust after glyph rebuild
+      var base = (ic && ic.src) ? ic.src : ('icons/pins/' + iconId + '.png');
+      return base + (base.indexOf('?') >= 0 ? '&' : '?') + 'v=naked2';
     }
-    /** CSS filter to recolor black silhouette to a hex (approx) — blood uses fixed red. */
+    /** Optional CSS recolor for black silhouettes when user picks a custom glyph tint. */
     function pinIconColorFilter(hex, iconId) {
-      // Glyph-only assets (black/colored on transparent). No nested pin frame.
+      if (!hex || hex === 'natural' || hex === 'none' || hex === 'original') return 'none';
+      // Blood asset is already red — keep natural unless user forces a tint
       if (iconId === 'blood') {
-        // Always red blood drop
-        return 'none';
+        var h = String(hex).toLowerCase();
+        if (h === '#e43844' || h === '#dc2626' || h === '#ef4444' || h === '#e43945') return 'none';
       }
-      if (!hex || hex === '#000' || hex === '#000000') {
+      if (hex === '#000' || hex === '#000000' || hex === '#1a1a1a') {
         return 'brightness(0)';
       }
       if (hex === '#fff' || hex === '#ffffff') {
         return 'brightness(0) invert(1)';
       }
-      // Approximate tint of black silhouette
-      return 'brightness(0) drop-shadow(0 0 0 ' + hex + ')';
+      return 'brightness(0) saturate(100%) drop-shadow(0 0 0.6px ' + hex + ') drop-shadow(0 0 0 ' + hex + ')';
     }
     function pinIconMarkup(iconId, glyphColor, size) {
       var img = pinIconImageSrc(iconId);
       var s = size || 22;
       if (!img) return '';
-      // Glyph-only PNGs (pin frame already stripped) — color via filter
+      // Default: natural PNG colors (white already removed at build time)
       var filt = pinIconColorFilter(glyphColor, iconId);
       return '<img src="' + img + '" width="' + s + '" height="' + s + '" alt="" draggable="false" ' +
-        'style="filter:' + filt + ';opacity:1;display:block;object-fit:contain;">';
+        'style="filter:' + filt + ';opacity:1;display:block;object-fit:contain;background:transparent;border:none;">';
     }
     function buildCustomPinMarkerHtml(loc) {
-      var outer = loc.color || '#e59a18';
-      var inner = loc.innerColor || '#f5f5f5';
-      var glyph = loc.iconColor || '#000000';
       var iconId = loc.iconId || null;
-      if (iconId === 'blood') glyph = '#dc2626';
-      // Custom pin body + inner disc; image is glyph-only (no nested black pin)
+      var outer = loc.color || (iconId ? pinIconDefaultColor(iconId) : '#e59a18');
+      // Light disc so the isolated glyph sits cleanly in the pin head
+      var inner = loc.innerColor || '#f5f5f5';
+      var glyph = (loc.iconColor == null || loc.iconColor === '') ? 'natural' : loc.iconColor;
       var pinW = 43, pinH = 53, disc = 28, body = 38;
       var innerContent = iconId
         ? pinIconMarkup(iconId, glyph, 22)
@@ -15758,8 +15760,8 @@
           '<div style="width:' + body + 'px;height:' + body + 'px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:' + outer +
             ';border:2.5px solid #fff;box-shadow:0 2px 7px rgba(0,0,0,0.55);position:absolute;left:2px;top:0;"></div>' +
           '<div style="position:absolute;left:7px;top:5px;width:' + disc + 'px;height:' + disc +
-            'px;border-radius:50%;background:' + inner + ';border:1.5px solid rgba(0,0,0,0.35);' +
-            'display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.4);overflow:hidden;">' +
+            'px;border-radius:50%;background:' + inner + ';border:1.5px solid rgba(0,0,0,0.28);' +
+            'display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.35);overflow:hidden;">' +
             innerContent +
           '</div>' +
         '</div>'
@@ -15778,31 +15780,43 @@
     function selectPinIcon(id) {
       selectedPinIconId = id || null;
       if (id) {
+        var icMeta = getPinIconById(id);
+        var defOuter = (icMeta && icMeta.defaultColor) ? icMeta.defaultColor : '#1a1a1a';
         var schemes = loadPinIconSchemes();
         var sch = schemes[id];
-        if (sch) {
+        if (sch && (sch.outer || sch.inner || sch.icon)) {
           if (sch.outer) { selectedPinColor = sch.outer; selectPinColor(sch.outer); }
+          else { selectedPinColor = defOuter; selectPinColor(defOuter); }
           if (sch.inner) {
             selectedPinInnerColor = sch.inner;
             var inn = document.getElementById('pin-inner-color');
             if (inn) inn.value = sch.inner;
             var cpI = document.getElementById('cp-pin-inner');
             if (cpI && typeof setColorPickerValue === 'function') setColorPickerValue(cpI, sch.inner);
+          } else {
+            selectedPinInnerColor = '#f5f5f5';
+            var inn0 = document.getElementById('pin-inner-color');
+            if (inn0) inn0.value = '#f5f5f5';
           }
-          if (sch.icon && id !== 'blood') {
+          if (sch.icon && sch.icon !== 'natural') {
             selectedPinGlyphColor = sch.icon;
             var g = document.getElementById('pin-glyph-color');
             if (g) g.value = sch.icon;
             var cpG = document.getElementById('cp-pin-glyph');
             if (cpG && typeof setColorPickerValue === 'function') setColorPickerValue(cpG, sch.icon);
+          } else {
+            selectedPinGlyphColor = 'natural';
           }
-        }
-        if (id === 'blood') {
-          selectedPinGlyphColor = '#dc2626';
-          var gB = document.getElementById('pin-glyph-color');
-          if (gB) gB.value = '#dc2626';
-          var cpGB = document.getElementById('cp-pin-glyph');
-          if (cpGB && typeof setColorPickerValue === 'function') setColorPickerValue(cpGB, '#dc2626');
+        } else {
+          // Fresh pick: pin body = image color; glyph shows natural PNG
+          selectedPinColor = defOuter;
+          selectPinColor(defOuter);
+          selectedPinInnerColor = '#f5f5f5';
+          selectedPinGlyphColor = 'natural';
+          var innD = document.getElementById('pin-inner-color');
+          if (innD) innD.value = '#f5f5f5';
+          var cpID = document.getElementById('cp-pin-inner');
+          if (cpID && typeof setColorPickerValue === 'function') setColorPickerValue(cpID, '#f5f5f5');
         }
       }
       renderPinIconGrid();
@@ -15841,7 +15855,7 @@
       grid.innerHTML = list.map(function(ic) {
         var sel = selectedPinIconId === ic.id ? ' selected' : '';
         return '<button type="button" class="' + sel + '" title="' + ic.name + '" onclick="selectPinIcon(\'' + ic.id + '\')">' +
-          pinIconMarkup(ic.id, ic.id === 'blood' ? '#dc2626' : '#000000', 22) +
+          pinIconMarkup(ic.id, 'natural', 22) +
           '<span>' + ic.name + '</span></button>';
       }).join('');
       if (recentEl) {
@@ -15852,7 +15866,7 @@
             recent.map(function(ic) {
               var sel = selectedPinIconId === ic.id ? ' selected' : '';
               return '<button type="button" class="' + sel + '" title="' + ic.name + '" onclick="selectPinIcon(\'' + ic.id + '\')">' +
-                pinIconMarkup(ic.id, ic.id === 'blood' ? '#dc2626' : '#000000', 22) +
+                pinIconMarkup(ic.id, 'natural', 22) +
                 '<span>' + ic.name + '</span></button>';
             }).join('') + '</div>';
         } else {
@@ -15894,7 +15908,12 @@
       var name = nameIn || defaultName;
       var isEdit = !!editingPinId;
       var pinId = isEdit ? editingPinId : ('pin_' + Date.now());
-      var iconColorFinal = (selectedPinIconId === 'blood') ? '#dc2626' : selectedPinGlyphColor;
+      // Natural = PNG as-is (already isolated colors); null stores natural
+      var iconColorFinal = (selectedPinGlyphColor && selectedPinGlyphColor !== 'natural')
+        ? selectedPinGlyphColor
+        : null;
+      var pinBodyColor = selectedPinColor ||
+        (selectedPinIconId ? pinIconDefaultColor(selectedPinIconId) : '#e59a18');
       var newLoc = {
         id: pinId,
         name: name,
@@ -15902,8 +15921,8 @@
         zone: detected.zone,
         lat: clickLat,
         lng: clickLng,
-        color: selectedPinColor,
-        innerColor: selectedPinInnerColor,
+        color: pinBodyColor,
+        innerColor: selectedPinInnerColor || '#f5f5f5',
         iconColor: iconColorFinal,
         iconId: selectedPinIconId || null,
         notes: notes,
@@ -16162,19 +16181,21 @@
       var bare = String(loc.name || '').replace(/\s*\(Pin - .*\)\s*$/, '');
       document.getElementById('pin-name-input').value = bare;
       document.getElementById('pin-notes-input').value = loc.notes || '';
-      selectedPinColor = loc.color || '#e59a18';
+      selectedPinColor = loc.color || (loc.iconId ? pinIconDefaultColor(loc.iconId) : '#e59a18');
       selectedPinInnerColor = loc.innerColor || '#f5f5f5';
-      selectedPinGlyphColor = loc.iconColor || '#000000';
+      selectedPinGlyphColor = (loc.iconColor == null || loc.iconColor === '') ? 'natural' : loc.iconColor;
       selectedPinIconId = loc.iconId || null;
       if (typeof selectPinColor === 'function') selectPinColor(selectedPinColor);
       var inn = document.getElementById('pin-inner-color');
       var gly = document.getElementById('pin-glyph-color');
       if (inn) inn.value = selectedPinInnerColor;
-      if (gly) gly.value = selectedPinGlyphColor;
+      if (gly) gly.value = (selectedPinGlyphColor === 'natural') ? '#000000' : selectedPinGlyphColor;
       var cpI = document.getElementById('cp-pin-inner');
       var cpG = document.getElementById('cp-pin-glyph');
       if (cpI && typeof setColorPickerValue === 'function') setColorPickerValue(cpI, selectedPinInnerColor);
-      if (cpG && typeof setColorPickerValue === 'function') setColorPickerValue(cpG, selectedPinGlyphColor);
+      if (cpG && typeof setColorPickerValue === 'function' && selectedPinGlyphColor !== 'natural') {
+        setColorPickerValue(cpG, selectedPinGlyphColor);
+      }
       var saveBtn = document.querySelector('#dt-pin-form button[onclick="savePinFromMap()"]');
       if (saveBtn) saveBtn.textContent = 'Save changes';
       document.getElementById('detection-toast').classList.add('active');
@@ -19057,23 +19078,76 @@
       return String(weapon);
     }
 
+    /** Full date string — never weekday/month abbreviations like "Aug" / "Sun". */
+    function formatMbbFullDate(d) {
+      if (!d) return '';
+      try {
+        return d.toLocaleDateString(undefined, {
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric'
+        });
+      } catch (e) {
+        var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        return days[d.getDay()] + ', ' + months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+      }
+    }
+    /**
+     * Shrink / grow the date font so the full (unabbreviated) string fits the
+     * reserved left slot — never truncate with ellipsis.
+     */
+    function fitMbbDateText(dateEl) {
+      if (!dateEl) return;
+      var ctx = dateEl.parentElement || document.getElementById('mbb-context');
+      var maxPx = 11;
+      var minPx = 5.5;
+      try {
+        if (document.documentElement.classList.contains('layout-phone')) {
+          maxPx = 10;
+          minPx = 5;
+        }
+      } catch (e0) {}
+      dateEl.style.fontSize = maxPx + 'px';
+      dateEl.style.letterSpacing = '0.01em';
+      var avail = 0;
+      if (ctx) {
+        var pad = 4;
+        avail = Math.max(40, (ctx.clientWidth || ctx.getBoundingClientRect().width || 100) - pad);
+      } else {
+        avail = 100;
+      }
+      // Binary-ish shrink until full text fits width
+      var size = maxPx;
+      dateEl.style.fontSize = size + 'px';
+      var guard = 0;
+      while (dateEl.scrollWidth > avail + 0.5 && size > minPx && guard < 40) {
+        size -= 0.25;
+        dateEl.style.fontSize = size + 'px';
+        guard++;
+      }
+      // Slight letter-spacing tighten if still a hair over at min size
+      if (dateEl.scrollWidth > avail + 0.5) {
+        dateEl.style.letterSpacing = '-0.02em';
+      }
+    }
     function updateBottomBarContext() {
       var dateEl = document.getElementById('mbb-date');
       var wpnEl = document.getElementById('mbb-weapon');
       var ctx = document.getElementById('mbb-context');
       if (dateEl) {
         if (selectedDate) {
-          var label;
-          try {
-            label = selectedDate.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
-          } catch (e) {
-            label = (selectedDate.getMonth() + 1) + '/' + selectedDate.getDate();
-          }
+          var label = formatMbbFullDate(selectedDate);
           dateEl.textContent = label;
           dateEl.classList.remove('is-empty');
+          dateEl.setAttribute('title', label);
         } else {
           dateEl.textContent = 'No date';
           dateEl.classList.add('is-empty');
+          dateEl.removeAttribute('title');
+          dateEl.style.fontSize = '';
+          dateEl.style.letterSpacing = '';
         }
       }
       if (wpnEl) {
@@ -19093,18 +19167,27 @@
       }
       if (ctx) {
         var parts = [];
-        if (selectedDate) {
-          try {
-            parts.push(selectedDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }));
-          } catch (e2) {
-            parts.push(String(selectedDate));
-          }
-        }
+        if (selectedDate) parts.push(formatMbbFullDate(selectedDate));
         if (selectedWeapon) parts.push(displayWeaponName(selectedWeapon));
         ctx.title = parts.length ? parts.join(' · ') : 'Hunt calendar date and weapon';
       }
+      // Fit after layout so clientWidth is correct
+      if (dateEl && selectedDate) {
+        requestAnimationFrame(function() {
+          fitMbbDateText(dateEl);
+          requestAnimationFrame(function() { fitMbbDateText(dateEl); });
+        });
+      }
     }
     window.updateBottomBarContext = updateBottomBarContext;
+    window.fitMbbDateText = fitMbbDateText;
+    // Refit date when the bar/viewport size changes
+    try {
+      window.addEventListener('resize', function() {
+        var el = document.getElementById('mbb-date');
+        if (el && selectedDate) fitMbbDateText(el);
+      });
+    } catch (eR) {}
 
     function applyDisplayVisibility() {
       var d = appSettings.display;
