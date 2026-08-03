@@ -51,3 +51,22 @@ Promote offline features into a real version only after you are happy with field
 ## Version badge
 
 In-app: **V4.5-OT** (`APP_VERSION = 4.5-offline-test`).
+
+## Cloud (Supabase) — testing multi-map + live location
+
+TestOffline is wired to the same **HuntSlayer** Supabase project as production (auth + private/shared maps + `party_presence`).
+
+| Piece | Detail |
+|--------|--------|
+| Auth / maps | Settings → **My Maps** |
+| Live location | Blue pulse button next to Current Location (shared map only) |
+| Scripts | `auth-sync.js`, `party-maps.js` (+ CDN Supabase JS) |
+
+**Use test accounts** (e.g. `testoffline1` / `testoffline2`), not real hunting accounts, so experiments don’t clutter production maps.
+
+Quick multi-user check:
+
+1. Open https://test-offline-seven.vercel.app (or local server) on two browsers.  
+2. Create two accounts → Settings → My Maps → Create shared map → Join with code on the other device.  
+3. Drop a pin on A → appears on B after sync.  
+4. Toggle share location on A → B sees the marker; click for distance.
