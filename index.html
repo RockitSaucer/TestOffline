@@ -1055,29 +1055,80 @@
     .pin-icon-grid {
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 4px;
-      max-height: 140px;
+      gap: 6px;
+      max-height: 168px;
       overflow: auto;
-    }
-    .pin-icon-grid button {
-      aspect-ratio: 1;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      background: var(--panel);
-      color: var(--ink);
-      font-size: 9px;
       padding: 2px;
+    }
+    /* White tiles so black/red glyphs pop; name only on hover */
+    .pin-icon-grid button {
+      position: relative;
+      aspect-ratio: 1;
+      border: 1px solid #c5c9c0;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #111;
+      font-size: 0;
+      padding: 3px;
       cursor: pointer;
-      line-height: 1.1;
+      line-height: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 2px;
+      gap: 0;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+      overflow: visible;
+    }
+    .pin-icon-grid button img {
+      width: 88% !important;
+      height: 88% !important;
+      max-width: 40px;
+      max-height: 40px;
+      object-fit: contain;
+      display: block;
+      pointer-events: none;
+    }
+    .pin-icon-grid button .pin-icon-label {
+      display: none;
+    }
+    /* Hover name tooltip */
+    .pin-icon-grid button::after {
+      content: attr(data-name);
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 4px);
+      transform: translateX(-50%) translateY(2px);
+      background: rgba(12, 16, 10, 0.96);
+      color: #f2f5ee;
+      border: 1px solid rgba(229, 154, 24, 0.55);
+      border-radius: 6px;
+      padding: 3px 7px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      line-height: 1.2;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 20;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+      transition: opacity 0.12s ease, transform 0.12s ease;
+    }
+    .pin-icon-grid button:hover::after,
+    .pin-icon-grid button:focus-visible::after {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .pin-icon-grid button:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent), 0 2px 6px rgba(0, 0, 0, 0.18);
+      z-index: 5;
     }
     .pin-icon-grid button.selected {
       border-color: var(--accent);
-      box-shadow: 0 0 0 1px var(--accent);
+      box-shadow: 0 0 0 2px var(--accent);
+      background: #fffef8;
     }
     .pin-icon-grid button svg { width: 16px; height: 16px; }
     /* Desktop: scale planner chrome with viewport width */
@@ -5738,8 +5789,8 @@
                 </div>
                 <div>
                   <span style="font-size:10px;color:var(--muted);font-weight:700;">Inside</span>
-                  <div class="color-picker" id="cp-pin-inner" data-input-id="pin-inner-color" data-initial="#111111" data-bind-var="selectedPinInnerColor"></div>
-                  <input type="hidden" id="pin-inner-color" value="#111111" />
+                  <div class="color-picker" id="cp-pin-inner" data-input-id="pin-inner-color" data-initial="#ffffff" data-bind-var="selectedPinInnerColor"></div>
+                  <input type="hidden" id="pin-inner-color" value="#ffffff" />
                 </div>
                 <div>
                   <span style="font-size:10px;color:var(--muted);font-weight:700;">Icon</span>
@@ -15672,7 +15723,8 @@
     ].sort(function(a, b) { return a.name.localeCompare(b.name); });
 
     var selectedPinIconId = null;
-    var selectedPinInnerColor = '#f5f5f5';
+    // White disc default so black/red glyphs stand out
+    var selectedPinInnerColor = '#ffffff';
     // 'natural' = show PNG as-is (no recolor filter)
     var selectedPinGlyphColor = 'natural';
     var selectedHuntStandType = 'rifle_stand';
@@ -15718,7 +15770,7 @@
       var ic = getPinIconById(iconId);
       // cache-bust after glyph rebuild
       var base = (ic && ic.src) ? ic.src : ('icons/pins/' + iconId + '.png');
-      return base + (base.indexOf('?') >= 0 ? '&' : '?') + 'v=naked2';
+      return base + (base.indexOf('?') >= 0 ? '&' : '?') + 'v=naked3';
     }
     /** Optional CSS recolor for black silhouettes when user picks a custom glyph tint. */
     function pinIconColorFilter(hex, iconId) {
@@ -15738,30 +15790,32 @@
     }
     function pinIconMarkup(iconId, glyphColor, size) {
       var img = pinIconImageSrc(iconId);
-      var s = size || 22;
+      var s = size || 26;
       if (!img) return '';
       // Default: natural PNG colors (white already removed at build time)
       var filt = pinIconColorFilter(glyphColor, iconId);
       return '<img src="' + img + '" width="' + s + '" height="' + s + '" alt="" draggable="false" ' +
-        'style="filter:' + filt + ';opacity:1;display:block;object-fit:contain;background:transparent;border:none;">';
+        'style="filter:' + filt + ';opacity:1;display:block;width:100%;height:100%;object-fit:contain;background:transparent;border:none;margin:0;padding:0;">';
     }
     function buildCustomPinMarkerHtml(loc) {
       var iconId = loc.iconId || null;
       var outer = loc.color || (iconId ? pinIconDefaultColor(iconId) : '#e59a18');
-      // Light disc so the isolated glyph sits cleanly in the pin head
-      var inner = loc.innerColor || '#f5f5f5';
+      // White disc default so black/red glyphs stand out; glyph fills disc edge-to-edge
+      var inner = loc.innerColor || '#ffffff';
       var glyph = (loc.iconColor == null || loc.iconColor === '') ? 'natural' : loc.iconColor;
-      var pinW = 43, pinH = 53, disc = 28, body = 38;
+      var pinW = 43, pinH = 53, disc = 30, body = 38;
+      // disc inset: (body-ish layout) glyph may touch inner circle edge
+      var discLeft = 6, discTop = 4;
       var innerContent = iconId
-        ? pinIconMarkup(iconId, glyph, 22)
+        ? pinIconMarkup(iconId, glyph, disc)
         : '';
       return (
         '<div style="width:' + pinW + 'px;height:' + pinH + 'px;position:relative;">' +
           '<div style="width:' + body + 'px;height:' + body + 'px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:' + outer +
             ';border:2.5px solid #fff;box-shadow:0 2px 7px rgba(0,0,0,0.55);position:absolute;left:2px;top:0;"></div>' +
-          '<div style="position:absolute;left:7px;top:5px;width:' + disc + 'px;height:' + disc +
-            'px;border-radius:50%;background:' + inner + ';border:1.5px solid rgba(0,0,0,0.28);' +
-            'display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.35);overflow:hidden;">' +
+          '<div style="position:absolute;left:' + discLeft + 'px;top:' + discTop + 'px;width:' + disc + 'px;height:' + disc +
+            'px;border-radius:50%;background:' + inner + ';border:1px solid rgba(0,0,0,0.22);' +
+            'display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0;box-sizing:border-box;">' +
             innerContent +
           '</div>' +
         '</div>'
@@ -15794,9 +15848,11 @@
             var cpI = document.getElementById('cp-pin-inner');
             if (cpI && typeof setColorPickerValue === 'function') setColorPickerValue(cpI, sch.inner);
           } else {
-            selectedPinInnerColor = '#f5f5f5';
+            selectedPinInnerColor = '#ffffff';
             var inn0 = document.getElementById('pin-inner-color');
-            if (inn0) inn0.value = '#f5f5f5';
+            if (inn0) inn0.value = '#ffffff';
+            var cpI0 = document.getElementById('cp-pin-inner');
+            if (cpI0 && typeof setColorPickerValue === 'function') setColorPickerValue(cpI0, '#ffffff');
           }
           if (sch.icon && sch.icon !== 'natural') {
             selectedPinGlyphColor = sch.icon;
@@ -15808,15 +15864,15 @@
             selectedPinGlyphColor = 'natural';
           }
         } else {
-          // Fresh pick: pin body = image color; glyph shows natural PNG
+          // Fresh pick: pin body = image color; white center; natural glyph
           selectedPinColor = defOuter;
           selectPinColor(defOuter);
-          selectedPinInnerColor = '#f5f5f5';
+          selectedPinInnerColor = '#ffffff';
           selectedPinGlyphColor = 'natural';
           var innD = document.getElementById('pin-inner-color');
-          if (innD) innD.value = '#f5f5f5';
+          if (innD) innD.value = '#ffffff';
           var cpID = document.getElementById('cp-pin-inner');
-          if (cpID && typeof setColorPickerValue === 'function') setColorPickerValue(cpID, '#f5f5f5');
+          if (cpID && typeof setColorPickerValue === 'function') setColorPickerValue(cpID, '#ffffff');
         }
       }
       renderPinIconGrid();
@@ -15854,9 +15910,11 @@
       }
       grid.innerHTML = list.map(function(ic) {
         var sel = selectedPinIconId === ic.id ? ' selected' : '';
-        return '<button type="button" class="' + sel + '" title="' + ic.name + '" onclick="selectPinIcon(\'' + ic.id + '\')">' +
-          pinIconMarkup(ic.id, 'natural', 22) +
-          '<span>' + ic.name + '</span></button>';
+        var safeName = String(ic.name || ic.id).replace(/"/g, '&quot;');
+        return '<button type="button" class="' + sel + '" data-name="' + safeName + '" title="' + safeName +
+          '" aria-label="' + safeName + '" onclick="selectPinIcon(\'' + ic.id + '\')">' +
+          pinIconMarkup(ic.id, 'natural', 36) +
+          '</button>';
       }).join('');
       if (recentEl) {
         var recent = loadPinIconRecent().map(getPinIconById).filter(Boolean);
@@ -15865,9 +15923,11 @@
           recentEl.innerHTML = '<div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Recent</div><div class="pin-icon-grid">' +
             recent.map(function(ic) {
               var sel = selectedPinIconId === ic.id ? ' selected' : '';
-              return '<button type="button" class="' + sel + '" title="' + ic.name + '" onclick="selectPinIcon(\'' + ic.id + '\')">' +
-                pinIconMarkup(ic.id, 'natural', 22) +
-                '<span>' + ic.name + '</span></button>';
+              var safeName = String(ic.name || ic.id).replace(/"/g, '&quot;');
+              return '<button type="button" class="' + sel + '" data-name="' + safeName + '" title="' + safeName +
+                '" aria-label="' + safeName + '" onclick="selectPinIcon(\'' + ic.id + '\')">' +
+                pinIconMarkup(ic.id, 'natural', 36) +
+                '</button>';
             }).join('') + '</div>';
         } else {
           recentEl.style.display = 'none';
@@ -15922,7 +15982,7 @@
         lat: clickLat,
         lng: clickLng,
         color: pinBodyColor,
-        innerColor: selectedPinInnerColor || '#f5f5f5',
+        innerColor: selectedPinInnerColor || '#ffffff',
         iconColor: iconColorFinal,
         iconId: selectedPinIconId || null,
         notes: notes,
@@ -16182,7 +16242,7 @@
       document.getElementById('pin-name-input').value = bare;
       document.getElementById('pin-notes-input').value = loc.notes || '';
       selectedPinColor = loc.color || (loc.iconId ? pinIconDefaultColor(loc.iconId) : '#e59a18');
-      selectedPinInnerColor = loc.innerColor || '#f5f5f5';
+      selectedPinInnerColor = loc.innerColor || '#ffffff';
       selectedPinGlyphColor = (loc.iconColor == null || loc.iconColor === '') ? 'natural' : loc.iconColor;
       selectedPinIconId = loc.iconId || null;
       if (typeof selectPinColor === 'function') selectPinColor(selectedPinColor);
