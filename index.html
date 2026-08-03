@@ -3692,16 +3692,15 @@
     }
 
     /*
-     * Mobile: same 3-zone layout, smaller controls, tighter gaps.
-     * Date + weapon always shown (stacked in fixed slot). Scale bar only
-     * on very narrow phones so the row stays one cohesive strip.
+     * Mobile bottom bar — compact single row that fits phone widths without
+     * left/center/right clusters overlapping. All icons equal size + gap.
+     * Math target (~360–390px): 9 icons + slim date slot + gaps ≤ viewport.
      */
     html.layout-phone .map-bottom-bar {
-      /* +20% vs prior 34px phone size → ~41px; bar 5% taller */
-      --mbb-h: 41px;
-      --mbb-gap: 3px;
-      --mbb-icon: 41px;
-      --mbb-bar-h: calc(var(--mbb-h) * 1.05);
+      --mbb-h: 34px;
+      --mbb-icon: 34px;
+      --mbb-gap: 2px;
+      --mbb-bar-h: 38px;
       left: 0;
       right: 0;
       bottom: 0 !important;
@@ -3710,190 +3709,238 @@
       height: calc(var(--mbb-bar-h) + env(safe-area-inset-bottom, 0px)) !important;
       min-height: calc(var(--mbb-bar-h) + env(safe-area-inset-bottom, 0px)) !important;
       max-height: calc(var(--mbb-bar-h) + env(safe-area-inset-bottom, 0px)) !important;
-      padding: 0 4px;
+      padding: 0 3px;
       padding-bottom: env(safe-area-inset-bottom, 0px);
       border-radius: 0;
-      column-gap: var(--mbb-gap);
+      /* left | center | right — equal side tracks so center stays true middle */
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+      grid-template-rows: var(--mbb-bar-h) !important;
+      column-gap: 3px !important;
       transform: none;
       align-items: center;
-    }
-    /* Keep every control on one baseline (no wrap / no vertical stagger) */
-    html.layout-phone .mbb-left {
-      flex-wrap: nowrap;
-      align-items: center;
-      overflow: hidden;
-      height: var(--mbb-h) !important;
-      max-height: var(--mbb-h) !important;
-    }
-    html.layout-phone .mbb-right {
-      flex-wrap: nowrap !important;
-      flex-direction: row !important;
-      align-items: center !important;
+      /* Keep vertical overflow for radar HUD / layers panel above the bar */
       overflow: visible;
-      height: var(--mbb-h) !important;
-      max-height: var(--mbb-h) !important;
-    }
-    html.layout-phone .map-draw-tools {
-      flex-wrap: nowrap;
-      align-items: center;
-      height: var(--mbb-h) !important;
     }
     html.layout-phone .map-wrapper.fullscreen .map-bottom-bar {
       transform: none;
       bottom: 0 !important;
     }
+    /* Side zones stay in their grid cells — no paint over GPS/share */
     html.layout-phone .mbb-left,
-    html.layout-phone .mbb-right {
-      gap: var(--mbb-gap);
+    html.layout-phone .mbb-right,
+    html.layout-phone .mbb-center {
+      flex-wrap: nowrap !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      gap: var(--mbb-gap) !important;
+      height: var(--mbb-h) !important;
+      max-height: var(--mbb-h) !important;
+      min-width: 0;
+      box-sizing: border-box;
     }
+    html.layout-phone .mbb-left {
+      justify-content: flex-start !important;
+      justify-self: start !important;
+      max-width: 100%;
+      overflow: hidden;
+      padding-right: 1px;
+    }
+    html.layout-phone .mbb-center {
+      justify-content: center !important;
+      justify-self: center !important;
+      flex: 0 0 auto;
+      z-index: 3;
+      overflow: visible;
+      padding: 0 1px;
+    }
+    html.layout-phone .mbb-right {
+      justify-content: flex-end !important;
+      justify-self: end !important;
+      max-width: 100%;
+      overflow: hidden; /* clip rather than overlap center */
+      padding-left: 1px;
+      line-height: 0;
+    }
+    html.layout-phone .mbb-right > * {
+      flex: 0 0 auto !important;
+      height: var(--mbb-h) !important;
+      max-height: var(--mbb-h) !important;
+    }
+    /* Slim date/weapon so tools fit */
     html.layout-phone .mbb-context {
-      width: 54px;
-      min-width: 54px;
-      max-width: 54px;
-      height: var(--mbb-h);
-      gap: 1px;
-      padding: 0 1px 0 0;
+      width: 38px;
+      min-width: 38px;
+      max-width: 38px;
+      height: var(--mbb-h) !important;
+      gap: 0;
+      padding: 0;
+      flex: 0 0 38px;
+      overflow: hidden;
     }
     html.layout-phone .mbb-date {
-      font-size: 9px;
+      font-size: 8px;
       letter-spacing: 0;
+      line-height: 1.05;
     }
     html.layout-phone .mbb-weapon {
-      height: 14px;
-      padding: 0 4px;
-      font-size: 8px;
-      border-radius: 4px;
-      /* never hide — always show weapon with date */
+      height: 12px;
+      padding: 0 3px;
+      font-size: 7px;
+      border-radius: 3px;
       display: inline-flex !important;
     }
     html.layout-phone .map-draw-tools {
-      gap: var(--mbb-gap);
+      gap: var(--mbb-gap) !important;
       flex: 0 0 auto;
+      flex-wrap: nowrap !important;
+      align-items: center !important;
+      height: var(--mbb-h) !important;
+      max-height: var(--mbb-h) !important;
+      min-width: 0;
+      overflow: hidden;
+    }
+    /* Every chrome button: identical square, light shadow (no messy double-glow) */
+    html.layout-phone .map-bottom-bar .mdt-btn.mdt-icon-btn,
+    html.layout-phone .map-bottom-bar .map-layers-toggle-btn,
+    html.layout-phone .map-bottom-bar .map-radar-toggle,
+    html.layout-phone .map-bottom-bar .map-settings-btn,
+    html.layout-phone .map-bottom-bar .mbb-icon-btn,
+    html.layout-phone .map-bottom-bar .mbb-compass-btn,
+    html.layout-phone .map-bottom-bar .mbb-ctrl {
+      width: var(--mbb-icon) !important;
+      min-width: var(--mbb-icon) !important;
+      max-width: var(--mbb-icon) !important;
+      height: var(--mbb-h) !important;
+      min-height: var(--mbb-h) !important;
+      max-height: var(--mbb-h) !important;
+      padding: 0 !important;
+      border-radius: 8px !important;
+      flex: 0 0 var(--mbb-icon) !important;
+      flex-shrink: 0 !important;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+      box-sizing: border-box !important;
+    }
+    html.layout-phone .map-bottom-bar .mbb-compass-btn,
+    html.layout-phone .map-bottom-bar .mbb-compass-btn.mode-wind {
+      width: var(--mbb-icon) !important;
+      min-width: var(--mbb-icon) !important;
+      max-width: var(--mbb-icon) !important;
+    }
+    html.layout-phone .map-bottom-bar .mdt-btn.mdt-track-stop {
+      width: auto !important;
+      min-width: 40px !important;
+      max-width: 48px !important;
+      flex: 0 0 auto !important;
+      padding: 0 6px !important;
+      font-size: 9px !important;
     }
     html.layout-phone .map-draw-tools .mdt-btn {
       height: var(--mbb-h);
       min-height: var(--mbb-h);
       max-height: var(--mbb-h);
-      padding: 0 5px;
+      padding: 0;
       font-size: 9px;
       border-radius: 8px;
-      flex: 0 0 auto;
       letter-spacing: 0;
     }
-    html.layout-phone .map-bottom-bar .mbb-ctrl,
-    html.layout-phone .map-settings-btn,
-    html.layout-phone .mbb-icon-btn,
-    html.layout-phone .map-radar-toggle,
-    html.layout-phone .mbb-compass-btn {
-      width: var(--mbb-icon);
-      height: var(--mbb-h);
-      min-width: var(--mbb-icon);
-      min-height: var(--mbb-h);
-      max-height: var(--mbb-h);
-      border-radius: 8px;
-      flex-shrink: 0;
-    }
-    html.layout-phone .mbb-compass-btn {
-      min-width: var(--mbb-icon);
-      width: auto;
-      max-width: 44px;
-      padding: 0 5px;
-      font-size: 9px;
-    }
+    /* Glyphs scale with button size */
     html.layout-phone .mbb-icon-btn svg,
-    html.layout-phone .mbb-compass-btn svg {
-      width: 17px;
-      height: 17px;
-    }
+    html.layout-phone .mbb-compass-btn svg,
     html.layout-phone .map-radar-toggle svg {
-      width: 22px;
-      height: 22px;
+      width: 18px !important;
+      height: 18px !important;
     }
     html.layout-phone .map-draw-tools .mdt-icon-img,
     html.layout-phone .map-layers-toggle-btn .mdt-icon-img {
-      width: 22px;
-      height: 22px;
+      width: 18px !important;
+      height: 18px !important;
+      max-width: 60% !important;
+      max-height: 60% !important;
     }
     html.layout-phone .map-settings-btn {
-      font-size: 18px;
-      background: rgba(22, 26, 18, 0.95) !important;
-      border: 1px solid var(--border) !important;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.35) !important;
-      border-radius: 8px;
+      font-size: 16px !important;
     }
-    html.layout-phone .map-layers-menu {
-      flex-shrink: 0;
-    }
-    html.layout-phone .map-layers-toggle-btn {
-      padding: 0;
-      height: var(--mbb-h);
-      min-height: var(--mbb-h);
-      max-height: var(--mbb-h);
-      font-size: 10px;
-      border-radius: 8px;
-      border: 1px solid var(--border) !important;
-      background: rgba(22, 26, 18, 0.95) !important;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.35) !important;
-      gap: 2px;
-    }
-    html.layout-phone .map-draw-tools .mdt-btn.mdt-icon-btn {
-      background: rgba(22, 26, 18, 0.95) !important;
-      border: 1px solid var(--border) !important;
-      border-color: var(--border) !important;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.35) !important;
-      border-radius: 8px;
-    }
-    html.layout-phone .map-radar-toggle {
-      background: rgba(22, 26, 18, 0.95) !important;
-      border: 1px solid var(--border) !important;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.35) !important;
-      border-radius: 8px;
-    }
-    html.layout-phone .map-layers-toggle-btn .ml-caret {
-      font-size: 8px;
-    }
+    html.layout-phone .map-layers-menu,
     html.layout-phone .map-radar-control {
-      flex-shrink: 0;
-      flex-direction: row !important;
+      flex: 0 0 auto !important;
+      flex-shrink: 0 !important;
+      width: var(--mbb-icon) !important;
+      min-width: var(--mbb-icon) !important;
+      max-width: var(--mbb-icon) !important;
       height: var(--mbb-h) !important;
       max-height: var(--mbb-h) !important;
+      overflow: visible; /* allow panels/HUD to rise above */
+      position: relative;
     }
-    /* Narrow phones: keep layout, slightly smaller icons — do not hide date/weapon */
+    html.layout-phone .map-layers-toggle-btn .ml-caret {
+      display: none; /* save space; panel still opens on tap */
+    }
+    /* Common phones (~360–390px): slightly tighter */
     @media (max-width: 390px) {
       html.layout-phone .map-bottom-bar,
       html.layout-phone .map-wrapper.fullscreen .map-bottom-bar {
-        --mbb-h: 30px;
-        --mbb-icon: 30px;
+        --mbb-h: 32px;
+        --mbb-icon: 32px;
         --mbb-gap: 2px;
-        --mbb-bar-h: calc(var(--mbb-h) * 1.05);
-        padding: 0 5px;
-        padding-bottom: env(safe-area-inset-bottom, 0px);
-        transform: none;
-        bottom: 0 !important;
-        width: 100%;
-        max-width: 100%;
-        height: calc(var(--mbb-bar-h) + env(safe-area-inset-bottom, 0px)) !important;
-        min-height: calc(var(--mbb-bar-h) + env(safe-area-inset-bottom, 0px)) !important;
-        max-height: calc(var(--mbb-bar-h) + env(safe-area-inset-bottom, 0px)) !important;
+        --mbb-bar-h: 36px;
+        padding: 0 2px;
+        column-gap: 2px !important;
       }
       html.layout-phone .mbb-context {
-        width: 50px;
-        min-width: 50px;
-        max-width: 50px;
+        width: 34px;
+        min-width: 34px;
+        max-width: 34px;
+        flex-basis: 34px;
       }
-      html.layout-phone .map-draw-tools .mdt-btn {
-        padding: 0 4px;
-        font-size: 8px;
+      html.layout-phone .mbb-date { font-size: 7.5px; }
+      html.layout-phone .mbb-weapon { height: 11px; font-size: 6.5px; padding: 0 2px; }
+      html.layout-phone .mbb-icon-btn svg,
+      html.layout-phone .mbb-compass-btn svg,
+      html.layout-phone .map-radar-toggle svg {
+        width: 16px !important;
+        height: 16px !important;
       }
+      html.layout-phone .map-draw-tools .mdt-icon-img,
+      html.layout-phone .map-layers-toggle-btn .mdt-icon-img {
+        width: 16px !important;
+        height: 16px !important;
+      }
+      html.layout-phone .map-settings-btn { font-size: 15px !important; }
     }
+    /* Very narrow phones */
     @media (max-width: 340px) {
       html.layout-phone .map-bottom-bar,
       html.layout-phone .map-wrapper.fullscreen .map-bottom-bar {
-        transform: none;
-        bottom: 0 !important;
-        width: 100%;
-        --mbb-gap: 2px;
-        padding: 0 3px;
+        --mbb-h: 28px;
+        --mbb-icon: 28px;
+        --mbb-gap: 1px;
+        --mbb-bar-h: 32px;
+        padding: 0 2px;
+        column-gap: 2px !important;
+      }
+      html.layout-phone .mbb-context {
+        width: 30px;
+        min-width: 30px;
+        max-width: 30px;
+        flex-basis: 30px;
+      }
+      html.layout-phone .mbb-icon-btn svg,
+      html.layout-phone .mbb-compass-btn svg,
+      html.layout-phone .map-radar-toggle svg {
+        width: 14px !important;
+        height: 14px !important;
+      }
+      html.layout-phone .map-draw-tools .mdt-icon-img,
+      html.layout-phone .map-layers-toggle-btn .mdt-icon-img {
+        width: 14px !important;
+        height: 14px !important;
+      }
+      html.layout-phone .map-settings-btn { font-size: 13px !important; }
+      html.layout-phone .map-bottom-bar .mdt-btn.mdt-track-stop {
+        min-width: 34px !important;
+        max-width: 40px !important;
+        font-size: 8px !important;
+        padding: 0 4px !important;
       }
     }
     /* Settings modal — must sit above true-fullscreen map (z 2147483000) */
