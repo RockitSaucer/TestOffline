@@ -2593,17 +2593,21 @@
     .gps-heading-tri {
       display: none;
     }
-    /* Radar control — icon on slim bottom bar; HUD pops upward when on */
+    /* Radar control — single bar-height icon; HUD/stop are absolute above the bar */
     .map-radar-control {
       pointer-events: auto;
       position: relative;
-      display: flex;
-      flex-direction: column-reverse;
+      display: inline-flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
       align-items: center;
+      justify-content: center;
       gap: 0;
       width: auto;
       min-width: 0;
       max-width: none;
+      height: var(--mbb-h, 40px);
+      max-height: var(--mbb-h, 40px);
       box-sizing: border-box;
       flex-shrink: 0;
     }
@@ -3235,18 +3239,22 @@
       display: grid !important;
       visibility: visible !important;
       opacity: 1 !important;
+      /* Exactly 3 cells: left | center | right — never a 4th child or tools wrap under the bar */
       grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      /* Content row is button height; safe-area is padding below so tools stay on the bar strip */
+      grid-template-rows: var(--mbb-bar-h);
       align-items: center;
       justify-items: stretch;
       column-gap: var(--mbb-gap);
       pointer-events: none;
       width: 100%;
       max-width: 100%;
-      height: var(--mbb-bar-h) !important;
-      min-height: var(--mbb-bar-h) !important;
-      max-height: var(--mbb-bar-h) !important;
+      /* Total bar height = button strip + home-indicator inset (never shrink content with padding) */
+      height: calc(var(--mbb-bar-h) + env(safe-area-inset-bottom, 0px)) !important;
+      min-height: calc(var(--mbb-bar-h) + env(safe-area-inset-bottom, 0px)) !important;
+      max-height: calc(var(--mbb-bar-h) + env(safe-area-inset-bottom, 0px)) !important;
       padding: 0 6px;
-      padding-bottom: max(0px, env(safe-area-inset-bottom, 0px));
+      padding-bottom: env(safe-area-inset-bottom, 0px);
       box-sizing: border-box;
       background: rgba(14, 18, 12, 0.92);
       border: none;
@@ -3254,12 +3262,13 @@
       border-radius: 0;
       box-shadow: 0 -4px 16px rgba(0,0,0,0.35);
       backdrop-filter: blur(6px);
-      overflow: hidden;
+      /* visible so popovers (radar HUD / layers) can rise above the bar; tools stay in the single grid row */
+      overflow: visible;
     }
     .map-bottom-bar > * {
       pointer-events: auto;
       align-self: center;
-      height: var(--mbb-h);
+      min-height: 0;
       max-height: var(--mbb-h);
     }
     .map-wrapper.fullscreen .map-bottom-bar {
@@ -3316,7 +3325,10 @@
     /* Left zone: date/weapon (fixed) + tools (tight), packed start */
     .mbb-left {
       grid-column: 1;
+      grid-row: 1;
       display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
       align-items: center;
       gap: var(--mbb-gap);
       min-width: 0;
@@ -3326,40 +3338,88 @@
       justify-self: start;
       overflow: hidden;
     }
-    /* Center zone: Current Location — always true center of bar */
-    .map-bottom-bar > .mbb-icon-btn.mbb-gps {
+    /* Center zone: GPS + share as one grid cell (keeps right tools on the same row) */
+    .mbb-center {
       grid-column: 2;
+      grid-row: 1;
       justify-self: center;
-    }
-    /* Right zone: radar / compass / layers / settings, packed end */
-    .mbb-right {
-      grid-column: 3;
       display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
       align-items: center;
       gap: var(--mbb-gap);
-      min-width: 0;
-      height: var(--mbb-h) !important;
-      max-height: var(--mbb-h) !important;
-      justify-content: flex-end;
-      justify-self: end;
-      overflow: hidden;
-    }
-    .map-bottom-bar .map-draw-tools,
-    .map-bottom-bar .map-radar-control,
-    .map-bottom-bar .map-layers-menu {
-      display: flex;
-      align-items: center;
       height: var(--mbb-h) !important;
       max-height: var(--mbb-h) !important;
       margin: 0;
       padding: 0;
     }
+    /* Right zone: radar · compass · layers · settings — one straight horizontal row, equal height */
+    .mbb-right {
+      grid-column: 3;
+      grid-row: 1;
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: nowrap !important;
+      align-items: center !important;
+      align-content: center;
+      gap: var(--mbb-gap);
+      min-width: 0;
+      width: auto;
+      height: var(--mbb-h) !important;
+      max-height: var(--mbb-h) !important;
+      justify-content: flex-end;
+      justify-self: end;
+      overflow: visible;
+      line-height: 0;
+    }
+    .mbb-right > * {
+      flex: 0 0 auto;
+      align-self: center !important;
+      height: var(--mbb-h) !important;
+      max-height: var(--mbb-h) !important;
+      margin: 0 !important;
+      vertical-align: middle;
+    }
+    .map-bottom-bar .map-draw-tools,
+    .map-bottom-bar .map-radar-control,
+    .map-bottom-bar .map-layers-menu {
+      display: inline-flex !important;
+      flex-direction: row !important;
+      flex-wrap: nowrap !important;
+      align-items: center !important;
+      height: var(--mbb-h) !important;
+      max-height: var(--mbb-h) !important;
+      min-height: var(--mbb-h) !important;
+      margin: 0;
+      padding: 0;
+      position: relative;
+      flex-shrink: 0;
+      line-height: 0;
+    }
+    /* Radar extras + layers panel: out of flow so they never push the bar taller or wrap tools */
     .map-bottom-bar .map-radar-hud,
     .map-bottom-bar .map-radar-stop {
-      /* keep radar extras out of the slim bar plane */
-      position: absolute;
-      bottom: 100%;
-      margin-bottom: 4px;
+      position: absolute !important;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: calc(100% + 6px);
+      z-index: 90;
+      margin: 0 !important;
+    }
+    .map-bottom-bar .map-radar-stop {
+      bottom: calc(100% + 72px);
+    }
+    .map-bottom-bar .map-radar-control.has-current-note .map-radar-stop {
+      bottom: calc(100% + 92px);
+    }
+    .map-bottom-bar .map-layers-panel {
+      position: absolute !important;
+      right: 0;
+      left: auto;
+      top: auto;
+      bottom: calc(100% + 6px);
+      z-index: 91;
+      margin: 0 !important;
     }
     .map-settings-btn {
       width: var(--mbb-icon);
@@ -3551,22 +3611,29 @@
       bottom: 0 !important;
       width: 100%;
       max-width: 100%;
-      height: var(--mbb-bar-h) !important;
-      min-height: var(--mbb-bar-h) !important;
-      max-height: var(--mbb-bar-h) !important;
+      height: calc(var(--mbb-bar-h) + env(safe-area-inset-bottom, 0px)) !important;
+      min-height: calc(var(--mbb-bar-h) + env(safe-area-inset-bottom, 0px)) !important;
+      max-height: calc(var(--mbb-bar-h) + env(safe-area-inset-bottom, 0px)) !important;
       padding: 0 4px;
-      padding-bottom: max(0px, env(safe-area-inset-bottom, 0px));
+      padding-bottom: env(safe-area-inset-bottom, 0px);
       border-radius: 0;
       column-gap: var(--mbb-gap);
       transform: none;
       align-items: center;
     }
     /* Keep every control on one baseline (no wrap / no vertical stagger) */
-    html.layout-phone .mbb-left,
-    html.layout-phone .mbb-right {
+    html.layout-phone .mbb-left {
       flex-wrap: nowrap;
       align-items: center;
       overflow: hidden;
+      height: var(--mbb-h) !important;
+      max-height: var(--mbb-h) !important;
+    }
+    html.layout-phone .mbb-right {
+      flex-wrap: nowrap !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      overflow: visible;
       height: var(--mbb-h) !important;
       max-height: var(--mbb-h) !important;
     }
@@ -3660,6 +3727,9 @@
     }
     html.layout-phone .map-radar-control {
       flex-shrink: 0;
+      flex-direction: row !important;
+      height: var(--mbb-h) !important;
+      max-height: var(--mbb-h) !important;
     }
     /* Narrow phones: keep layout, slightly smaller icons — do not hide date/weapon */
     @media (max-width: 390px) {
@@ -3668,12 +3738,16 @@
         --mbb-h: 30px;
         --mbb-icon: 30px;
         --mbb-gap: 2px;
-        padding: 4px 5px;
-        padding-bottom: max(4px, env(safe-area-inset-bottom, 0px));
+        --mbb-bar-h: calc(var(--mbb-h) * 1.05);
+        padding: 0 5px;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
         transform: none;
         bottom: 0 !important;
         width: 100%;
         max-width: 100%;
+        height: calc(var(--mbb-bar-h) + env(safe-area-inset-bottom, 0px)) !important;
+        min-height: calc(var(--mbb-bar-h) + env(safe-area-inset-bottom, 0px)) !important;
+        max-height: calc(var(--mbb-bar-h) + env(safe-area-inset-bottom, 0px)) !important;
       }
       html.layout-phone .mbb-context {
         width: 50px;
@@ -5247,66 +5321,70 @@
               </div>
             </div>
 
-            <button type="button" class="mbb-icon-btn mbb-gps mbb-ctrl" id="gps-snap-btn" onclick="snapToGPS()" title="Current Location — snap map to your GPS" aria-label="Current Location">
-              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <circle cx="12" cy="12" r="7.25" fill="none" stroke="currentColor" stroke-width="1.6"/>
-                <path d="M12 2.5v3.2M12 18.3v3.2M2.5 12h3.2M18.3 12h3.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-                <path d="M12 8.2c-1.55 0-2.8 1.2-2.8 2.7 0 2.05 2.8 5 2.8 5s2.8-2.95 2.8-5c0-1.5-1.25-2.7-2.8-2.7z" fill="currentColor"/>
-                <circle cx="12" cy="10.9" r="1" fill="#fff"/>
-              </svg>
-            </button>
-            <button type="button" class="mbb-icon-btn mbb-share-loc mbb-ctrl" id="share-loc-btn" title="Share current location with party" aria-label="Share location" aria-pressed="false">
-              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <circle cx="12" cy="12" r="3.2" fill="currentColor"/>
-                <circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="1.6" opacity="0.7"/>
-                <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.35"/>
-              </svg>
-            </button>
-
-            <div class="mbb-right">
-            <div class="map-radar-control" id="map-radar-control">
-              <button type="button" class="map-radar-toggle" id="map-radar-toggle" onclick="toggleMapRadar()" title="Weather radar — last hour, ~5 min steps" aria-label="Radar" aria-pressed="false">
+            <!-- Center cluster must be ONE grid cell (GPS + share) or right tools wrap below the bar -->
+            <div class="mbb-center" id="mbb-center">
+              <button type="button" class="mbb-icon-btn mbb-gps mbb-ctrl" id="gps-snap-btn" onclick="snapToGPS()" title="Current Location — snap map to your GPS" aria-label="Current Location">
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <circle class="radar-screen" cx="12" cy="13" r="8.2" fill="rgba(8,40,60,0.55)" stroke="currentColor" stroke-width="1.45"/>
-                  <circle cx="12" cy="13" r="5.4" fill="none" stroke="currentColor" stroke-width="0.95" opacity="0.55"/>
-                  <circle cx="12" cy="13" r="2.8" fill="none" stroke="currentColor" stroke-width="0.9" opacity="0.45"/>
-                  <path d="M12 5v16M4 13h16" fill="none" stroke="currentColor" stroke-width="0.85" opacity="0.35"/>
-                  <g class="radar-sweep">
-                    <path d="M12 13 L12 5.1 A7.9 7.9 0 0 1 18.3 9.2 Z" fill="currentColor" opacity="0.4"/>
-                    <path d="M12 13 L12 5.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-                  </g>
-                  <circle cx="12" cy="13" r="1.1" fill="currentColor"/>
-                  <circle cx="15.2" cy="9.6" r="0.85" fill="currentColor" opacity="0.9"/>
-                  <!-- cloud covering top of radar -->
-                  <g class="radar-cloud" fill="#e2e8f0" stroke="#94a3b8" stroke-width="0.6">
-                    <ellipse cx="9.2" cy="5.2" rx="2.6" ry="1.7"/>
-                    <ellipse cx="12.2" cy="4.6" rx="3.1" ry="2"/>
-                    <ellipse cx="15.1" cy="5.4" rx="2.4" ry="1.55"/>
-                    <ellipse cx="12" cy="6.1" rx="4.2" ry="1.5" fill="#f1f5f9" stroke="none"/>
-                  </g>
+                  <circle cx="12" cy="12" r="7.25" fill="none" stroke="currentColor" stroke-width="1.6"/>
+                  <path d="M12 2.5v3.2M12 18.3v3.2M2.5 12h3.2M18.3 12h3.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                  <path d="M12 8.2c-1.55 0-2.8 1.2-2.8 2.7 0 2.05 2.8 5 2.8 5s2.8-2.95 2.8-5c0-1.5-1.25-2.7-2.8-2.7z" fill="currentColor"/>
+                  <circle cx="12" cy="10.9" r="1" fill="#fff"/>
                 </svg>
               </button>
-              <div class="map-radar-hud" id="map-radar-hud" aria-live="polite">
-                <div class="mrh-label">Radar time</div>
-                <div class="mrh-clock" id="map-radar-clock">—</div>
-                <div class="mrh-meta" id="map-radar-meta" hidden aria-hidden="true"></div>
-                <div class="mrh-current-note" id="map-radar-current-note">Radar is current</div>
-              </div>
-              <button type="button" class="map-radar-stop" id="map-radar-stop" onclick="stopMapRadar()" title="Stop radar loop">Stop</button>
+              <button type="button" class="mbb-icon-btn mbb-share-loc mbb-ctrl" id="share-loc-btn" title="Share current location with party" aria-label="Share location" aria-pressed="false">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <circle cx="12" cy="12" r="3.2" fill="currentColor"/>
+                  <circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="1.6" opacity="0.7"/>
+                  <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.35"/>
+                </svg>
+              </button>
             </div>
 
-            <button type="button" class="mbb-compass-btn mbb-ctrl is-on" id="mbb-compass-btn" onclick="toggleDialHudFromToolbar()" title="Show/hide compass or wind" aria-label="Compass or wind" aria-pressed="true">
-              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/>
-                <path d="M12 5.5 L14.2 12 L12 18.5 L9.8 12 Z" fill="currentColor"/>
-                <circle cx="12" cy="12" r="1.4" fill="#161a12"/>
-              </svg>
-            </button>
+            <!-- Right tools: one horizontal row, equal height (radar · compass · layers · settings) -->
+            <div class="mbb-right" id="mbb-right">
+              <div class="map-radar-control" id="map-radar-control">
+                <button type="button" class="map-radar-toggle" id="map-radar-toggle" onclick="toggleMapRadar()" title="Weather radar — last hour, ~5 min steps" aria-label="Radar" aria-pressed="false">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <circle class="radar-screen" cx="12" cy="13" r="8.2" fill="rgba(8,40,60,0.55)" stroke="currentColor" stroke-width="1.45"/>
+                    <circle cx="12" cy="13" r="5.4" fill="none" stroke="currentColor" stroke-width="0.95" opacity="0.55"/>
+                    <circle cx="12" cy="13" r="2.8" fill="none" stroke="currentColor" stroke-width="0.9" opacity="0.45"/>
+                    <path d="M12 5v16M4 13h16" fill="none" stroke="currentColor" stroke-width="0.85" opacity="0.35"/>
+                    <g class="radar-sweep">
+                      <path d="M12 13 L12 5.1 A7.9 7.9 0 0 1 18.3 9.2 Z" fill="currentColor" opacity="0.4"/>
+                      <path d="M12 13 L12 5.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                    </g>
+                    <circle cx="12" cy="13" r="1.1" fill="currentColor"/>
+                    <circle cx="15.2" cy="9.6" r="0.85" fill="currentColor" opacity="0.9"/>
+                    <!-- cloud covering top of radar -->
+                    <g class="radar-cloud" fill="#e2e8f0" stroke="#94a3b8" stroke-width="0.6">
+                      <ellipse cx="9.2" cy="5.2" rx="2.6" ry="1.7"/>
+                      <ellipse cx="12.2" cy="4.6" rx="3.1" ry="2"/>
+                      <ellipse cx="15.1" cy="5.4" rx="2.4" ry="1.55"/>
+                      <ellipse cx="12" cy="6.1" rx="4.2" ry="1.5" fill="#f1f5f9" stroke="none"/>
+                    </g>
+                  </svg>
+                </button>
+                <div class="map-radar-hud" id="map-radar-hud" aria-live="polite">
+                  <div class="mrh-label">Radar time</div>
+                  <div class="mrh-clock" id="map-radar-clock">—</div>
+                  <div class="mrh-meta" id="map-radar-meta" hidden aria-hidden="true"></div>
+                  <div class="mrh-current-note" id="map-radar-current-note">Radar is current</div>
+                </div>
+                <button type="button" class="map-radar-stop" id="map-radar-stop" onclick="stopMapRadar()" title="Stop radar loop">Stop</button>
+              </div>
 
-            <div class="map-layers-menu map-layers-bottom" id="map-layers-menu">
-              <button type="button" class="map-layers-toggle-btn mdt-icon-btn" id="map-layers-toggle-btn" aria-expanded="false" aria-controls="map-layers-panel" title="Layers" aria-label="Layers">
-                <img class="mdt-icon-img" src="icons/tools/layers.png" alt="" width="22" height="22" draggable="false">
+              <button type="button" class="mbb-compass-btn mbb-ctrl is-on" id="mbb-compass-btn" onclick="toggleDialHudFromToolbar()" title="Show/hide compass or wind" aria-label="Compass or wind" aria-pressed="true">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/>
+                  <path d="M12 5.5 L14.2 12 L12 18.5 L9.8 12 Z" fill="currentColor"/>
+                  <circle cx="12" cy="12" r="1.4" fill="#161a12"/>
+                </svg>
               </button>
+
+              <div class="map-layers-menu map-layers-bottom" id="map-layers-menu">
+                <button type="button" class="map-layers-toggle-btn mdt-icon-btn" id="map-layers-toggle-btn" aria-expanded="false" aria-controls="map-layers-panel" title="Layers" aria-label="Layers">
+                  <img class="mdt-icon-img" src="icons/tools/layers.png" alt="" width="22" height="22" draggable="false">
+                </button>
 <div class="map-layers-panel" id="map-layers-panel" role="group" aria-label="Map layers">
                           <div class="ml-section">Base map</div>
                           <label class="ml-option">
