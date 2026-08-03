@@ -2065,8 +2065,8 @@
       pointer-events: none;
     }
     /*
-     * Tool glyphs (from Tool Icons, BG-stripped): same size family as compass/radar SVGs.
-     * Black silhouettes → light ink on dark chrome so every toolbar button matches.
+     * Tool glyphs (from Tool Icons, BG-stripped).
+     * Measure/Draw = yellow; Track = red; Layers = light (larger, thicker asset).
      */
     .map-draw-tools .mdt-icon-img,
     .map-layers-toggle-btn .mdt-icon-img {
@@ -2082,14 +2082,23 @@
       outline: none !important;
       box-shadow: none !important;
       background: transparent !important;
-      /* light silhouette on dark button chrome (matches compass/settings ink) */
-      filter: brightness(0) invert(1);
-      opacity: 0.95;
+      opacity: 1;
     }
+    /* Measure + Draw: yellow silhouettes */
     .map-draw-tools #mdt-measure .mdt-icon-img,
-    .map-draw-tools #mdt-draw .mdt-icon-img,
-    .map-draw-tools #mdt-track .mdt-icon-img,
+    .map-draw-tools #mdt-draw .mdt-icon-img {
+      filter: brightness(0) saturate(100%) invert(78%) sepia(72%) saturate(1200%) hue-rotate(2deg) brightness(1.08);
+    }
+    /* Track: red silhouette (always); pulses stronger when tracking */
+    .map-draw-tools #mdt-track .mdt-icon-img {
+      filter: brightness(0) saturate(100%) invert(16%) sepia(95%) saturate(5000%) hue-rotate(348deg) brightness(1.05);
+    }
+    /* Layers: slightly larger in the button; light ink on dark chrome */
     .map-layers-toggle-btn .mdt-icon-img {
+      width: 28px;
+      height: 28px;
+      max-width: 72%;
+      max-height: 72%;
       filter: brightness(0) invert(1);
     }
     /* Active / tracking — same “is-on” language as compass (accent border) */
@@ -2106,14 +2115,12 @@
       animation: none;
       outline: none !important;
     }
-    /* Track active: red glyph + pulse; button chrome stays toolbar family */
     .map-draw-tools.tracking #mdt-track {
       border-color: #f87171 !important;
       background: rgba(220, 38, 38, 0.16) !important;
     }
     .map-draw-tools.tracking #mdt-track .mdt-icon-img,
     .map-draw-tools #mdt-track.active .mdt-icon-img {
-      filter: brightness(0) saturate(100%) invert(16%) sepia(95%) saturate(5000%) hue-rotate(348deg) brightness(1.05);
       animation: trackIconPulse 1.1s ease-in-out infinite;
     }
     @keyframes trackIconPulse {
@@ -5645,7 +5652,7 @@
 
               <div class="map-layers-menu map-layers-bottom" id="map-layers-menu">
                 <button type="button" class="map-layers-toggle-btn mdt-icon-btn" id="map-layers-toggle-btn" aria-expanded="false" aria-controls="map-layers-panel" title="Layers" aria-label="Layers">
-                  <img class="mdt-icon-img" src="icons/tools/layers.png?v=tool2" alt="" width="24" height="24" draggable="false">
+                  <img class="mdt-icon-img" src="icons/tools/layers.png?v=tool3" alt="" width="28" height="28" draggable="false">
                 </button>
 <div class="map-layers-panel" id="map-layers-panel" role="group" aria-label="Map layers">
                           <div class="ml-section">Base map</div>
