@@ -141,28 +141,64 @@
       user-select: none;
       text-shadow: 0 1px 3px rgba(0,0,0,0.85);
     }
-    /* Active map name (private / shared) — top-left of brand bar */
+    /* Desktop: map name in brand header, top-right */
     .brand-map-name {
       position: absolute;
-      left: 12px;
+      right: 14px;
       top: 50%;
       transform: translateY(-50%);
       z-index: 2;
-      max-width: min(36vw, 220px);
+      max-width: min(40vw, 260px);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 800;
       letter-spacing: 0.04em;
       color: var(--accent, #e59a18);
       text-shadow: 0 1px 4px rgba(0,0,0,0.85);
       pointer-events: none;
+      text-align: right;
     }
+    /* Mobile: hide header name — shown above map instead */
     html.layout-phone .brand-map-name {
-      font-size: 10px;
-      left: 8px;
-      max-width: 38vw;
+      display: none !important;
+    }
+    /* Mobile strip: between available tracts and the map */
+    .map-title-bar {
+      display: none;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 6px 12px 4px;
+      text-align: center;
+      background: transparent;
+    }
+    .map-title-bar .map-title-text {
+      display: block;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: var(--accent, #e59a18);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    html.layout-phone .map-title-bar {
+      display: block;
+      order: 2; /* with card-map children; parent card-map is order 3 in stack */
+    }
+    html.layout-phone .card-map {
+      display: flex;
+      flex-direction: column;
+    }
+    html.layout-phone .card-map > .map-title-bar {
+      order: 0;
+      flex: 0 0 auto;
+    }
+    html.layout-phone .card-map > .map-section-block {
+      order: 1;
+      flex: 1 1 auto;
+      min-height: 0;
     }
 
     /* Site links / tagline live in page footer (v3.9) */
@@ -3185,31 +3221,32 @@
      * balanced mid-zones around GPS (not between individual buttons).
      */
     .map-bottom-bar {
-      --mbb-h: 36px;
+      /* Buttons +20% vs 36px → 43px; bar only ~5% taller than buttons */
+      --mbb-h: 43px;
       --mbb-gap: 4px;
-      --mbb-icon: 36px;
+      --mbb-icon: 43px;
+      --mbb-bar-h: calc(var(--mbb-h) * 1.05);
       position: absolute;
       left: 0;
       right: 0;
-      /* Flush to bottom edge of the map — no floating gap */
       bottom: 0 !important;
       transform: none;
-      /* Stable: always above map/compass/popups so the bar never vanishes under Leaflet */
       z-index: 80 !important;
       display: grid !important;
       visibility: visible !important;
       opacity: 1 !important;
       grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
       align-items: center;
+      justify-items: stretch;
       column-gap: var(--mbb-gap);
       pointer-events: none;
       width: 100%;
       max-width: 100%;
-      /* Just a little taller than the buttons themselves */
-      padding: 3px 6px;
-      padding-bottom: max(3px, env(safe-area-inset-bottom, 0px));
-      min-height: calc(var(--mbb-h) + 6px);
-      height: auto;
+      height: var(--mbb-bar-h) !important;
+      min-height: var(--mbb-bar-h) !important;
+      max-height: var(--mbb-bar-h) !important;
+      padding: 0 6px;
+      padding-bottom: max(0px, env(safe-area-inset-bottom, 0px));
       box-sizing: border-box;
       background: rgba(14, 18, 12, 0.92);
       border: none;
@@ -3217,12 +3254,20 @@
       border-radius: 0;
       box-shadow: 0 -4px 16px rgba(0,0,0,0.35);
       backdrop-filter: blur(6px);
+      overflow: hidden;
     }
-    .map-bottom-bar > * { pointer-events: auto; }
+    .map-bottom-bar > * {
+      pointer-events: auto;
+      align-self: center;
+      height: var(--mbb-h);
+      max-height: var(--mbb-h);
+    }
     .map-wrapper.fullscreen .map-bottom-bar {
       z-index: 80 !important;
       bottom: 0 !important;
-      padding-bottom: max(6px, env(safe-area-inset-bottom, 0px));
+      height: calc(var(--mbb-bar-h) + env(safe-area-inset-bottom, 0px)) !important;
+      max-height: calc(var(--mbb-bar-h) + env(safe-area-inset-bottom, 0px)) !important;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
     }
     /* Never hide the chrome bar via popup stacking or accidental utility classes */
     .map-wrapper.map-popup-open .map-bottom-bar,
@@ -3233,12 +3278,40 @@
       opacity: 1 !important;
       z-index: 80 !important;
     }
-    /* Equal-height controls on the bar */
-    .map-bottom-bar .mbb-ctrl {
-      height: var(--mbb-h);
-      min-height: var(--mbb-h);
-      max-height: var(--mbb-h);
+    /* Equal-height controls — tops/bottoms on one plane */
+    .map-bottom-bar .mbb-ctrl,
+    .map-bottom-bar .mdt-btn,
+    .map-bottom-bar .mbb-icon-btn,
+    .map-bottom-bar .map-settings-btn,
+    .map-bottom-bar .map-radar-toggle,
+    .map-bottom-bar .mbb-compass-btn,
+    .map-bottom-bar .map-layers-toggle-btn {
+      height: var(--mbb-h) !important;
+      min-height: var(--mbb-h) !important;
+      max-height: var(--mbb-h) !important;
       box-sizing: border-box;
+      align-self: center;
+      flex-shrink: 0;
+    }
+    .map-bottom-bar .mbb-icon-btn,
+    .map-bottom-bar .map-settings-btn,
+    .map-bottom-bar .map-radar-toggle,
+    .map-bottom-bar .map-layers-toggle-btn,
+    .map-bottom-bar .mdt-btn.mdt-icon-btn {
+      width: var(--mbb-icon) !important;
+      min-width: var(--mbb-icon) !important;
+      max-width: var(--mbb-icon) !important;
+    }
+    .map-bottom-bar .mdt-btn.mdt-track-stop {
+      width: auto !important;
+      min-width: 52px !important;
+      max-width: none !important;
+    }
+    .map-bottom-bar .mbb-compass-btn.mode-wind,
+    .map-bottom-bar .mbb-compass-btn {
+      width: auto !important;
+      min-width: var(--mbb-icon) !important;
+      max-width: 56px !important;
     }
     /* Left zone: date/weapon (fixed) + tools (tight), packed start */
     .mbb-left {
@@ -3247,8 +3320,11 @@
       align-items: center;
       gap: var(--mbb-gap);
       min-width: 0;
+      height: var(--mbb-h) !important;
+      max-height: var(--mbb-h) !important;
       justify-content: flex-start;
       justify-self: start;
+      overflow: hidden;
     }
     /* Center zone: Current Location — always true center of bar */
     .map-bottom-bar > .mbb-icon-btn.mbb-gps {
@@ -3262,8 +3338,28 @@
       align-items: center;
       gap: var(--mbb-gap);
       min-width: 0;
+      height: var(--mbb-h) !important;
+      max-height: var(--mbb-h) !important;
       justify-content: flex-end;
       justify-self: end;
+      overflow: hidden;
+    }
+    .map-bottom-bar .map-draw-tools,
+    .map-bottom-bar .map-radar-control,
+    .map-bottom-bar .map-layers-menu {
+      display: flex;
+      align-items: center;
+      height: var(--mbb-h) !important;
+      max-height: var(--mbb-h) !important;
+      margin: 0;
+      padding: 0;
+    }
+    .map-bottom-bar .map-radar-hud,
+    .map-bottom-bar .map-radar-stop {
+      /* keep radar extras out of the slim bar plane */
+      position: absolute;
+      bottom: 100%;
+      margin-bottom: 4px;
     }
     .map-settings-btn {
       width: var(--mbb-icon);
@@ -3294,11 +3390,15 @@
       flex-direction: column;
       align-items: flex-start;
       justify-content: center;
-      gap: 2px;
+      gap: 1px;
       flex: 0 0 auto;
       width: 72px;
       min-width: 72px;
       max-width: 72px;
+      height: var(--mbb-h) !important;
+      max-height: var(--mbb-h) !important;
+      overflow: hidden;
+      box-sizing: border-box;
       padding: 0 2px 0 0;
       color: var(--ink);
       overflow: hidden;
@@ -3444,17 +3544,21 @@
      * on very narrow phones so the row stays one cohesive strip.
      */
     html.layout-phone .map-bottom-bar {
-      --mbb-h: 34px;
+      /* +20% vs prior 34px phone size → ~41px; bar 5% taller */
+      --mbb-h: 41px;
       --mbb-gap: 3px;
-      --mbb-icon: 34px;
+      --mbb-icon: 41px;
+      --mbb-bar-h: calc(var(--mbb-h) * 1.05);
       left: 0;
       right: 0;
       bottom: 0 !important;
       width: 100%;
       max-width: 100%;
-      padding: 2px 4px;
-      padding-bottom: max(2px, env(safe-area-inset-bottom, 0px));
-      min-height: calc(var(--mbb-h) + 4px);
+      height: var(--mbb-bar-h) !important;
+      min-height: var(--mbb-bar-h) !important;
+      max-height: var(--mbb-bar-h) !important;
+      padding: 0 4px;
+      padding-bottom: max(0px, env(safe-area-inset-bottom, 0px));
       border-radius: 0;
       column-gap: var(--mbb-gap);
       transform: none;
@@ -3466,10 +3570,13 @@
       flex-wrap: nowrap;
       align-items: center;
       overflow: hidden;
+      height: var(--mbb-h) !important;
+      max-height: var(--mbb-h) !important;
     }
     html.layout-phone .map-draw-tools {
       flex-wrap: nowrap;
       align-items: center;
+      height: var(--mbb-h) !important;
     }
     html.layout-phone .map-wrapper.fullscreen .map-bottom-bar {
       transform: none;
@@ -5060,6 +5167,10 @@
     </div>
 
     <div class="card card-map">
+      <!-- Mobile: map name between available tracts and the map -->
+      <div class="map-title-bar" id="map-title-bar" aria-live="polite">
+        <span class="map-title-text" id="map-title-mobile">My Map</span>
+      </div>
       <div class="map-section-block">
         <div class="map-wrapper" id="map-wrapper">
           <!-- Free-standing compass / wind dials — absolute on map; draggable when enlarged -->
@@ -15591,7 +15702,7 @@
       isShowingCurrentData = false;
       isHistorical = getDaysFromToday(selectedDate) < 0;
       selectLocation(newLoc, rule);
-      alert((isEdit ? 'Pin updated: "' : 'Pin "') + name + (isEdit ? '"' : '" saved!') + (tva && !isEdit ? '\n\nMarked as TVA Undeveloped Recreation Land (' + tva.reservoir + ').' : ''));
+      // No confirmation dialog — return straight to the map
     }
     function saveHuntFromMap() {
       var nameIn = document.getElementById('hunt-name-input').value.trim();
@@ -15636,10 +15747,7 @@
           if (typeof window.regSlayerMapDataChanged === 'function') window.regSlayerMapDataChanged();
           else if (window.RegSlayerCloud && typeof window.RegSlayerCloud.markDirty === 'function') window.RegSlayerCloud.markDirty();
         } catch (eHuntCloud) {}
-        var tempNote = (hunt.highTemp != null && hunt.lowTemp != null)
-          ? ('\nHigh ' + hunt.highTemp + '° / Low ' + hunt.lowTemp + '° on ' + dateStr)
-          : '';
-        alert('Hunt "' + name + '" logged!' + tempNote + (tva ? '\n\nOn TVA land: ' + tva.reservoir + '.' : ''));
+        // No confirmation dialog — return straight to the map
       }
       try {
         var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + clickLat + '&longitude=' + clickLng +
@@ -19148,14 +19256,21 @@
             if (window.RegSlayerCloud && window.RegSlayerCloud.getViewState) {
               var vs = window.RegSlayerCloud.getViewState();
               var lab = document.getElementById('set-map-mode-label');
+              var mapNm = (vs.mode === 'shared')
+                ? (vs.sharedMapName || 'Shared map')
+                : (vs.privateMapName || 'My Map');
               if (lab && vs) {
                 if (vs.mode === 'shared') {
-                  lab.textContent = 'Viewing: ' + (vs.sharedMapName || 'Shared map') +
+                  lab.textContent = 'Viewing: ' + mapNm +
                     (vs.sharedMapCode ? ' · code ' + vs.sharedMapCode : '');
                 } else {
-                  lab.textContent = 'Viewing: ' + (vs.privateMapName || 'My Map') + ' (private)';
+                  lab.textContent = 'Viewing: ' + mapNm + ' (private)';
                 }
               }
+              var bn = document.getElementById('brand-map-name');
+              var mn = document.getElementById('map-title-mobile');
+              if (bn) bn.textContent = mapNm;
+              if (mn) mn.textContent = mapNm;
               var chip = document.getElementById('auth-user-chip');
               var prof = window.RegSlayerCloud.getProfile && window.RegSlayerCloud.getProfile();
               if (chip) chip.textContent = prof && prof.username

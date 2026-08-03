@@ -739,17 +739,26 @@
 
   // ---- UI ----
   function updateAuthChrome() {
+    var mapLabel = 'My Map';
+    var mapTitle = 'Private map';
+    if (viewState.mode === 'shared' && viewState.sharedMapName) {
+      mapLabel = viewState.sharedMapName;
+      mapTitle = 'Shared map · code ' + (viewState.sharedMapCode || '');
+    } else {
+      mapLabel = viewState.privateMapName || 'My Map';
+      mapTitle = 'Private map';
+    }
     var nameEl = $('brand-map-name');
     if (nameEl) {
-      if (viewState.mode === 'shared' && viewState.sharedMapName) {
-        nameEl.textContent = viewState.sharedMapName;
-        nameEl.style.display = '';
-        nameEl.title = 'Shared map Â· code ' + (viewState.sharedMapCode || '');
-      } else {
-        nameEl.textContent = viewState.privateMapName || 'My Map';
-        nameEl.style.display = '';
-        nameEl.title = 'Private map';
-      }
+      nameEl.textContent = mapLabel;
+      nameEl.title = mapTitle;
+      // Desktop shows header name; mobile CSS hides it
+      nameEl.style.display = '';
+    }
+    var mobileName = $('map-title-mobile');
+    if (mobileName) {
+      mobileName.textContent = mapLabel;
+      mobileName.title = mapTitle;
     }
     var badge = $('auth-user-chip');
     if (badge) {
