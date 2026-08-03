@@ -2,7 +2,7 @@
  * Caches app shell for return visits with no signal.
  * Map tiles: cache-first when already stored; network otherwise (then cache).
  */
-const SHELL_CACHE = 'reg-slayer-shell-v4';
+const SHELL_CACHE = 'reg-slayer-shell-v5';
 const TILE_CACHE = 'reg-slayer-tiles-v2';
 const DATA_CACHE = 'reg-slayer-data-v1';
 
@@ -15,12 +15,10 @@ const SHELL_ASSETS = [
   './offline-engine.js',
   './auth-sync.js',
   './party-maps.js',
-  './icons/tools/measure.jpg',
+  './icons/tools/measure.png',
   './icons/tools/draw.png',
-  './icons/tools/track.jpg',
-  './icons/tools/layers.webp',
-  './icons/pins/rifle_stand.svg',
-  './icons/pins/bow_stand.svg',
+  './icons/tools/track.png',
+  './icons/tools/layers.png',
   './vendor/leaflet/leaflet.js',
   './vendor/leaflet/leaflet.css',
   './vendor/leaflet/marker-icon.png',

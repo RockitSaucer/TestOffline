@@ -1911,7 +1911,6 @@
       flex-shrink: 0;
     }
     .map-draw-tools .mdt-btn {
-      /* Match settings-adjacent chrome: green field + light silhouette icons */
       background: var(--green, #486a2f);
       border: 1px solid #3a5626;
       color: #fff;
@@ -1939,6 +1938,12 @@
       padding: 0;
       background: var(--green, #486a2f);
     }
+    /* Measure + Draw: slightly lighter green so black/yellow silhouettes pop */
+    .map-draw-tools #mdt-measure,
+    .map-draw-tools #mdt-draw {
+      background: #5d8e3d;
+      border-color: #4a7530;
+    }
     .map-draw-tools .mdt-btn.mdt-track-stop {
       width: auto;
       min-width: 48px;
@@ -1948,34 +1953,50 @@
     }
     .map-draw-tools .mdt-icon,
     .map-layers-toggle-btn .mdt-icon {
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
       display: block;
       pointer-events: none;
     }
     .map-draw-tools .mdt-icon-img,
     .map-layers-toggle-btn .mdt-icon-img {
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
       object-fit: contain;
       display: block;
       pointer-events: none;
       border-radius: 0;
-      /* Silhouette: white glyph on green button */
-      filter: brightness(0) invert(1);
+      /* Default: black silhouette on green */
+      filter: brightness(0);
       opacity: 0.95;
     }
-    .map-draw-tools .mdt-btn:hover { border-color: #9fd06a; filter: brightness(1.06); }
+    /* Measure / Draw: yellow silhouettes (tape & pencil) */
+    .map-draw-tools #mdt-measure .mdt-icon-img,
+    .map-draw-tools #mdt-draw .mdt-icon-img {
+      filter: brightness(0) saturate(100%) invert(78%) sepia(72%) saturate(1200%) hue-rotate(2deg) brightness(1.08);
+    }
+    /* Track: red silhouette always; pulses when tracking */
+    .map-draw-tools #mdt-track .mdt-icon-img {
+      filter: brightness(0) saturate(100%) invert(16%) sepia(95%) saturate(5000%) hue-rotate(348deg) brightness(1.05);
+    }
+    .map-draw-tools #mdt-track {
+      background: var(--green, #486a2f);
+      border-color: #3a5626;
+    }
+    .map-draw-tools.tracking #mdt-track,
+    .map-draw-tools #mdt-track.active {
+      background: var(--green, #486a2f);
+      border-color: #f87171;
+      animation: trackIconPulse 1.1s ease-in-out infinite;
+    }
+    @keyframes trackIconPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.55); }
+      50% { box-shadow: 0 0 0 8px rgba(220, 38, 38, 0); }
+    }
+    .map-draw-tools .mdt-btn:hover { border-color: #9fd06a; }
     .map-draw-tools .mdt-btn.active {
       border-color: var(--accent);
       box-shadow: 0 0 0 1px var(--accent);
-    }
-    /* Track lights up red when GPS tracking is active */
-    .map-draw-tools.tracking .mdt-track-idle,
-    .map-draw-tools .mdt-track-idle.active {
-      border-color: #f87171;
-      background: #7f1d1d;
-      box-shadow: 0 0 10px rgba(248, 113, 113, 0.55);
     }
     .map-layers-toggle-btn.mdt-icon-btn {
       width: var(--mbb-h, 36px);
@@ -1993,6 +2014,9 @@
     }
     .map-layers-toggle-btn.mdt-icon-btn:hover {
       border-color: #9fd06a;
+    }
+    .map-layers-toggle-btn .mdt-icon-img {
+      filter: brightness(0);
     }
     .map-draw-tools .mdt-btn:disabled { opacity: 0.45; cursor: default; }
     /* Active tool chrome (Undo/Finish/Cancel) — top-left like v3.5 */
@@ -2723,13 +2747,9 @@
       0%, 100% { box-shadow: 0 0 0 2px rgba(185, 28, 28, 0.35), 0 4px 14px rgba(0,0,0,0.5); }
       50% { box-shadow: 0 0 0 4px rgba(185, 28, 28, 0.55), 0 4px 16px rgba(0,0,0,0.55); }
     }
+    /* While tracking: show Stop; keep Track idle hidden; other tools stay available */
     .map-draw-tools.tracking .mdt-track-idle { display: none; }
     .map-draw-tools:not(.tracking) .mdt-track-stop { display: none !important; }
-    /* Track focus: hide measure/draw while live tracking */
-    .map-draw-tools.tracking:not(.tool-active) #mdt-measure,
-    .map-draw-tools.tracking:not(.tool-active) #mdt-draw {
-      display: none !important;
-    }
     .map-track-live-stats {
       display: none;
       background: rgba(127, 29, 29, 0.94);
@@ -5098,13 +5118,13 @@
               </div>
               <div class="map-draw-tools" id="map-draw-tools">
                 <button type="button" class="mdt-btn mdt-icon-btn" id="mdt-measure" onclick="startMapMeasure()" title="Measure" aria-label="Measure">
-                  <img class="mdt-icon-img" src="icons/tools/measure.jpg" alt="" width="22" height="22" draggable="false">
+                  <img class="mdt-icon-img" src="icons/tools/measure.png" alt="" width="22" height="22" draggable="false">
                 </button>
                 <button type="button" class="mdt-btn mdt-icon-btn" id="mdt-draw" onclick="startMapDrawShape()" title="Draw" aria-label="Draw">
                   <img class="mdt-icon-img" src="icons/tools/draw.png" alt="" width="22" height="22" draggable="false">
                 </button>
                 <button type="button" class="mdt-btn mdt-icon-btn mdt-track-idle" id="mdt-track" onclick="toggleGpsTrack()" title="Track" aria-label="Track">
-                  <img class="mdt-icon-img" src="icons/tools/track.jpg" alt="" width="22" height="22" draggable="false">
+                  <img class="mdt-icon-img" src="icons/tools/track.png" alt="" width="22" height="22" draggable="false">
                 </button>
                 <button type="button" class="mdt-btn mdt-track-stop" id="mdt-track-stop" onclick="toggleGpsTrack()" title="Stop" aria-label="Stop GPS tracking">Stop</button>
                 <div class="mdt-tools-panel" id="mdt-tools-panel" role="group" aria-label="Active tool controls">
@@ -5176,7 +5196,7 @@
 
             <div class="map-layers-menu map-layers-bottom" id="map-layers-menu">
               <button type="button" class="map-layers-toggle-btn mdt-icon-btn" id="map-layers-toggle-btn" aria-expanded="false" aria-controls="map-layers-panel" title="Layers" aria-label="Layers">
-                <img class="mdt-icon-img" src="icons/tools/layers.webp" alt="" width="22" height="22" draggable="false">
+                <img class="mdt-icon-img" src="icons/tools/layers.png" alt="" width="22" height="22" draggable="false">
               </button>
 <div class="map-layers-panel" id="map-layers-panel" role="group" aria-label="Map layers">
                           <div class="ml-section">Base map</div>
@@ -5316,7 +5336,7 @@
             </div>
             <div id="dt-pin-form" style="display:none; margin-top:8px; border-top:1px solid var(--border); padding-top:8px;">
               <span style="font-size:11px; font-weight:bold; color:var(--accent); text-transform:uppercase;">Save Spot as Pin</span>
-              <input type="text" id="pin-name-input" class="toast-form-control" placeholder="Pin Name...">
+              <input type="text" id="pin-name-input" class="toast-form-control" placeholder="Name (optional — defaults to pin type)">
               <div style="margin-top:6px;">
                 <button type="button" id="pin-icon-toggle" class="filter-btn" style="width:100%;font-size:11px;" onclick="togglePinIconPicker()">Choose pin icon (optional)</button>
                 <div id="pin-icon-picker" style="display:none;margin-top:6px;">
@@ -5356,7 +5376,7 @@
                 <button type="button" class="filter-btn active" id="hunt-stand-rifle" onclick="setHuntStandType('rifle_stand')" style="flex:1;font-size:11px;">Rifle Stand</button>
                 <button type="button" class="filter-btn" id="hunt-stand-bow" onclick="setHuntStandType('bow_stand')" style="flex:1;font-size:11px;">Bow Stand</button>
               </div>
-              <input type="text" id="hunt-name-input" class="toast-form-control" placeholder="Hunt Title...">
+              <input type="text" id="hunt-name-input" class="toast-form-control" placeholder="Name (optional — defaults to Rifle/Bow Stand)">
               <input type="date" id="hunt-date-input" class="toast-form-control">
               <div style="margin-top:6px;">
                 <span style="font-size:11px; color:var(--muted);">Color:</span>
@@ -15236,33 +15256,40 @@
     window.selectPinColor = selectPinColor;
     window.selectHuntColor = selectHuntColor;
 
-    // ---- Custom pin icons (#8) ----
+    // ---- Custom pin icons: only assets from HuntApp/button icons (normalized 128×128) ----
+    // id = filename slug; name = display name from original file
     var PIN_ICON_CATALOG = [
-      { id: 'blood', name: 'Blood', d: 'M12 3c-2 4-5 6.5-5 10a5 5 0 0 0 10 0c0-3.5-3-6-5-10z' },
-      { id: 'buck', name: 'Buck', d: 'M8 10c0-2 1.8-4 4-4s4 2 4 4c1.2.4 2 1.6 2 3s-1.2 3-3 3h-6c-1.8 0-3-1.6-3-3s.8-2.6 2-3z' },
-      { id: 'doe', name: 'Doe', d: 'M9 10c0-1.7 1.3-3 3-3s3 1.3 3 3c1 .4 1.8 1.4 1.8 2.6S15 16 13.2 16H10.8C9 16 8 14.8 8 13.6S8 10.4 9 10z' },
-      { id: 'rifle_stand', name: 'Rifle Stand', d: 'M6 18h12v1.5H6V18zm5-2V7l-3 2V7l4-3 4 3v2l-3-2v9h-2z' },
-      { id: 'bow_stand', name: 'Bow Stand', d: 'M12 4v16M8 7c3 2 5 2 8 0M8 17c3-2 5-2 8 0M10 12h4' },
-      { id: 'scrape', name: 'Scrape', d: 'M5 16c2-4 4-6 7-6s5 2 7 6M9 10l1-3 2 1 2-1 1 3' },
-      { id: 'rub', name: 'Rub', d: 'M12 4v16M9 7l3-2 3 2M9 17l3 2 3-2M8 12h8' },
-      { id: 'feeder', name: 'Feeder', d: 'M8 6h8v3H8V6zm1 3h6l1 10H8l1-10z' },
-      { id: 'camera', name: 'Camera', d: 'M8 8h2l1-1.5h2L14 8h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2zm4 2.5a2.5 2.5 0 1 0 .001 5.001A2.5 2.5 0 0 0 12 10.5z' },
-      { id: 'blind', name: 'Blind', d: 'M4 18h16L12 5 4 18zm8-4v3' },
-      { id: 'creek', name: 'Creek', d: 'M4 8c2 1 3 1 5 0s3-1 5 0 3 1 5 0M4 12c2 1 3 1 5 0s3-1 5 0 3 1 5 0M4 16c2 1 3 1 5 0s3-1 5 0 3 1 5 0' },
-      { id: 'road', name: 'Road', d: 'M8 4h8l2 16H6L8 4zm4 2v2m0 3v2m0 3v2' },
-      { id: 'parking', name: 'Parking', d: 'M7 5h7a4 4 0 0 1 0 8H9v6H7V5zm2 2v4h5a2 2 0 0 0 0-4H9z' },
-      { id: 'camp', name: 'Camp', d: 'M4 18h16L12 6 4 18zm4 0l4-7 4 7' },
-      { id: 'gate', name: 'Gate', d: 'M5 6v12M19 6v12M5 8h14M5 12h14M5 16h14' },
-      { id: 'food_plot', name: 'Food Plot', d: 'M6 18c2-6 4-10 6-12 2 2 4 6 6 12H6zm3-3h6' },
-      { id: 'tree', name: 'Tree', d: 'M12 3l5 7h-3l3 5h-3l2 4H8l2-4H7l3-5H7l5-7z' },
-      { id: 'water', name: 'Water', d: 'M12 4c-4 5-6 8-6 11a6 6 0 0 0 12 0c0-3-2-6-6-11z' },
-      { id: 'shed', name: 'Shed', d: 'M6 10l6-5 6 5v9H6v-9zm3 4h6v5H9v-5z' },
-      { id: 'sign', name: 'Sign', d: 'M11 4h2v3h5v8H6V7h5V4zm-3 5v4h8V9H8z' }
+      { id: 'alligator', name: 'Alligator', src: 'icons/pins/alligator.png' },
+      { id: 'arrow', name: 'Arrow', src: 'icons/pins/arrow.png' },
+      { id: 'beaver_dam', name: 'Beaver Dam', src: 'icons/pins/beaver_dam.png' },
+      { id: 'blood', name: 'Blood', src: 'icons/pins/blood.png' },
+      { id: 'boat', name: 'Boat', src: 'icons/pins/boat.png' },
+      { id: 'bow', name: 'Bow', src: 'icons/pins/bow.png' },
+      { id: 'bow_stand', name: 'Bow Stand', src: 'icons/pins/bow_stand.png' },
+      { id: 'bridge', name: 'Bridge', src: 'icons/pins/bridge.png' },
+      { id: 'buck', name: 'Buck', src: 'icons/pins/buck.png' },
+      { id: 'camera', name: 'Camera', src: 'icons/pins/camera.png' },
+      { id: 'crossing', name: 'Crossing', src: 'icons/pins/crossing.png' },
+      { id: 'deadhead', name: 'Deadhead', src: 'icons/pins/deadhead.png' },
+      { id: 'doe', name: 'Doe', src: 'icons/pins/doe.png' },
+      { id: 'feeder', name: 'Feeder', src: 'icons/pins/feeder.png' },
+      { id: 'food', name: 'Food', src: 'icons/pins/food.png' },
+      { id: 'muzzleloader', name: 'Muzzleloader', src: 'icons/pins/muzzleloader.png' },
+      { id: 'prints', name: 'Prints', src: 'icons/pins/prints.png' },
+      { id: 'rifle', name: 'Rifle', src: 'icons/pins/rifle.png' },
+      { id: 'rifle_stand', name: 'Rifle Stand', src: 'icons/pins/rifle_stand.png' },
+      { id: 'rub', name: 'Rub', src: 'icons/pins/rub.png' },
+      { id: 'salt', name: 'Salt', src: 'icons/pins/salt.png' },
+      { id: 'scrape', name: 'Scrape', src: 'icons/pins/scrape.png' },
+      { id: 'shed', name: 'Shed', src: 'icons/pins/shed.png' },
+      { id: 'tent', name: 'Tent', src: 'icons/pins/tent.png' },
+      { id: 'tree', name: 'Tree', src: 'icons/pins/tree.png' },
+      { id: 'truck', name: 'Truck', src: 'icons/pins/truck.png' }
     ].sort(function(a, b) { return a.name.localeCompare(b.name); });
 
     var selectedPinIconId = null;
-    var selectedPinInnerColor = '#111111';
-    var selectedPinGlyphColor = '#ffffff';
+    var selectedPinInnerColor = '#f5f5f5';
+    var selectedPinGlyphColor = '#000000';
     var selectedHuntStandType = 'rifle_stand';
     var PIN_ICON_RECENT_KEY = 'reg_slayer_pin_icon_recent_v1';
     var PIN_ICON_SCHEME_KEY = 'reg_slayer_pin_icon_schemes_v1';
@@ -15288,6 +15315,10 @@
     function savePinIconScheme(id, scheme) {
       if (!id || !scheme) return;
       var o = loadPinIconSchemes();
+      // Never persist custom icon color for blood — icon is always red
+      if (id === 'blood' && scheme) {
+        scheme = Object.assign({}, scheme, { icon: '#dc2626' });
+      }
       o[id] = scheme;
       try { localStorage.setItem(PIN_ICON_SCHEME_KEY, JSON.stringify(o)); } catch (e3) {}
     }
@@ -15297,49 +15328,53 @@
       }
       return null;
     }
-    /** Image paths for hunt stand types (and future issue #8 asset pack). */
-    var PIN_ICON_IMAGE = {
-      rifle_stand: 'icons/pins/rifle_stand.svg',
-      bow_stand: 'icons/pins/bow_stand.svg'
-    };
     function pinIconImageSrc(iconId) {
       if (!iconId) return null;
-      if (PIN_ICON_IMAGE[iconId]) return PIN_ICON_IMAGE[iconId];
-      return null;
-    }
-    function pinIconSvgMarkup(iconId, glyphColor, size) {
-      var img = pinIconImageSrc(iconId);
-      var s = size || 18;
-      var gc = glyphColor || '#000000';
-      if (img) {
-        // High-contrast silhouette: black detail with slight white halo for glanceability
-        return '<img src="' + img + '" width="' + s + '" height="' + s + '" alt="" draggable="false" ' +
-          'style="filter:drop-shadow(0 0 1px #fff) drop-shadow(0 0 1px #fff) brightness(0);opacity:1;display:block;">';
-      }
       var ic = getPinIconById(iconId);
-      if (!ic) return '';
-      return '<svg viewBox="0 0 24 24" width="' + s + '" height="' + s + '" aria-hidden="true" style="filter:drop-shadow(0 0 1px #fff);">' +
-        '<path fill="none" stroke="' + gc + '" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="' + ic.d + '"/></svg>';
+      return (ic && ic.src) ? ic.src : ('icons/pins/' + iconId + '.png');
+    }
+    /** CSS filter to recolor black silhouette to a hex (approx) — blood uses fixed red. */
+    function pinIconColorFilter(hex, iconId) {
+      if (iconId === 'blood') {
+        // Keep original blood artwork (always red) — pin outer/inner still customizable
+        return 'drop-shadow(0 0 1px rgba(255,255,255,0.9)) contrast(1.05)';
+      }
+      // Default: black silhouette with white halo for glanceability
+      if (!hex || hex === '#000' || hex === '#000000') {
+        return 'brightness(0) drop-shadow(0 0 1px #fff) drop-shadow(0 0 1px #fff)';
+      }
+      if (hex === '#fff' || hex === '#ffffff') {
+        return 'brightness(0) invert(1) drop-shadow(0 0 1px #000)';
+      }
+      // Colored silhouette: black shape + colored drop-shadow stack reads as tinted icon
+      return 'brightness(0) drop-shadow(0 0 0 ' + hex + ') drop-shadow(0 0 0.6px ' + hex + ') drop-shadow(0 0 1px #fff)';
+    }
+    function pinIconMarkup(iconId, glyphColor, size) {
+      var img = pinIconImageSrc(iconId);
+      var s = size || 22;
+      if (!img) return '';
+      var filt = pinIconColorFilter(glyphColor, iconId);
+      return '<img src="' + img + '" width="' + s + '" height="' + s + '" alt="" draggable="false" ' +
+        'style="filter:' + filt + ';opacity:1;display:block;object-fit:contain;">';
     }
     function buildCustomPinMarkerHtml(loc) {
       var outer = loc.color || '#e59a18';
       var inner = loc.innerColor || '#f5f5f5';
       var glyph = loc.iconColor || '#000000';
       var iconId = loc.iconId || null;
-      var letter = getFirstLetter(loc.name);
-      if (loc.isStand && !iconId) letter = 'S';
-      // Larger pin + roomy white/light inner disc so icon reads at a glance
-      var pinW = 34, pinH = 42, disc = 22;
+      if (iconId === 'blood') glyph = '#dc2626';
+      // +25% from previous 34×42 → ~43×53
+      var pinW = 43, pinH = 53, disc = 28, body = 38;
       var innerContent = iconId
-        ? pinIconSvgMarkup(iconId, glyph, 16)
-        : '<span style="font-size:12px;font-weight:900;color:' + glyph + ';line-height:1;text-shadow:0 0 2px #fff;">' + letter + '</span>';
+        ? pinIconMarkup(iconId, glyph, 20)
+        : '';
       return (
         '<div style="width:' + pinW + 'px;height:' + pinH + 'px;position:relative;">' +
-          '<div style="width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:' + outer +
-            ';border:2.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.5);position:absolute;left:2px;top:0;"></div>' +
-          '<div style="position:absolute;left:6px;top:4px;width:' + disc + 'px;height:' + disc +
+          '<div style="width:' + body + 'px;height:' + body + 'px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:' + outer +
+            ';border:2.5px solid #fff;box-shadow:0 2px 7px rgba(0,0,0,0.55);position:absolute;left:2px;top:0;"></div>' +
+          '<div style="position:absolute;left:7px;top:5px;width:' + disc + 'px;height:' + disc +
             'px;border-radius:50%;background:' + inner + ';border:1.5px solid rgba(0,0,0,0.35);' +
-            'display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.35);">' +
+            'display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.4);">' +
             innerContent +
           '</div>' +
         '</div>'
@@ -15367,12 +15402,23 @@
             selectedPinInnerColor = sch.inner;
             var inn = document.getElementById('pin-inner-color');
             if (inn) inn.value = sch.inner;
+            var cpI = document.getElementById('cp-pin-inner');
+            if (cpI && typeof setColorPickerValue === 'function') setColorPickerValue(cpI, sch.inner);
           }
-          if (sch.icon) {
+          if (sch.icon && id !== 'blood') {
             selectedPinGlyphColor = sch.icon;
             var g = document.getElementById('pin-glyph-color');
             if (g) g.value = sch.icon;
+            var cpG = document.getElementById('cp-pin-glyph');
+            if (cpG && typeof setColorPickerValue === 'function') setColorPickerValue(cpG, sch.icon);
           }
+        }
+        if (id === 'blood') {
+          selectedPinGlyphColor = '#dc2626';
+          var gB = document.getElementById('pin-glyph-color');
+          if (gB) gB.value = '#dc2626';
+          var cpGB = document.getElementById('cp-pin-glyph');
+          if (cpGB && typeof setColorPickerValue === 'function') setColorPickerValue(cpGB, '#dc2626');
         }
       }
       renderPinIconGrid();
@@ -15411,8 +15457,8 @@
       grid.innerHTML = list.map(function(ic) {
         var sel = selectedPinIconId === ic.id ? ' selected' : '';
         return '<button type="button" class="' + sel + '" title="' + ic.name + '" onclick="selectPinIcon(\'' + ic.id + '\')">' +
-          pinIconSvgMarkup(ic.id, '#e2e8f0', 16) +
-          '<span>' + ic.name.split(' ')[0] + '</span></button>';
+          pinIconMarkup(ic.id, ic.id === 'blood' ? '#dc2626' : '#000000', 22) +
+          '<span>' + ic.name + '</span></button>';
       }).join('');
       if (recentEl) {
         var recent = loadPinIconRecent().map(getPinIconById).filter(Boolean);
@@ -15422,8 +15468,8 @@
             recent.map(function(ic) {
               var sel = selectedPinIconId === ic.id ? ' selected' : '';
               return '<button type="button" class="' + sel + '" title="' + ic.name + '" onclick="selectPinIcon(\'' + ic.id + '\')">' +
-                pinIconSvgMarkup(ic.id, '#e2e8f0', 16) +
-                '<span>' + ic.name.split(' ')[0] + '</span></button>';
+                pinIconMarkup(ic.id, ic.id === 'blood' ? '#dc2626' : '#000000', 22) +
+                '<span>' + ic.name + '</span></button>';
             }).join('') + '</div>';
         } else {
           recentEl.style.display = 'none';
@@ -15446,8 +15492,7 @@
     window.setHuntStandType = setHuntStandType;
 
     function savePinFromMap() {
-      const name = document.getElementById('pin-name-input').value.trim();
-      if (!name) { alert('Please enter a name for the Pin.'); return; }
+      var nameIn = document.getElementById('pin-name-input').value.trim();
       let notes = document.getElementById('pin-notes-input').value.trim();
       const detected = detectBoundaryAndZone(clickLat, clickLng);
       const tva = lastClickTva;
@@ -15456,21 +15501,26 @@
         notes = notes ? (notes + '\n' + tvaLine) : tvaLine;
       }
       onPinColorInputsChange();
+      // Default name: icon name if chosen, else "Pin"
+      var defaultName = 'Pin';
+      if (selectedPinIconId) {
+        var icN = getPinIconById(selectedPinIconId);
+        defaultName = (icN && icN.name) ? icN.name : selectedPinIconId.replace(/_/g, ' ');
+      }
+      var name = nameIn || defaultName;
       var isEdit = !!editingPinId;
       var pinId = isEdit ? editingPinId : ('pin_' + Date.now());
-      var displayName = isEdit
-        ? name
-        : (name + ' (Pin - ' + detected.name + (tva ? ' / TVA' : '') + ')');
+      var iconColorFinal = (selectedPinIconId === 'blood') ? '#dc2626' : selectedPinGlyphColor;
       var newLoc = {
         id: pinId,
-        name: displayName,
+        name: name,
         type: tva ? 'TVA Pin' : 'Custom Pin',
         zone: detected.zone,
         lat: clickLat,
         lng: clickLng,
         color: selectedPinColor,
         innerColor: selectedPinInnerColor,
-        iconColor: selectedPinGlyphColor,
+        iconColor: iconColorFinal,
         iconId: selectedPinIconId || null,
         notes: notes,
         isPin: true,
@@ -15542,9 +15592,14 @@
       alert((isEdit ? 'Pin updated: "' : 'Pin "') + name + (isEdit ? '"' : '" saved!') + (tva && !isEdit ? '\n\nMarked as TVA Undeveloped Recreation Land (' + tva.reservoir + ').' : ''));
     }
     function saveHuntFromMap() {
-      const name = document.getElementById('hunt-name-input').value.trim();
+      var nameIn = document.getElementById('hunt-name-input').value.trim();
       const dateStr = document.getElementById('hunt-date-input').value;
-      if (!name || !dateStr) { alert('Please enter a title and date.'); return; }
+      if (!dateStr) { alert('Please enter a date for the hunt.'); return; }
+      // Default name from stand type (Rifle Stand / Bow Stand), or "Hunt"
+      var standType = selectedHuntStandType || 'rifle_stand';
+      var standIc = getPinIconById(standType);
+      var defaultHuntName = (standIc && standIc.name) ? standIc.name : (standType === 'bow_stand' ? 'Bow Stand' : 'Rifle Stand');
+      var name = nameIn || defaultHuntName;
       let notes = document.getElementById('hunt-notes-input').value.trim();
       const tva = lastClickTva;
       if (tva) {
@@ -15557,7 +15612,7 @@
       const newHunt = {
         id: 'hunt_' + Date.now(), name: name + (tva ? ' [TVA]' : ''), date: dateStr,
         lat: clickLat, lng: clickLng, color: selectedHuntColor, notes: notes,
-        iconId: selectedHuntStandType || 'rifle_stand',
+        iconId: standType,
         temp: w.hourly.temperature_2m[7], windSpeed: w.hourly.wind_speed_10m[7], windDir: w.hourly.wind_direction_10m[7],
         highTemp: dayHL.high, lowTemp: dayHL.low,
         tva: tva ? { reservoir: tva.reservoir, recType: tva.recType, restricted: tva.restricted } : null
@@ -15757,8 +15812,8 @@
             html: (typeof buildCustomPinMarkerHtml === 'function')
               ? buildCustomPinMarkerHtml(loc)
               : '<div style="background:' + (loc.color || (isStandPin ? '#1f6f9f' : '#e59a18')) + ';width:20px;height:20px;border-radius:50%;border:2px solid white;"></div>',
-            iconSize: [34, 42],
-            iconAnchor: [17, 40]
+            iconSize: [43, 53],
+            iconAnchor: [21, 50]
           })
         });
         var safeId = escJsStr(loc.id);
@@ -15807,8 +15862,8 @@
             html: (typeof buildCustomPinMarkerHtml === 'function')
               ? buildCustomPinMarkerHtml(huntLoc)
               : '<div style="background:' + (hunt.color||'#3498db') + ';width:20px;height:20px;border-radius:50%;border:2px solid white;"></div>',
-            iconSize: [34, 42],
-            iconAnchor: [17, 40]
+            iconSize: [43, 53],
+            iconAnchor: [21, 50]
           })
         });
         var safeId = escJsStr(hunt.id);
