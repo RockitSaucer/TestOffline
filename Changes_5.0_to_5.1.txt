@@ -1,0 +1,29 @@
+REG SLAYER — Changes 5.0 Beta → 5.1 Beta
+========================================
+Date: 2026-08-03
+Label: V5.1 Beta
+
+TOOLBAR ICONS (cleaner bar, especially mobile)
+----------------------------------------------
+- Measure / Draw / Track / Layers are icon-only buttons (no word labels)
+- Red icon set matching radar/compass footprint (40×40, 22px SVG; phone 17px)
+  · Measure = tape measure
+  · Draw = pencil
+  · Track = two pins + path
+  · Layers = stacked sheets (no caret text)
+- Hover shows a tiny name tip only (data-tip / title). No labels under buttons.
+- Track Stop remains a short status control when tracking is active.
+- Toolbar bar height unchanged; buttons share --mbb-h / --mbb-icon with radar & compass.
+
+MOBILE LAUNCH SCROLL / STUTTER
+------------------------------
+- GPS bootstrap no longer forces selectDateStep without skipScroll (was auto-scrolling
+  the page to the weather dashboard ~1–3s after load).
+- Boot quiet window (~4.5s): blocks scrollIntoView and map-in-view lock fighting.
+- Map-in-view restore shortened (was ~3.2s of forced scrollBy); user touch/wheel cancels it.
+- Fewer layout reflow passes on launch; viewport resize debounced harder during boot.
+
+DEPLOY
+------
+- GitHub: Hunt-Slayer, TestOffline (test), Reg-Slayer
+- Vercel: hunt-app1-24 (regslayer.com) + test-offline

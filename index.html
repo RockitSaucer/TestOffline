@@ -6,13 +6,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>REG SLAYER - Offline Test (from 4.5)</title>
-  <meta name="theme-color" content="#0a0c09">
-  <meta name="description" content="REG SLAYER offline test: 2 mi map packs, cached lands, weather, custom draw areas.">
-  <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="apple-touch-icon" href="./reg-slayer-logo.png">
-  <!-- Offline engine (map packs, weather disk cache, SW registration) -->
-  <script src="./offline-engine.js"></script>
+  <title>REG SLAYER - Alabama Deer Season Planner v5.1 Beta</title>
   <!-- Detect phone vs desktop as early as possible (reduces layout flash) -->
   <script>
     (function () {
@@ -51,8 +45,20 @@
       --brand-bar: #0a0c09;
     }
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    html, body { height: 100%; }
-    body { background: var(--bg); color: var(--ink); margin: 0; padding: 0; line-height: 1.5; min-height: 100vh; display: flex; flex-direction: column; }
+    /* height:auto so body can grow — fixed 100% + flex footer pinned the credits on screen */
+    html { height: auto; min-height: 100%; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      margin: 0;
+      padding: 0;
+      line-height: 1.5;
+      min-height: 100vh;
+      min-height: 100dvh;
+      height: auto;
+      display: flex;
+      flex-direction: column;
+    }
     /*
      * Mobile / home-screen: stop browser double-tap page-zoom when hammering
      * calendar Next/Prev, filters, etc. Map keeps pinch-zoom via Leaflet handlers.
@@ -66,7 +72,7 @@
     }
 
     /*
-     * Brand header (v4.5): 4.2 diagonal green stripes (22px / 22px).
+     * Brand header (v5.1 Beta): 4.2 diagonal green stripes (22px / 22px).
      * Logo is drawn near 4.2 scale so its stripe pitch matches the header,
      * then the wrap clips only empty PNG margin — shield + letters stay fully visible.
      */
@@ -139,13 +145,15 @@
       text-shadow: 0 1px 3px rgba(0,0,0,0.85);
     }
 
-    /* Site links / tagline live in page footer (v3.9) */
+    /* Site links / tagline — document end only (scroll to bottom); never sticky/fixed */
     .site-footer {
-      margin-top: auto;
+      position: relative;
+      margin-top: 20px;
       border-top: 1px solid var(--border);
       background: var(--brand-bar);
-      padding: 16px 20px 20px;
+      padding: 8px 12px 10px;
       flex-shrink: 0;
+      flex-grow: 0;
     }
     .site-footer-inner {
       width: 100%;
@@ -155,23 +163,35 @@
       flex-wrap: wrap;
       align-items: center;
       justify-content: center;
-      gap: 8px 16px;
+      gap: 4px 8px;
       text-align: center;
     }
     .site-footer-inner p {
       margin: 0;
       color: var(--muted);
-      font-size: 12.5px;
+      font-size: 10px;
+      line-height: 1.3;
+      width: 100%;
     }
-    .site-footer-inner a { color: var(--accent); text-decoration: none; font-size: 12px; }
+    .site-footer-inner a { color: var(--accent); text-decoration: none; font-size: 10px; }
     .site-footer-inner a:hover { text-decoration: underline; }
     .version-badge {
-      font-size: 11px; color: var(--muted); background: var(--panel-light);
-      padding: 3px 9px; border-radius: 6px; border: 1px solid var(--border);
+      font-size: 9px; color: var(--muted); background: var(--panel-light);
+      padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border);
     }
+    html.layout-phone .site-footer {
+      margin-top: 28px;
+      padding: 6px 8px 10px;
+      padding-bottom: max(10px, env(safe-area-inset-bottom, 0px));
+    }
+    html.layout-phone .site-footer-inner { gap: 3px 6px; }
+    html.layout-phone .site-footer-inner p { font-size: 9px; }
+    html.layout-phone .site-footer-inner a { font-size: 9px; }
+    html.layout-phone .version-badge { font-size: 8px; padding: 1px 5px; }
 
     /* ========== DESKTOP SHELL (v3.9 - planner+weather left, big map right) ========== */
     .app-shell {
+      flex: 1 0 auto;
       max-width: none;
       margin: 0;
       padding: 14px 14px 20px;
@@ -354,8 +374,6 @@
       object-position: center;
     }
     html.layout-phone .brand-version { font-size: 8px; bottom: 6px; right: 4px; }
-    html.layout-phone .site-footer-inner { gap: 6px 10px; padding-left: 12px; padding-right: 12px; }
-    html.layout-phone .site-footer-inner p { font-size: 12px; }
     html.layout-phone #dashboard-container,
     html.layout-phone .dashboard-under-steps {
       position: static; max-height: none; min-height: 0; margin-top: 16px; padding-top: 14px;
@@ -482,8 +500,11 @@
       .brand-logo-wrap { width: 94vw; height: 100%; padding-right: 36px; overflow: hidden; }
       .brand-logo { width: auto; height: 100px; max-height: none; object-fit: contain; object-position: center; }
       .brand-version { font-size: 8px; bottom: 6px; }
-      .site-footer-inner { gap: 6px 10px; padding-left: 12px; padding-right: 12px; }
-      .site-footer-inner p { font-size: 12px; }
+      .site-footer { margin-top: 28px; padding: 6px 8px 10px; }
+      .site-footer-inner { gap: 3px 6px; padding-left: 8px; padding-right: 8px; }
+      .site-footer-inner p { font-size: 9px; }
+      .site-footer-inner a { font-size: 9px; }
+      .version-badge { font-size: 8px; padding: 1px 5px; }
       #dashboard-container,
       .dashboard-under-steps {
         position: static; max-height: none; min-height: 0; margin-top: 16px; padding-top: 14px;
@@ -1514,39 +1535,38 @@
     }
     .map-dot-popup .leaflet-popup-content {
       margin: 0;
-      min-width: 196px;
+      min-width: 220px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     /* Mobile: compact map action menus (area info / links) */
     html.layout-phone .map-dot-popup .leaflet-popup-content {
       min-width: 0;
-      max-width: min(228px, calc(100vw - 40px));
+      max-width: min(248px, calc(100vw - 36px));
     }
     html.layout-phone .map-dot-menu {
       min-width: 0;
-      max-width: min(228px, calc(100vw - 40px));
-      padding: 8px 9px 8px;
-      gap: 4px;
+      max-width: min(248px, calc(100vw - 36px));
+      padding: 10px 10px 9px;
+      gap: 5px;
     }
     html.layout-phone .map-dot-menu .mdm-title {
       font-size: 12px;
-      margin: 0 22px 1px 0;
+      margin: 0 24px 2px 0;
     }
     html.layout-phone .map-dot-menu .mdm-sub {
       font-size: 11px;
       margin: -2px 0 2px;
     }
     html.layout-phone .map-dot-menu .mdm-btn {
-      padding: 8px 9px;
+      padding: 8px 10px;
       font-size: 13px;
       border-radius: 7px;
-      min-height: 36px;
     }
     html.layout-phone .map-dot-menu .mdm-hunt-status {
-      padding: 7px 8px;
-      margin: 0 0 3px;
+      padding: 8px 9px;
+      margin: 0 0 4px;
     }
-    html.layout-phone .map-dot-menu .mdm-hunt-status .mhs-title { font-size: 12px; }
+    html.layout-phone .map-dot-menu .mdm-hunt-status .mhs-title { font-size: 13px; }
     html.layout-phone .map-dot-menu .mdm-hunt-status .mhs-line { font-size: 11px; }
     html.layout-phone .map-dot-menu .mdm-hunt-status .mhs-sub { font-size: 10px; }
     html.layout-phone .map-dot-popup .leaflet-popup-close-button {
@@ -1589,38 +1609,36 @@
     }
     .map-dot-popup .leaflet-popup-close-button:hover { opacity: 1; color: #e59a18 !important; }
     .map-dot-menu {
-      min-width: 196px;
-      max-width: 248px;
+      min-width: 220px;
       display: flex;
       flex-direction: column;
-      gap: 5px;
-      padding: 10px 11px 9px;
+      gap: 8px;
+      padding: 14px 14px 12px;
       box-sizing: border-box;
     }
     .map-dot-menu .mdm-title {
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 800;
       color: #ffffff;
       letter-spacing: 0.02em;
-      margin: 0 26px 2px 0;
-      line-height: 1.25;
+      margin: 0 28px 4px 0;
+      line-height: 1.3;
     }
     .map-dot-menu .mdm-sub {
-      font-size: 11px;
+      font-size: 12px;
       color: #c5d0be;
-      margin: -2px 0 2px;
-      line-height: 1.3;
+      margin: -2px 0 4px;
+      line-height: 1.35;
     }
     .map-dot-menu .mdm-btn {
       display: block;
       width: 100%;
       text-align: center;
-      padding: 9px 11px;
-      min-height: 38px;
-      border-radius: 7px;
+      padding: 12px 14px;
+      border-radius: 8px;
       border: none;
       cursor: pointer;
-      font-size: 13.5px;
+      font-size: 15px;
       font-weight: 700;
       letter-spacing: 0.01em;
       line-height: 1.2;
@@ -1632,11 +1650,11 @@
     .map-dot-menu .mdm-btn.weather { background: #3f6b2a; }
     /* Hunt status strip at top of map-dot popup */
     .map-dot-menu .mdm-hunt-status {
-      border-radius: 7px;
-      padding: 8px 9px;
-      margin: 0 0 3px;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin: 0 0 6px;
       border: 1px solid var(--border);
-      line-height: 1.3;
+      line-height: 1.35;
     }
     .map-dot-menu .mdm-hunt-status.closed {
       background: rgba(185, 28, 28, 0.28);
@@ -1651,10 +1669,10 @@
       border-color: var(--accent);
     }
     .map-dot-menu .mdm-hunt-status .mhs-title {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 900;
       letter-spacing: 0.02em;
-      margin: 0 0 3px;
+      margin: 0 0 4px;
     }
     .map-dot-menu .mdm-hunt-status.closed .mhs-title { color: #fecaca; }
     .map-dot-menu .mdm-hunt-status.open .mhs-title { color: #bbf7d0; }
@@ -1747,14 +1765,85 @@
       align-items: center;
       justify-content: center;
       flex: 0 0 auto;
+      position: relative;
+    }
+    /* Icon tool buttons — same footprint as radar / compass */
+    .map-draw-tools .mdt-btn.mdt-icon-btn {
+      width: var(--mbb-icon, 40px);
+      min-width: var(--mbb-icon, 40px);
+      max-width: var(--mbb-icon, 40px);
+      padding: 0;
+      color: #ef4444;
+      border-color: rgba(239, 68, 68, 0.45);
+      background: rgba(28, 16, 16, 0.96);
+      line-height: 0;
+    }
+    .map-draw-tools .mdt-btn.mdt-icon-btn svg {
+      width: 22px;
+      height: 22px;
+      display: block;
+      overflow: visible;
+      pointer-events: none;
+    }
+    .map-draw-tools .mdt-btn.mdt-icon-btn:hover {
+      border-color: #f87171;
+      color: #fca5a5;
+      background: rgba(40, 18, 18, 0.98);
+    }
+    .map-draw-tools .mdt-btn.mdt-icon-btn.active {
+      border-color: #f87171;
+      background: rgba(239, 68, 68, 0.18);
+      color: #fca5a5;
     }
     .map-draw-tools .mdt-btn:hover { border-color: var(--accent); color: #fff; }
+    .map-draw-tools .mdt-btn.mdt-icon-btn:hover { border-color: #f87171; color: #fca5a5; }
     .map-draw-tools .mdt-btn.active {
       border-color: var(--accent);
       background: rgba(229, 154, 24, 0.18);
       color: var(--accent);
     }
+    .map-draw-tools .mdt-btn.mdt-icon-btn.active {
+      border-color: #f87171;
+      background: rgba(239, 68, 68, 0.18);
+      color: #fca5a5;
+    }
     .map-draw-tools .mdt-btn:disabled { opacity: 0.45; cursor: default; }
+    /* Tiny hover name tip (desktop); mobile uses native title on long-press */
+    .mbb-tip {
+      position: relative;
+    }
+    .mbb-tip[data-tip]::after {
+      content: attr(data-tip);
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 7px);
+      transform: translateX(-50%) translateY(2px);
+      padding: 3px 7px;
+      border-radius: 6px;
+      background: rgba(8, 10, 8, 0.96);
+      border: 1px solid rgba(141, 156, 132, 0.45);
+      color: #f0f4ee;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      line-height: 1.2;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.1s ease, transform 0.1s ease, visibility 0.1s;
+      z-index: 90;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.45);
+    }
+    .mbb-tip[data-tip]:hover::after,
+    .mbb-tip[data-tip]:focus-visible::after {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+    @media (hover: none) {
+      .mbb-tip[data-tip]::after { display: none; }
+    }
     /* Active tool chrome (Undo/Finish/Cancel) — top-left like v3.5 */
     .mdt-tools-panel {
       display: none;
@@ -2978,7 +3067,15 @@
       justify-content: flex-start;
       justify-self: start;
     }
-    /* Center zone: Current Location — always true center of bar */
+    /* Center zone: Current Location + Share Location */
+    .mbb-center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--mbb-gap, 4px);
+      pointer-events: auto;
+    }
+    .map-bottom-bar > .mbb-center,
     .map-bottom-bar > .mbb-icon-btn.mbb-gps {
       grid-column: 2;
       justify-self: center;
@@ -3108,13 +3205,14 @@
       color: #fff;
     }
 
-    /* Satellite imagery acquisition date (bottom-right, above bottom bar) */
+    /* Satellite imagery date — sits on the map ABOVE the bottom bar (never over toolbar) */
     .map-imagery-date {
       position: absolute;
       left: 8px;
       right: auto;
-      bottom: 50px;
-      z-index: 850;
+      /* bar ~40px + pad + safe area; keep label fully on map surface */
+      bottom: calc(58px + env(safe-area-inset-bottom, 0px));
+      z-index: 70; /* below .map-bottom-bar (80) so toolbar stays clickable */
       pointer-events: none;
       font-size: 10px;
       font-weight: 700;
@@ -3133,12 +3231,16 @@
       text-overflow: ellipsis;
     }
     .map-imagery-date.visible { display: block; }
-    .map-wrapper.fullscreen .map-imagery-date { bottom: 52px; left: 8px; right: auto; }
+    .map-wrapper.fullscreen .map-imagery-date {
+      bottom: calc(58px + env(safe-area-inset-bottom, 0px));
+      left: 8px;
+      right: auto;
+    }
     html.layout-phone .map-imagery-date {
       font-size: 9px;
       left: 6px;
       right: auto;
-      bottom: 46px;
+      bottom: calc(56px + env(safe-area-inset-bottom, 0px));
       padding: 2px 6px;
     }
     .map-layers-menu {
@@ -3228,11 +3330,23 @@
       flex: 0 0 auto;
       letter-spacing: 0;
     }
+    html.layout-phone .map-draw-tools .mdt-btn.mdt-icon-btn {
+      width: var(--mbb-icon);
+      min-width: var(--mbb-icon);
+      max-width: var(--mbb-icon);
+      padding: 0;
+    }
+    html.layout-phone .map-draw-tools .mdt-btn.mdt-icon-btn svg {
+      width: 17px;
+      height: 17px;
+    }
     html.layout-phone .map-bottom-bar .mbb-ctrl,
     html.layout-phone .map-settings-btn,
     html.layout-phone .mbb-icon-btn,
     html.layout-phone .map-radar-toggle,
-    html.layout-phone .mbb-compass-btn {
+    html.layout-phone .mbb-compass-btn,
+    html.layout-phone .map-layers-toggle-btn,
+    html.layout-phone .map-draw-tools .mdt-btn.mdt-icon-btn {
       width: var(--mbb-icon);
       height: var(--mbb-h);
       min-width: var(--mbb-icon);
@@ -3258,16 +3372,23 @@
       flex-shrink: 0;
     }
     html.layout-phone .map-layers-toggle-btn {
-      padding: 0 6px;
+      padding: 0;
+      width: var(--mbb-icon);
+      min-width: var(--mbb-icon);
+      max-width: var(--mbb-icon);
       height: var(--mbb-h);
       min-height: var(--mbb-h);
       max-height: var(--mbb-h);
-      font-size: 10px;
+      font-size: 0;
       border-radius: 8px;
-      gap: 2px;
+      gap: 0;
+    }
+    html.layout-phone .map-layers-toggle-btn svg {
+      width: 17px;
+      height: 17px;
     }
     html.layout-phone .map-layers-toggle-btn .ml-caret {
-      font-size: 8px;
+      display: none !important;
     }
     html.layout-phone .map-radar-control {
       flex-shrink: 0;
@@ -3294,6 +3415,12 @@
       html.layout-phone .map-draw-tools .mdt-btn {
         padding: 0 4px;
         font-size: 8px;
+      }
+      html.layout-phone .map-draw-tools .mdt-btn.mdt-icon-btn {
+        padding: 0;
+        width: var(--mbb-icon);
+        min-width: var(--mbb-icon);
+        max-width: var(--mbb-icon);
       }
     }
     @media (max-width: 340px) {
@@ -3633,49 +3760,60 @@
     .map-layers-toggle-btn {
       display: inline-flex;
       align-items: center;
-      gap: 3px;
-      background: rgba(22, 26, 18, 0.95);
-      border: 1px solid var(--border);
-      color: var(--accent);
-      border-radius: 10px;
-      padding: 0 10px;
+      justify-content: center;
+      gap: 0;
+      width: var(--mbb-icon, 40px);
+      min-width: var(--mbb-icon, 40px);
+      max-width: var(--mbb-icon, 40px);
       height: var(--mbb-h, 40px);
       min-height: var(--mbb-h, 40px);
       max-height: var(--mbb-h, 40px);
-      font-size: 12px;
+      padding: 0;
+      background: rgba(28, 16, 16, 0.96);
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      color: #ef4444;
+      border-radius: 10px;
+      font-size: 0;
       font-weight: 800;
-      letter-spacing: 0.03em;
+      letter-spacing: 0;
       cursor: pointer;
       box-shadow: 0 2px 8px rgba(0,0,0,0.35);
       white-space: nowrap;
-      line-height: 1.2;
+      line-height: 0;
       box-sizing: border-box;
       flex-shrink: 0;
+      position: relative;
+    }
+    .map-layers-toggle-btn svg {
+      width: 22px;
+      height: 22px;
+      display: block;
+      overflow: visible;
+      pointer-events: none;
     }
     .map-layers-toggle-btn:hover,
     .map-layers-menu.open .map-layers-toggle-btn,
     .map-layers-menu:hover .map-layers-toggle-btn {
-      border-color: var(--accent);
-      background: rgba(32, 38, 26, 0.98);
+      border-color: #f87171;
+      color: #fca5a5;
+      background: rgba(40, 18, 18, 0.98);
     }
     .map-layers-toggle-btn .ml-caret {
-      font-size: 10px;
-      color: var(--muted);
-      transition: transform 0.15s ease;
+      display: none !important;
     }
     /* Bottom layers: caret points up when closed, down when open */
     .map-layers-menu.map-layers-bottom .map-layers-toggle-btn .ml-caret {
-      transform: rotate(180deg);
+      transform: none;
     }
     .map-layers-menu.open .map-layers-toggle-btn .ml-caret,
     .map-layers-menu:hover .map-layers-toggle-btn .ml-caret {
-      transform: rotate(0deg);
-      color: var(--accent);
+      transform: none;
+      color: #fca5a5;
     }
     .map-layers-menu.map-layers-bottom.open .map-layers-toggle-btn .ml-caret,
     .map-layers-menu.map-layers-bottom:hover .map-layers-toggle-btn .ml-caret {
-      transform: rotate(0deg);
-      color: var(--accent);
+      transform: none;
+      color: #fca5a5;
     }
     .map-layers-panel {
       display: none;
@@ -4279,14 +4417,256 @@
     .tva-note.active { display: block; }
     .tva-note strong { color: #7ec8ff; }
     .tva-note a { color: var(--accent); }
+  
+    /* ===== Auth + map name (v5.1 Beta) ===== */
+    .brand-map-name {
+      position: absolute;
+      left: 8px;
+      bottom: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: rgba(160, 175, 150, 0.95);
+      line-height: 1.1;
+      max-width: 38%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      pointer-events: none;
+      user-select: none;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.85);
+      z-index: 2;
+    }
+    html.layout-phone .brand-map-name { font-size: 10px; left: 4px; bottom: 6px; max-width: 42%; }
+    .brand-logo-wrap { padding-left: 48px; }
+
+    #auth-gate {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 2147483646;
+      background: rgba(6, 10, 6, 0.92);
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+    #auth-gate.active { display: flex; }
+    .auth-card {
+      width: min(420px, 100%);
+      max-height: min(92vh, 720px);
+      overflow: auto;
+      background: var(--panel, #1a2118);
+      border: 1px solid var(--border, #2e3a2a);
+      border-radius: 14px;
+      padding: 18px 16px 16px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.55);
+      color: var(--ink, #e8efe4);
+    }
+    .auth-card h2 {
+      margin: 0 0 4px;
+      font-size: 1.25rem;
+      letter-spacing: 0.04em;
+    }
+    .auth-sub {
+      margin: 0 0 14px;
+      font-size: 12.5px;
+      color: var(--muted, #9aab94);
+      line-height: 1.35;
+    }
+    .auth-field { margin-bottom: 10px; }
+    .auth-field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--muted, #9aab94);
+      margin-bottom: 4px;
+    }
+    .auth-field input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 11px;
+      border-radius: 8px;
+      border: 1px solid var(--border, #2e3a2a);
+      background: #0f140e;
+      color: var(--ink, #e8efe4);
+      font-size: 15px;
+    }
+    .auth-field .hint {
+      display: block;
+      margin-top: 3px;
+      font-size: 11px;
+      color: var(--muted, #9aab94);
+    }
+    .auth-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+    .auth-actions button, .auth-btn {
+      appearance: none;
+      border: none;
+      border-radius: 8px;
+      padding: 11px 14px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      background: var(--accent, #c9a227);
+      color: #111;
+    }
+    .auth-actions button.secondary, .auth-btn.secondary {
+      background: transparent;
+      color: var(--accent, #c9a227);
+      border: 1px solid var(--border, #2e3a2a);
+    }
+    .auth-links {
+      margin-top: 12px;
+      font-size: 12.5px;
+      text-align: center;
+      color: var(--muted, #9aab94);
+    }
+    .auth-links a { color: var(--accent, #c9a227); cursor: pointer; text-decoration: underline; }
+    #auth-error {
+      min-height: 1.2em;
+      color: #ff8a80;
+      font-size: 12.5px;
+      margin: 6px 0 0;
+      white-space: pre-wrap;
+    }
+    #auth-codes-list {
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.55;
+      background: #0f140e;
+      border: 1px solid var(--border, #2e3a2a);
+      border-radius: 8px;
+      padding: 10px;
+      white-space: pre;
+      overflow: auto;
+      max-height: 220px;
+    }
+    .settings-map-row { margin: 6px 0; }
+    .settings-map-open {
+      width: 100%;
+      text-align: left;
+      background: #0f140e;
+      border: 1px solid var(--border, #2e3a2a);
+      color: var(--ink, #e8efe4);
+      border-radius: 8px;
+      padding: 10px 12px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .settings-map-row.is-active .settings-map-open {
+      border-color: var(--accent, #c9a227);
+      box-shadow: 0 0 0 1px rgba(201,162,39,0.35);
+    }
+    .settings-map-code {
+      float: right;
+      font-family: ui-monospace, Consolas, monospace;
+      color: var(--accent, #c9a227);
+      letter-spacing: 0.12em;
+    }
+    #set-map-mode-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent, #c9a227);
+      margin: 0 0 8px;
+    }
+    #set-sync-status { font-size: 12px; color: var(--muted, #9aab94); margin: 4px 0 10px; }
+    .settings-inline-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin: 8px 0;
+    }
+    .settings-inline-row input[type="text"] {
+      flex: 1;
+      min-width: 0;
+      padding: 9px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border, #2e3a2a);
+      background: #0f140e;
+      color: var(--ink, #e8efe4);
+      font-size: 14px;
+    }
+    .settings-inline-row button {
+      flex-shrink: 0;
+      padding: 9px 12px;
+      border-radius: 8px;
+      border: none;
+      background: var(--accent, #c9a227);
+      color: #111;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+
+    /* Share location toolbar + party UI */
+    .mbb-icon-btn.mbb-share-loc {
+      color: #9aa894;
+      background: rgba(20, 24, 18, 0.92);
+      border: 1px solid rgba(80, 90, 70, 0.55);
+    }
+    .mbb-icon-btn.mbb-share-loc.is-sharing {
+      color: #fff;
+      background: #c41e1e;
+      border-color: #ff6b6b;
+      box-shadow: 0 0 0 1px rgba(255,80,80,0.35);
+    }
+    .mbb-icon-btn.mbb-share-loc svg { width: 20px; height: 20px; }
+    .map-bottom-bar > .mbb-icon-btn.mbb-gps {
+      /* keep gps centered-ish; share sits just to its right in flow — grid has gps as center child */
+    }
+    .rs-simple-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 2147483645;
+      background: rgba(0,0,0,0.72);
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .rs-simple-modal.active { display: flex; }
+    .rs-simple-card {
+      width: min(400px, 100%);
+      background: var(--panel, #1a2118);
+      border: 1px solid var(--border, #2e3a2a);
+      border-radius: 14px;
+      padding: 16px;
+      color: var(--ink, #e8efe4);
+      max-height: 90vh;
+      overflow: auto;
+    }
+    .rs-simple-card h3 { margin: 0 0 10px; font-size: 1.1rem; }
+    .rs-simple-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+    .rs-simple-actions .settings-subbtn { width: 100%; text-align: center; }
+    .rs-btn-primary, .rs-simple-actions .rs-btn-primary {
+      background: var(--accent, #c9a227) !important;
+      color: #111 !important;
+      border: none !important;
+      font-weight: 700;
+    }
+    .party-member-row {
+      border: 1px solid var(--border, #2e3a2a);
+      border-radius: 8px;
+      padding: 8px;
+      margin: 8px 0;
+      background: #0f140e;
+    }
+    .party-member-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 13px; }
+    .party-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+    .party-presence-icon { background: transparent !important; border: none !important; }
+    .rs-extra-maps { font-size: 12px; }
+    .rs-extra-maps .settings-row { padding: 4px 0; }
   </style>
 </head>
 <body>
-  <!-- Brand header: centered logo + small V4.5 badge -->
+  <!-- Brand header: map name + logo + V5.1 Beta badge -->
   <header class="brand-header" role="banner">
     <div class="brand-logo-wrap">
+      <span id="brand-map-name" class="brand-map-name" title="Personal map">My Map</span>
       <img class="brand-logo" src="reg-slayer-logo.png" alt="REG SLAYER - Know Before You Go" width="1100" height="240" />
-      <span class="brand-version" aria-label="Version 4.5 Offline Test">V4.5-OT</span>
+      <span class="brand-version" aria-label="Version 5.1 Beta">V5.1 Beta</span>
     </div>
   </header>
 
@@ -4587,10 +4967,31 @@
                 <span class="mbb-weapon is-empty" id="mbb-weapon" aria-hidden="true"></span>
               </div>
               <div class="map-draw-tools" id="map-draw-tools">
-                <button type="button" class="mdt-btn" id="mdt-measure" onclick="startMapMeasure()" title="Measure distance">Measure</button>
-                <button type="button" class="mdt-btn" id="mdt-draw" onclick="startMapDrawShape()" title="Draw a shape">Draw</button>
-                <button type="button" class="mdt-btn mdt-track-idle" id="mdt-track" onclick="toggleGpsTrack()" title="GPS track">Track</button>
-                <button type="button" class="mdt-btn mdt-track-stop" id="mdt-track-stop" onclick="toggleGpsTrack()" title="Stop GPS tracking">Stop</button>
+                <button type="button" class="mdt-btn mdt-icon-btn mbb-tip mbb-ctrl" id="mdt-measure" onclick="startMapMeasure()" title="Measure" data-tip="Measure" aria-label="Measure">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path fill="currentColor" d="M4.2 8.2h10.2c.9 0 1.6.7 1.6 1.6v5.4c0 .9-.7 1.6-1.6 1.6H4.2c-.9 0-1.6-.7-1.6-1.6v-5.4c0-.9.7-1.6 1.6-1.6z"/>
+                    <circle cx="9.3" cy="11.9" r="3.1" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                    <circle cx="9.3" cy="11.9" r="1.35" fill="currentColor"/>
+                    <path fill="currentColor" d="M15.8 12.6h2.2v1.7h-1.1l.05 1.1h1.9v1.5h-3.05z"/>
+                    <path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M18.2 14.4h3.4"/>
+                    <path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M21.2 14.4v1.5"/>
+                  </svg>
+                </button>
+                <button type="button" class="mdt-btn mdt-icon-btn mbb-tip mbb-ctrl" id="mdt-draw" onclick="startMapDrawShape()" title="Draw" data-tip="Draw" aria-label="Draw">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path fill="currentColor" d="M15.3 3.6l5.1 5.1-11.2 11.2H4.1v-5.1L15.3 3.6z"/>
+                    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" d="M13.4 5.5l5.1 5.1"/>
+                    <path fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" d="M4.2 20.2h7.2"/>
+                  </svg>
+                </button>
+                <button type="button" class="mdt-btn mdt-icon-btn mdt-track-idle mbb-tip mbb-ctrl" id="mdt-track" onclick="toggleGpsTrack()" title="Track" data-tip="Track" aria-label="Track">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M6.8 16.2 C9.2 12.2, 14.5 12.6, 17.2 8.4"/>
+                    <path fill="currentColor" d="M7.2 6.2c-1.7 0-3.1 1.35-3.1 3.05 0 2.35 3.1 5.75 3.1 5.75s3.1-3.4 3.1-5.75c0-1.7-1.4-3.05-3.1-3.05zm0 4.15a1.1 1.1 0 1 1 0-2.2 1.1 1.1 0 0 1 0 2.2z"/>
+                    <path fill="currentColor" d="M17 3.6c-1.45 0-2.65 1.15-2.65 2.6 0 2 2.65 4.9 2.65 4.9s2.65-2.9 2.65-4.9c0-1.45-1.2-2.6-2.65-2.6zm0 3.55a.95.95 0 1 1 0-1.9.95.95 0 0 1 0 1.9z"/>
+                  </svg>
+                </button>
+                <button type="button" class="mdt-btn mdt-track-stop mbb-tip" id="mdt-track-stop" onclick="toggleGpsTrack()" title="Stop" data-tip="Stop" aria-label="Stop tracking">Stop</button>
                 <div class="mdt-tools-panel" id="mdt-tools-panel" role="group" aria-label="Active tool controls">
                   <div class="map-track-live-stats" id="map-track-live-stats"></div>
                   <button type="button" class="mdt-btn mdt-tool-only" id="mdt-undo" onclick="undoMapDrawVertex()" disabled title="Remove last point">Undo point</button>
@@ -4602,6 +5003,7 @@
               </div>
             </div>
 
+            <div class="mbb-center">
             <button type="button" class="mbb-icon-btn mbb-gps mbb-ctrl" id="gps-snap-btn" onclick="snapToGPS()" title="Current Location — snap map to your GPS" aria-label="Current Location">
               <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                 <circle cx="12" cy="12" r="7.25" fill="none" stroke="currentColor" stroke-width="1.6"/>
@@ -4610,6 +5012,12 @@
                 <circle cx="12" cy="10.9" r="1" fill="#fff"/>
               </svg>
             </button>
+            <button type="button" class="mbb-icon-btn mbb-share-loc mbb-ctrl" id="share-loc-btn" title="Share current location with party" aria-label="Share location" aria-pressed="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M12 2.5 L20 20.5 L12 16.2 L4 20.5 Z" fill="currentColor" stroke="#000" stroke-width="1.2" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            </div><!-- /.mbb-center -->
 
             <div class="mbb-right">
             <div class="map-radar-control" id="map-radar-control">
@@ -4652,8 +5060,14 @@
             </button>
 
             <div class="map-layers-menu map-layers-bottom" id="map-layers-menu">
-              <button type="button" class="map-layers-toggle-btn" id="map-layers-toggle-btn" aria-expanded="false" aria-controls="map-layers-panel" title="Map base & overlays">
-                Layers <span class="ml-caret" aria-hidden="true">▾</span>
+              <button type="button" class="map-layers-toggle-btn mbb-tip mbb-ctrl" id="map-layers-toggle-btn" aria-expanded="false" aria-controls="map-layers-panel" title="Layers" data-tip="Layers" aria-label="Layers">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <rect x="4.2" y="11.6" width="12.2" height="8.2" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.55"/>
+                  <rect x="6" y="8.2" width="12.2" height="8.2" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.55"/>
+                  <rect x="7.8" y="4.8" width="12.2" height="8.2" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.55"/>
+                  <path fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" d="M9.6 7.2h6.6M9.6 9.6h5.2"/>
+                </svg>
+                <span class="ml-caret" aria-hidden="true">▾</span>
               </button>
 <div class="map-layers-panel" id="map-layers-panel" role="group" aria-label="Map layers">
                           <div class="ml-section">Base map</div>
@@ -4682,6 +5096,12 @@
                           </label>
           
                           <div class="ml-section">Overlays</div>
+                          <button type="button" class="ml-fold-btn" id="ml-fold-party" onclick="toggleLayersFold('party')" aria-expanded="false">
+                            Party<span class="ml-fold-caret" aria-hidden="true">▸</span>
+                          </button>
+                          <div class="ml-fold-body" id="ml-fold-body-party" hidden>
+                            <div id="ml-party-list"></div>
+                          </div>
                           <label class="ml-option">
                             <input type="checkbox" id="toggle-prev-hunts-chk" onchange="drawHuntsOnMap()">
                             <span class="ml-opt-text">Past Hunts</span>
@@ -4791,6 +5211,7 @@
                 <input type="hidden" id="pin-color-value" value="#e59a18" />
               </div>
               <textarea id="pin-notes-input" class="toast-form-control" placeholder="Notes..." style="height:50px; resize:none;"></textarea>
+              <div id="pin-extra-maps" class="rs-extra-maps" style="margin-top:6px;"></div>
               <div style="display:flex; gap:4px; margin-top:6px;">
                 <button onclick="savePinFromMap()" style="flex:1; background:var(--green); color:white; border:none; padding:4px; font-size:11px; font-weight:bold; border-radius:4px; cursor:pointer;">Save Pin</button>
                 <button onclick="cancelToastForm()" style="flex:1; background:var(--panel); border:1px solid var(--border); color:var(--muted); padding:4px; font-size:11px; border-radius:4px; cursor:pointer;">Cancel</button>
@@ -4949,6 +5370,60 @@
     </div>
   </div>
 
+
+  <!-- Auth gate (v5.1 Beta) — required on first visit per device; session persists -->
+  <div id="auth-gate" aria-hidden="true">
+    <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+      <h2 id="auth-title">HuntSlayer</h2>
+      <p class="auth-sub">Sign in to sync your personal map across devices and join shared hunt maps. You stay signed in on this device.</p>
+      <p id="auth-error" role="alert"></p>
+
+      <div id="auth-panel-signin">
+        <div class="auth-field"><label for="auth-si-user">Username</label><input id="auth-si-user" autocomplete="username" autocapitalize="none" spellcheck="false"></div>
+        <div class="auth-field"><label for="auth-si-pass">Password</label><input id="auth-si-pass" type="password" autocomplete="current-password"></div>
+        <div class="auth-actions">
+          <button type="button" id="auth-btn-signin">Sign in</button>
+        </div>
+        <div class="auth-links">
+          <a data-auth-goto="signup">Create account</a>
+          &nbsp;·&nbsp;
+          <a data-auth-goto="recover">Forgot password</a>
+        </div>
+      </div>
+
+      <div id="auth-panel-signup" style="display:none">
+        <div class="auth-field"><label for="auth-su-user">Username (required)</label><input id="auth-su-user" autocomplete="username" autocapitalize="none" spellcheck="false"><span class="hint">3–32 characters: letters, numbers, underscore</span></div>
+        <div class="auth-field"><label for="auth-su-pass">Password (required)</label><input id="auth-su-pass" type="password" autocomplete="new-password"><span class="hint">At least 6 characters</span></div>
+        <div class="auth-field"><label for="auth-su-pass2">Confirm password</label><input id="auth-su-pass2" type="password" autocomplete="new-password"></div>
+        <div class="auth-field"><label for="auth-su-email">Email (optional)</label><input id="auth-su-email" type="email" autocomplete="email"><span class="hint">Only for password recovery if you prefer email later. Not required.</span></div>
+        <div class="auth-actions">
+          <button type="button" id="auth-btn-signup">Create account</button>
+          <button type="button" class="secondary" data-auth-goto="signin">Back to sign in</button>
+        </div>
+      </div>
+
+      <div id="auth-panel-recover" style="display:none">
+        <p class="auth-sub">Use a one-time recovery code from when you created your account. Each code works once.</p>
+        <div class="auth-field"><label for="auth-rc-user">Username</label><input id="auth-rc-user" autocapitalize="none" spellcheck="false"></div>
+        <div class="auth-field"><label for="auth-rc-code">Recovery code</label><input id="auth-rc-code" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX"></div>
+        <div class="auth-field"><label for="auth-rc-pass">New password</label><input id="auth-rc-pass" type="password" autocomplete="new-password"></div>
+        <div class="auth-actions">
+          <button type="button" id="auth-btn-recover">Reset password</button>
+          <button type="button" class="secondary" data-auth-goto="signin">Back to sign in</button>
+        </div>
+      </div>
+
+      <div id="auth-panel-codes" style="display:none">
+        <p class="auth-sub"><strong>Save these recovery codes now.</strong> If you skip email, these are the only way to reset your password. Each code works once. Store them offline (screenshot or paper).</p>
+        <div id="auth-codes-list"></div>
+        <div class="auth-actions">
+          <button type="button" id="auth-btn-copy-codes">Copy codes</button>
+          <button type="button" id="auth-btn-codes-done">I've saved my codes — continue</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- App settings (gear near Layers) -->
   <div id="settings-modal" onclick="if(event.target===this)closeSettingsModal()">
     <div class="settings-card" role="dialog" aria-modal="true" aria-labelledby="settings-title">
@@ -4960,6 +5435,7 @@
         <button type="button" class="settings-tab active" data-stab="tools" onclick="switchSettingsTab('tools')">Tools</button>
         <button type="button" class="settings-tab" data-stab="defaults" onclick="switchSettingsTab('defaults')">Defaults</button>
         <button type="button" class="settings-tab" data-stab="display" onclick="switchSettingsTab('display')">Display</button>
+        <button type="button" class="settings-tab" data-stab="maps" onclick="switchSettingsTab('maps')">Maps</button>
       </div>
       <div class="settings-body">
         <div class="settings-pane active" id="settings-pane-tools">
@@ -4969,6 +5445,11 @@
           <label class="settings-row"><input type="checkbox" id="set-tool-track" onchange="onSettingsToolsChange()"><span class="sr-text">GPS track<span class="sr-sub">Record movement</span></span></label>
           <label class="settings-row"><input type="checkbox" id="set-tool-gps" onchange="onSettingsToolsChange()"><span class="sr-text">Current Location<span class="sr-sub">Snap map to GPS</span></span></label>
           <p class="settings-hint">Unchecked tools are removed from the bottom bar. Active Measure/Draw still show Undo/Finish/Cancel top-left.</p>
+          <div class="settings-section-title">Your direction arrow</div>
+          <label class="settings-row" style="align-items:center;gap:10px;">
+            <span class="sr-text">Arrow color<span class="sr-sub">Your GPS / party direction icon</span></span>
+            <input type="color" id="set-my-arrow-color" value="#e11d1d" style="width:48px;height:32px;border:none;background:transparent;cursor:pointer;">
+          </label>
           <div class="settings-section-title">Map chrome</div>
           <label class="settings-row"><input type="checkbox" id="set-show-compass" onchange="onSettingsToolsChange()"><span class="sr-text">Wind / compass<span class="sr-sub">Top dial — hides both wind indicator and compass</span></span></label>
           <label class="settings-row"><input type="checkbox" id="set-show-radar" onchange="onSettingsToolsChange()"><span class="sr-text">Radar<span class="sr-sub">Radar dish on the bottom bar</span></span></label>
@@ -4994,25 +5475,1203 @@
             <label class="settings-row"><input type="checkbox" id="set-weather-map-fs" onchange="saveAppSettingsFromUi()"><span class="sr-text">Weather on map when fullscreen<span class="sr-sub">Compact card while map is Max</span></span></label>
           </div>
         </div>
+
+        <div class="settings-pane" id="settings-pane-maps">
+          <div id="set-map-mode-label">Viewing: My Map (personal)</div>
+          <div id="set-sync-status">Cloud sync ready</div>
+          <label class="settings-row"><input type="checkbox" id="set-offline-mode"><span class="sr-text">Offline mode<span class="sr-sub">Save on this device only — pause cloud upload until you turn this off</span></span></label>
+          <p class="settings-hint">Edits always save on this device first, then upload when online (and not in Offline mode).</p>
+
+          <div class="settings-section-title">Account</div>
+          <p class="settings-hint" id="auth-user-chip">Not signed in</p>
+          <button type="button" class="settings-subbtn" id="set-signout-btn">Sign out on this device</button>
+
+          <div class="settings-section-title">Which map</div>
+          <button type="button" class="settings-subbtn" id="set-use-personal-btn">Use default private map</button>
+          <button type="button" class="settings-subbtn" id="set-rename-current-btn">Rename current map</button>
+          <p class="settings-hint">Your private maps (tap for View / Rename):</p>
+          <div id="set-private-maps-list"></div>
+          <div class="settings-inline-row">
+            <input type="text" id="set-create-private-name" maxlength="60" placeholder="New private map name">
+            <button type="button" id="set-create-private-btn">Create</button>
+          </div>
+          <p class="settings-hint">Shared maps (tap for View this map / Share this map):</p>
+          <div id="set-shared-maps-list"></div>
+
+          <div id="set-party-section" style="display:none;">
+            <div class="settings-section-title">Party on this map</div>
+            <p class="settings-hint">Members who can see the shared map you are viewing. Nicknames and colors are only for you.</p>
+            <div id="set-party-members"></div>
+          </div>
+
+          <div class="settings-section-title">Create shared map</div>
+          <div class="settings-inline-row">
+            <input type="text" id="set-create-map-name" maxlength="60" placeholder="Map name (e.g. Saturday club)">
+            <button type="button" id="set-create-map-btn">Create</button>
+          </div>
+          <p class="settings-hint">Creates a unique 6-digit code for this map only. Invite is copied automatically.</p>
+
+          <div class="settings-section-title">Join shared map</div>
+          <div class="settings-inline-row">
+            <input type="text" id="set-join-map-code" maxlength="12" inputmode="numeric" placeholder="6-digit code">
+            <button type="button" id="set-join-map-btn">Join</button>
+          </div>
+
+          <div class="settings-section-title">Share</div>
+          <button type="button" class="settings-subbtn" id="set-share-code-btn">Copy invite (Join my HuntSlayer map!)</button>
+          <p class="settings-hint">Copies the current shared map code + link. Only works while viewing a shared map.</p>
+        </div>
+
         <div class="settings-pane" id="settings-pane-display">
           <p class="settings-hint">Uncheck a section to hide it in the app until re-enabled here.</p>
           <label class="settings-row"><input type="checkbox" id="set-disp-planner" onchange="onSettingsDisplayChange()"><span class="sr-text">Steps 1–3: Calendar, weapon, open tracts<span class="sr-sub">Hunt planner controls</span></span></label>
           <label class="settings-row"><input type="checkbox" id="set-disp-weather" onchange="onSettingsDisplayChange()"><span class="sr-text">Weather<span class="sr-sub">Step 4 dashboard under the planner</span></span></label>
           <label class="settings-row"><input type="checkbox" id="set-disp-map" onchange="onSettingsDisplayChange()"><span class="sr-text">Map<span class="sr-sub">Alabama map card</span></span></label>
           <label class="settings-row" style="padding-left:28px;"><input type="checkbox" id="set-disp-map-fs" onchange="onSettingsDisplayChange()"><span class="sr-text">Open map full screen on launch<span class="sr-sub">Also used when only Map is enabled</span></span></label>
-          <div class="settings-section-title" style="margin-top:14px;">Offline (TestOffline build)</div>
-          <p class="settings-hint" id="offline-packs-summary">Map packs, custom draw areas, pins, stands, and public lands stay on this device. Nothing is a native app install.</p>
-          <button type="button" class="settings-subbtn" onclick="window.refreshOfflinePacksSummary && window.refreshOfflinePacksSummary()">Refresh offline status</button>
-          <button type="button" class="settings-subbtn" style="margin-top:6px;border-color:#8a3030;color:#f0a0a0;" onclick="window.clearOfflineMapPacks && window.clearOfflineMapPacks()">Clear offline map tiles</button>
-          <p class="settings-hint">Clearing tiles does not delete pins, stands, custom areas, or hunt logs — only cached map images.</p>
         </div>
       </div>
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+/* REG SLAYER 5.1 Beta — Auth + personal/shared map cloud sync (local-first).
+   Loaded inline into index.html. Performance rules:
+   - Always write localStorage first
+   - Debounced cloud push (idle when possible)
+   - No push while offlineMode or navigator.onLine === false
+   - No aggressive polling; shared pull only when tab visible
+*/
+(function () {
+  'use strict';
+
+  var SB_URL = 'https://grvhmktqzrivbqbczkii.supabase.co';
+  var SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdydmhta3RxenJpdmJxYmN6a2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3MDQ0MTIsImV4cCI6MjEwMTI4MDQxMn0.fFfrS-7w45IzxwOvvyYDB5ngLnyTz-Ru7XVL5LZXm4o';
+
+  var EMAIL_DOMAIN = 'users.regslayer.local';
+  var VIEW_KEY = 'reg_slayer_view_v1';
+  var OFFLINE_KEY = 'reg_slayer_offline_mode_v1';
+  var CACHE_KEY = 'reg_slayer_map_cache_v1';
+  var DIRTY_KEY = 'reg_slayer_map_dirty_v1';
+  var MAX_CACHE_BYTES = 1800000; // ~1.8MB prune threshold
+
+  var sb = null;
+  var sessionUser = null;
+  var profile = null;
+  var viewState = { mode: 'private', privateMapId: null, privateMapName: 'My Map', sharedMapId: null, sharedMapName: '', sharedMapCode: '' };
+  var offlineMode = false;
+  var cloudBusy = false;
+  var dirty = false;
+  var pushTimer = null;
+  var pullTimer = null;
+  var lastPullAt = 0;
+  var localRevision = 0;
+  var pendingSignupCodes = null;
+  var authReadyResolve = null;
+  var authReady = new Promise(function (r) { authReadyResolve = r; });
+
+  function $(id) { return document.getElementById(id); }
+
+  function normalizeUsername(u) {
+    return String(u || '').trim().toLowerCase().replace(/\s+/g, '');
+  }
+
+  function syntheticEmail(username) {
+    return normalizeUsername(username) + '@' + EMAIL_DOMAIN;
+  }
+
+  function isOnline() {
+    if (offlineMode) return false;
+    try { if (navigator.onLine === false) return false; } catch (e) {}
+    return true;
+  }
+
+  function loadJson(key, fallback) {
+    try {
+      var raw = localStorage.getItem(key);
+      if (!raw) return fallback;
+      return JSON.parse(raw);
+    } catch (e) { return fallback; }
+  }
+
+  function saveJson(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
+  }
+
+  function loadViewState() {
+    var v = loadJson(VIEW_KEY, null);
+    if (v && (v.mode === 'personal' || v.mode === 'private' || v.mode === 'shared')) {
+      viewState = Object.assign({
+        mode: 'private', privateMapId: null, privateMapName: 'My Map',
+        sharedMapId: null, sharedMapName: '', sharedMapCode: ''
+      }, v);
+      if (viewState.mode === 'personal') viewState.mode = 'private';
+    }
+  }
+
+  function persistViewState() {
+    saveJson(VIEW_KEY, viewState);
+  }
+
+  function loadOfflineMode() {
+    try { offlineMode = localStorage.getItem(OFFLINE_KEY) === '1'; } catch (e) { offlineMode = false; }
+  }
+
+  function setOfflineMode(on) {
+    offlineMode = !!on;
+    try { localStorage.setItem(OFFLINE_KEY, offlineMode ? '1' : '0'); } catch (e) {}
+    updateAuthChrome();
+    if (!offlineMode && isDirty()) scheduleCloudPush(true);
+  }
+
+  function isDirty() {
+    if (dirty) return true;
+    try { return localStorage.getItem(DIRTY_KEY) === '1'; } catch (e) { return false; }
+  }
+
+  function restoreDirtyFlag() {
+    try { dirty = localStorage.getItem(DIRTY_KEY) === '1'; } catch (e) { dirty = false; }
+  }
+
+  // ---- Map state pack/unpack (mirrors existing localStorage keys) ----
+  var MAP_KEYS = {
+    pins: 'alabama_hunt_custom_pins',
+    hunts: 'alabama_hunt_historical_hunts',
+    customAreas: 'alabama_hunt_custom_areas_v1',
+    measuredPaths: 'alabama_hunt_measured_paths_v1',
+    stands: 'alabama_hunt_user_stands_v1',
+    hiddenLocs: 'alabama_hunt_hidden_locations_v1'
+  };
+
+  function collectMapState() {
+    var state = {
+      pins: loadJson(MAP_KEYS.pins, []),
+      hunts: loadJson(MAP_KEYS.hunts, []),
+      customAreas: loadJson(MAP_KEYS.customAreas, []),
+      measuredPaths: loadJson(MAP_KEYS.measuredPaths, []),
+      stands: loadJson(MAP_KEYS.stands, {}),
+      hiddenLocs: loadJson(MAP_KEYS.hiddenLocs, []),
+      meta: { savedAt: new Date().toISOString(), revision: localRevision || 0 }
+    };
+    return state;
+  }
+
+  function applyMapState(state) {
+    if (!state || typeof state !== 'object') state = {};
+    saveJson(MAP_KEYS.pins, Array.isArray(state.pins) ? state.pins : []);
+    saveJson(MAP_KEYS.hunts, Array.isArray(state.hunts) ? state.hunts : []);
+    saveJson(MAP_KEYS.customAreas, Array.isArray(state.customAreas) ? state.customAreas : []);
+    saveJson(MAP_KEYS.measuredPaths, Array.isArray(state.measuredPaths) ? state.measuredPaths : []);
+    saveJson(MAP_KEYS.stands, state.stands && typeof state.stands === 'object' ? state.stands : {});
+    saveJson(MAP_KEYS.hiddenLocs, Array.isArray(state.hiddenLocs) ? state.hiddenLocs : []);
+    localRevision = (state.meta && state.meta.revision) || 0;
+  }
+
+  function cacheSlotKey() {
+    if (viewState.mode === 'shared' && viewState.sharedMapId) return 'shared:' + viewState.sharedMapId;
+    if (viewState.privateMapId) return 'private:' + viewState.privateMapId;
+    return 'personal';
+  }
+
+  function writeLocalCache(state) {
+    var cache = loadJson(CACHE_KEY, {});
+    cache[cacheSlotKey()] = {
+      state: state,
+      savedAt: Date.now(),
+      name: viewState.mode === 'shared' ? viewState.sharedMapName : 'My Map',
+      code: viewState.sharedMapCode || null
+    };
+    // Prune if too large
+    try {
+      var raw = JSON.stringify(cache);
+      if (raw.length > MAX_CACHE_BYTES) {
+        var entries = Object.keys(cache).map(function (k) {
+          return { k: k, t: (cache[k] && cache[k].savedAt) || 0 };
+        }).sort(function (a, b) { return a.t - b.t; });
+        var active = cacheSlotKey();
+        while (entries.length > 2 && JSON.stringify(cache).length > MAX_CACHE_BYTES * 0.75) {
+          var drop = entries.shift();
+          if (drop.k !== active && drop.k !== 'personal') delete cache[drop.k];
+          else break;
+        }
+      }
+    } catch (e) {}
+    saveJson(CACHE_KEY, cache);
+  }
+
+  function readLocalCache(slot) {
+    var cache = loadJson(CACHE_KEY, {});
+    return cache[slot] || null;
+  }
+
+  function markDirty() {
+    dirty = true;
+    try { localStorage.setItem(DIRTY_KEY, '1'); } catch (e) {}
+    // Always refresh local cache immediately (offline-safe)
+    try {
+      var st = collectMapState();
+      writeLocalCache(st);
+    } catch (e2) {}
+    // Fast path: upload soon after edit/delete (still idle-friendly)
+    scheduleCloudPush(false);
+  }
+
+  function scheduleCloudPush(immediate) {
+    if (pushTimer) { clearTimeout(pushTimer); pushTimer = null; }
+    var delay = immediate ? 50 : 700;
+    pushTimer = setTimeout(function () {
+      pushTimer = null;
+      runWhenIdle(function () { pushMapToCloud(); });
+    }, delay);
+  }
+
+  // Public hook used after any map feature save
+  window.regSlayerMapDataChanged = function () {
+    try { markDirty(); } catch (e) {}
+  };
+
+  function runWhenIdle(fn) {
+    if (typeof requestIdleCallback === 'function') {
+      requestIdleCallback(function () { try { fn(); } catch (e) { console.warn(e); } }, { timeout: 2500 });
+    } else {
+      setTimeout(function () { try { fn(); } catch (e) { console.warn(e); } }, 0);
+    }
+  }
+
+  async function pushMapToCloud() {
+    if (!sb || !sessionUser || cloudBusy) return;
+    if (!isOnline()) return;
+    if (!isDirty()) return;
+    cloudBusy = true;
+    updateSyncBadge('syncing');
+    try {
+      // Local is authority when dirty — full replace (no merge).
+      // Merge-by-id was resurrecting deleted pins/areas on push/refresh.
+      var state = collectMapState();
+      writeLocalCache(state);
+      if (!state.meta) state.meta = {};
+      state.meta.savedAt = new Date().toISOString();
+      state.meta.savedBy = sessionUser.id;
+
+      if (viewState.mode === 'shared' && viewState.sharedMapId) {
+        var { data: cur, error: rErr } = await sb
+          .from('shared_maps')
+          .select('map_revision')
+          .eq('id', viewState.sharedMapId)
+          .maybeSingle();
+        if (rErr) throw rErr;
+        var remoteRev = (cur && cur.map_revision) || 0;
+        var nextRev = remoteRev + 1;
+        state.meta.revision = nextRev;
+        var { error: uErr } = await sb
+          .from('shared_maps')
+          .update({ map_state: state, map_revision: nextRev })
+          .eq('id', viewState.sharedMapId);
+        if (uErr) throw uErr;
+        localRevision = nextRev;
+      } else if (viewState.privateMapId) {
+        var { data: pm, error: pmErr } = await sb
+          .from('private_maps')
+          .select('map_revision')
+          .eq('id', viewState.privateMapId)
+          .maybeSingle();
+        if (pmErr) throw pmErr;
+        var prev = ((pm && pm.map_revision) || 0) + 1;
+        state.meta.revision = prev;
+        var { error: pUp } = await sb
+          .from('private_maps')
+          .update({
+            map_state: state,
+            map_revision: prev,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', viewState.privateMapId);
+        if (pUp) throw pUp;
+        localRevision = prev;
+      } else {
+        var { data: um, error: umErr } = await sb
+          .from('user_map_state')
+          .select('map_revision')
+          .eq('user_id', sessionUser.id)
+          .maybeSingle();
+        if (umErr) throw umErr;
+        var urev = ((um && um.map_revision) || 0) + 1;
+        state.meta.revision = urev;
+        var { error: upErr } = await sb
+          .from('user_map_state')
+          .upsert({
+            user_id: sessionUser.id,
+            map_state: state,
+            map_revision: urev,
+            updated_at: new Date().toISOString()
+          });
+        if (upErr) throw upErr;
+        localRevision = urev;
+      }
+      dirty = false;
+      try { localStorage.removeItem(DIRTY_KEY); } catch (e) {}
+      writeLocalCache(state);
+      updateSyncBadge('ok');
+    } catch (e) {
+      console.warn('Cloud push deferred', e);
+      updateSyncBadge('pending');
+    } finally {
+      cloudBusy = false;
+    }
+  }
+
+  async function pullMapFromCloud(force) {
+    if (!sb || !sessionUser) return;
+    if (!isOnline()) return;
+    if (!force && Date.now() - lastPullAt < 12000) return;
+    // Never overwrite a local delete/edit that has not uploaded yet
+    if (isDirty()) {
+      scheduleCloudPush(true);
+      return;
+    }
+    try {
+      var state = null;
+      var rev = 0;
+      if (viewState.mode === 'shared' && viewState.sharedMapId) {
+        var { data, error } = await sb
+          .from('shared_maps')
+          .select('map_state, map_revision, name, code')
+          .eq('id', viewState.sharedMapId)
+          .maybeSingle();
+        if (error) throw error;
+        if (!data) return;
+        state = data.map_state || {};
+        rev = data.map_revision || 0;
+        viewState.sharedMapName = data.name || viewState.sharedMapName;
+        viewState.sharedMapCode = data.code || viewState.sharedMapCode;
+        persistViewState();
+      } else if (viewState.privateMapId) {
+        var { data: pmd, error: pe } = await sb
+          .from('private_maps')
+          .select('map_state, map_revision, name')
+          .eq('id', viewState.privateMapId)
+          .maybeSingle();
+        if (pe) throw pe;
+        if (!pmd) return;
+        state = pmd.map_state || {};
+        rev = pmd.map_revision || 0;
+        viewState.privateMapName = pmd.name || viewState.privateMapName;
+        persistViewState();
+      } else {
+        var { data: um, error: e2 } = await sb
+          .from('user_map_state')
+          .select('map_state, map_revision')
+          .eq('user_id', sessionUser.id)
+          .maybeSingle();
+        if (e2) throw e2;
+        if (!um) return;
+        state = um.map_state || {};
+        rev = um.map_revision || 0;
+      }
+      lastPullAt = Date.now();
+      if (rev && rev === localRevision && !force) return;
+
+      // If remote is empty but local still has data (and not dirty), seed cloud once
+      var local = collectMapState();
+      var remoteEmpty = !state || (
+        !(state.pins && state.pins.length) &&
+        !(state.hunts && state.hunts.length) &&
+        !(state.customAreas && state.customAreas.length) &&
+        !(state.measuredPaths && state.measuredPaths.length)
+      );
+      var localHas = (local.pins && local.pins.length) || (local.hunts && local.hunts.length) ||
+        (local.customAreas && local.customAreas.length) || (local.measuredPaths && local.measuredPaths.length);
+      // Only seed when we have never synced (rev 0) — not after intentional full delete
+      if (remoteEmpty && localHas && !rev) {
+        dirty = true;
+        try { localStorage.setItem(DIRTY_KEY, '1'); } catch (eD) {}
+        scheduleCloudPush(true);
+        return;
+      }
+
+      // Full replace from cloud (includes deletions)
+      applyMapState(state);
+      localRevision = rev;
+      writeLocalCache(state);
+      refreshMapFromLocalState();
+      updateAuthChrome();
+    } catch (e) {
+      console.warn('Cloud pull skipped', e);
+    }
+  }
+
+  function refreshMapFromLocalState() {
+    try {
+      if (typeof window.regSlayerRefreshMapData === 'function') window.regSlayerRefreshMapData();
+    } catch (e) {
+      console.warn('refreshMapFromLocalState', e);
+    }
+  }
+
+  async function persistViewPrefsCloud() {
+    if (!sb || !sessionUser || !isOnline()) return;
+    try {
+      var mode = viewState.mode === 'shared' ? 'shared' : 'private';
+      await sb.from('user_view_prefs').upsert({
+        user_id: sessionUser.id,
+        view_mode: mode,
+        last_shared_map_id: viewState.mode === 'shared' ? viewState.sharedMapId : null,
+        last_private_map_id: viewState.mode !== 'shared' ? viewState.privateMapId : null,
+        updated_at: new Date().toISOString()
+      });
+    } catch (e) {}
+  }
+
+  async function ensureDefaultPrivateMap() {
+    if (!sb || !sessionUser) return null;
+    var { data: list } = await sb.rpc('list_my_private_maps');
+    if (list && list.length) {
+      var def = list.find(function (m) { return m.is_default; }) || list[0];
+      return def;
+    }
+    var { data: created } = await sb.rpc('create_private_map', { p_name: 'My Map' });
+    return created;
+  }
+
+  async function restoreViewPrefsFromCloud() {
+    if (!sb || !sessionUser || !isOnline()) return;
+    try {
+      var def = await ensureDefaultPrivateMap();
+      var { data } = await sb
+        .from('user_view_prefs')
+        .select('view_mode, last_shared_map_id, last_private_map_id')
+        .eq('user_id', sessionUser.id)
+        .maybeSingle();
+      if (data && (data.view_mode === 'shared') && data.last_shared_map_id) {
+        var { data: sm } = await sb
+          .from('shared_maps')
+          .select('id, name, code')
+          .eq('id', data.last_shared_map_id)
+          .maybeSingle();
+        if (sm) {
+          viewState.mode = 'shared';
+          viewState.sharedMapId = sm.id;
+          viewState.sharedMapName = sm.name;
+          viewState.sharedMapCode = sm.code;
+          if (def) {
+            viewState.privateMapId = viewState.privateMapId || def.id;
+            viewState.privateMapName = viewState.privateMapName || def.name;
+          }
+          persistViewState();
+          return;
+        }
+      }
+      var pid = (data && data.last_private_map_id) || (def && def.id);
+      if (pid) {
+        var { data: pm } = await sb.from('private_maps').select('id, name').eq('id', pid).maybeSingle();
+        if (pm) {
+          viewState.mode = 'private';
+          viewState.privateMapId = pm.id;
+          viewState.privateMapName = pm.name;
+          viewState.sharedMapId = null;
+          viewState.sharedMapName = '';
+          viewState.sharedMapCode = '';
+          persistViewState();
+          return;
+        }
+      }
+      if (def) {
+        viewState.mode = 'private';
+        viewState.privateMapId = def.id;
+        viewState.privateMapName = def.name;
+        viewState.sharedMapId = null;
+        viewState.sharedMapName = '';
+        viewState.sharedMapCode = '';
+        persistViewState();
+      }
+    } catch (e) {}
+  }
+
+  // ---- Auth ----
+  function randomRecoveryCodes(n) {
+    var out = [];
+    var alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    for (var i = 0; i < n; i++) {
+      var s = '';
+      var arr = new Uint8Array(8);
+      crypto.getRandomValues(arr);
+      for (var j = 0; j < 8; j++) s += alphabet[arr[j] % alphabet.length];
+      // format XXXX-XXXX
+      out.push(s.slice(0, 4) + '-' + s.slice(4));
+    }
+    return out;
+  }
+
+  async function sha256Hex(text) {
+    var data = new TextEncoder().encode(text);
+    var hash = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(hash)).map(function (b) {
+      return b.toString(16).padStart(2, '0');
+    }).join('');
+  }
+
+  async function ensureClient() {
+    if (sb) return sb;
+    if (!window.supabase || !window.supabase.createClient) {
+      throw new Error('Supabase library not loaded');
+    }
+    sb = window.supabase.createClient(SB_URL, SB_ANON, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storage: window.localStorage
+      }
+    });
+    return sb;
+  }
+
+  async function loadProfile() {
+    if (!sb || !sessionUser) return null;
+    var { data, error } = await sb
+      .from('profiles')
+      .select('id, username, recovery_email, display_name')
+      .eq('id', sessionUser.id)
+      .maybeSingle();
+    if (error) throw error;
+    profile = data;
+    return profile;
+  }
+
+  async function signUp(username, password, recoveryEmail) {
+    await ensureClient();
+    var uname = normalizeUsername(username);
+    if (uname.length < 3 || uname.length > 32 || !/^[a-z0-9_]+$/.test(uname)) {
+      throw new Error('Username: 3–32 chars, letters/numbers/underscore only');
+    }
+    if (!password || password.length < 6) throw new Error('Password must be at least 6 characters');
+    var email = syntheticEmail(uname);
+    var codes = randomRecoveryCodes(8);
+    var hashes = [];
+    for (var i = 0; i < codes.length; i++) hashes.push(await sha256Hex(codes[i].toUpperCase()));
+
+    var { data, error } = await sb.auth.signUp({
+      email: email,
+      password: password,
+      options: { data: { username: uname } }
+    });
+    if (error) throw error;
+    if (!data.user) throw new Error('Sign up failed');
+
+    var recEmail = recoveryEmail && String(recoveryEmail).trim() ? String(recoveryEmail).trim() : null;
+    var { error: pErr } = await sb.from('profiles').insert({
+      id: data.user.id,
+      username: username.trim(),
+      username_normalized: uname,
+      recovery_email: recEmail,
+      recovery_code_hashes: hashes,
+      display_name: username.trim()
+    });
+    if (pErr) throw pErr;
+
+    pendingSignupCodes = codes;
+    sessionUser = data.user;
+    await loadProfile();
+    return { codes: codes };
+  }
+
+  async function signIn(username, password) {
+    await ensureClient();
+    var uname = normalizeUsername(username);
+    var email = syntheticEmail(uname);
+    var { data, error } = await sb.auth.signInWithPassword({ email: email, password: password });
+    if (error) throw error;
+    sessionUser = data.user;
+    await loadProfile();
+    return data;
+  }
+
+  async function signOut() {
+    if (sb) await sb.auth.signOut();
+    sessionUser = null;
+    profile = null;
+    showAuthGate(true);
+  }
+
+  async function recoverWithCode(username, code, newPassword) {
+    var res = await fetch(SB_URL + '/functions/v1/recover-password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: SB_ANON,
+        Authorization: 'Bearer ' + SB_ANON
+      },
+      body: JSON.stringify({
+        username: username,
+        recovery_code: String(code || '').trim().toUpperCase(),
+        new_password: newPassword
+      })
+    });
+    var body = await res.json().catch(function () { return {}; });
+    if (!res.ok) throw new Error(body.error || 'Recovery failed');
+    return true;
+  }
+
+  // ---- Shared maps ----
+  async function createSharedMap(name) {
+    if (!sb || !sessionUser) throw new Error('Sign in required');
+    // Save personal first
+    await snapshotCurrentToCache();
+    var { data, error } = await sb.rpc('create_shared_map', { p_name: name });
+    if (error) throw error;
+    viewState.mode = 'shared';
+    viewState.sharedMapId = data.id;
+    viewState.sharedMapName = data.name;
+    viewState.sharedMapCode = data.code;
+    persistViewState();
+    await persistViewPrefsCloud();
+    // Seed shared with current local (user's stuff) then push
+    dirty = true;
+    try { localStorage.setItem(DIRTY_KEY, '1'); } catch (eD) {}
+    await pushMapToCloud();
+    // Auto-copy invite with deep link
+    try {
+      var invite = inviteShareText(data.code, data.name);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(invite);
+      } else {
+        fallbackCopy(invite);
+      }
+    } catch (eCopy) {
+      try { fallbackCopy(inviteShareText(data.code, data.name)); } catch (e2) {}
+    }
+    updateAuthChrome();
+    return data;
+  }
+
+  async function joinSharedMap(code) {
+    if (!sb || !sessionUser) throw new Error('Sign in required');
+    await snapshotCurrentToCache();
+    var { data, error } = await sb.rpc('join_shared_map', { p_code: code });
+    if (error) throw error;
+    viewState.mode = 'shared';
+    viewState.sharedMapId = data.id;
+    viewState.sharedMapName = data.name;
+    viewState.sharedMapCode = data.code;
+    persistViewState();
+    await persistViewPrefsCloud();
+    dirty = false;
+    localRevision = 0;
+    await pullMapFromCloud(true);
+    updateAuthChrome();
+    return data;
+  }
+
+  async function switchToPersonal() {
+    await snapshotCurrentToCache();
+    if (dirty && isOnline()) {
+      try { await pushMapToCloud(); } catch (e) {}
+    }
+    var def = await ensureDefaultPrivateMap();
+    viewState.mode = 'private';
+    viewState.sharedMapId = null;
+    viewState.sharedMapName = '';
+    viewState.sharedMapCode = '';
+    if (def) {
+      viewState.privateMapId = def.id;
+      viewState.privateMapName = def.name;
+    }
+    persistViewState();
+    await persistViewPrefsCloud();
+    var cached = readLocalCache(cacheSlotKey());
+    if (cached && cached.state) applyMapState(cached.state);
+    dirty = false;
+    await pullMapFromCloud(true);
+    refreshMapFromLocalState();
+    updateAuthChrome();
+  }
+
+  async function switchToPrivateMap(mapId) {
+    await snapshotCurrentToCache();
+    if (isDirty() && isOnline()) {
+      try { await pushMapToCloud(); } catch (e) {}
+    }
+    var { data, error } = await sb.from('private_maps').select('id, name').eq('id', mapId).maybeSingle();
+    if (error || !data) throw error || new Error('Map not found');
+    viewState.mode = 'private';
+    viewState.privateMapId = data.id;
+    viewState.privateMapName = data.name;
+    viewState.sharedMapId = null;
+    viewState.sharedMapName = '';
+    viewState.sharedMapCode = '';
+    persistViewState();
+    await persistViewPrefsCloud();
+    var cached = readLocalCache(cacheSlotKey());
+    if (cached && cached.state) applyMapState(cached.state);
+    dirty = false;
+    await pullMapFromCloud(true);
+    refreshMapFromLocalState();
+    updateAuthChrome();
+  }
+
+  async function switchToShared(mapId) {
+    await snapshotCurrentToCache();
+    if (dirty && isOnline()) {
+      try { await pushMapToCloud(); } catch (e) {}
+    }
+    var { data, error } = await sb.from('shared_maps').select('id, name, code').eq('id', mapId).maybeSingle();
+    if (error || !data) throw error || new Error('Map not found');
+    viewState.mode = 'shared';
+    viewState.sharedMapId = data.id;
+    viewState.sharedMapName = data.name;
+    viewState.sharedMapCode = data.code;
+    persistViewState();
+    await persistViewPrefsCloud();
+    var cached = readLocalCache('shared:' + data.id);
+    if (cached && cached.state) applyMapState(cached.state);
+    dirty = false;
+    await pullMapFromCloud(true);
+    refreshMapFromLocalState();
+    updateAuthChrome();
+  }
+
+  async function snapshotCurrentToCache() {
+    try {
+      var st = collectMapState();
+      writeLocalCache(st);
+    } catch (e) {}
+  }
+
+  async function listMySharedMaps() {
+    if (!sb || !sessionUser) return [];
+    var { data, error } = await sb.rpc('list_my_shared_maps');
+    if (error) throw error;
+    return data || [];
+  }
+
+  function shareCodeToClipboard() {
+    var code = viewState.sharedMapCode;
+    if (!code) {
+      alert('Open a shared map first, or create one in Settings → Maps.');
+      return;
+    }
+    var text = inviteShareText(code, viewState.sharedMapName);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        alert('Copied:\n' + text);
+      }).catch(function () {
+        fallbackCopy(text);
+      });
+    } else fallbackCopy(text);
+  }
+
+  function fallbackCopy(text) {
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      alert('Copied:\n' + text);
+    } catch (e) {
+      prompt('Copy this:', text);
+    }
+  }
+
+  // ---- UI ----
+  function updateAuthChrome() {
+    var nameEl = $('brand-map-name');
+    if (nameEl) {
+      if (viewState.mode === 'shared' && viewState.sharedMapName) {
+        nameEl.textContent = viewState.sharedMapName;
+        nameEl.style.display = '';
+        nameEl.title = 'Shared map · code ' + (viewState.sharedMapCode || '');
+      } else {
+        nameEl.textContent = viewState.privateMapName || 'My Map';
+        nameEl.style.display = '';
+        nameEl.title = 'Private map';
+      }
+    }
+    var badge = $('auth-user-chip');
+    if (badge) {
+      badge.textContent = profile && profile.username ? ('@' + profile.username) : (sessionUser ? 'Signed in' : '');
+    }
+    var modeLabel = $('set-map-mode-label');
+    if (modeLabel) {
+      if (viewState.mode === 'shared') {
+        modeLabel.textContent = 'Viewing: ' + (viewState.sharedMapName || 'Shared') + ' (' + (viewState.sharedMapCode || '------') + ')';
+      } else {
+        modeLabel.textContent = 'Viewing: ' + (viewState.privateMapName || 'My Map') + ' (private)';
+      }
+    }
+    var off = $('set-offline-mode');
+    if (off) off.checked = !!offlineMode;
+    var sync = $('set-sync-status');
+    if (sync) {
+      if (offlineMode) sync.textContent = 'Offline mode — cloud sync paused';
+      else if (!isOnline()) sync.textContent = 'No connection — saving locally';
+      else if (dirty) sync.textContent = 'Local save pending cloud upload…';
+      else sync.textContent = 'Cloud sync ready';
+    }
+    updateSettingsMapsList();
+  }
+
+  function updateSyncBadge(state) {
+    var sync = $('set-sync-status');
+    if (!sync) return;
+    if (offlineMode) { sync.textContent = 'Offline mode — cloud sync paused'; return; }
+    if (state === 'syncing') sync.textContent = 'Uploading to cloud…';
+    else if (state === 'pending') sync.textContent = 'Waiting to upload (will retry when online)…';
+    else if (state === 'ok') sync.textContent = 'Synced with cloud';
+  }
+
+  async function updateSettingsMapsList() {
+    var box = $('set-shared-maps-list');
+    if (!box || !sessionUser) return;
+    box.innerHTML = '<p class="settings-hint">Loading maps…</p>';
+    try {
+      var maps = await listMySharedMaps();
+      if (!maps.length) {
+        box.innerHTML = '<p class="settings-hint">No shared maps yet. Create one below.</p>';
+        return;
+      }
+      var html = '';
+      maps.forEach(function (m) {
+        var active = viewState.mode === 'shared' && viewState.sharedMapId === m.id;
+        html += '<div class="settings-map-row' + (active ? ' is-active' : '') + '">';
+        html += '<button type="button" class="settings-map-open" data-mid="' + m.id + '">' +
+          esc(m.name) + ' <span class="settings-map-code">' + esc(m.code) + '</span></button>';
+        html += '</div>';
+      });
+      box.innerHTML = html;
+      box.querySelectorAll('.settings-map-open').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          switchToShared(btn.getAttribute('data-mid')).catch(function (e) {
+            alert(e.message || String(e));
+          });
+        });
+      });
+    } catch (e) {
+      box.innerHTML = '<p class="settings-hint">Could not load maps (offline?).</p>';
+    }
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function showAuthGate(show) {
+    var gate = $('auth-gate');
+    if (!gate) return;
+    gate.classList.toggle('active', !!show);
+    gate.setAttribute('aria-hidden', show ? 'false' : 'true');
+    if (show) {
+      try {
+        if (gate.parentNode !== document.body) document.body.appendChild(gate);
+      } catch (e) {}
+      gate.style.zIndex = '2147483646';
+    }
+  }
+
+  function showAuthPanel(name) {
+    ['auth-panel-signin', 'auth-panel-signup', 'auth-panel-recover', 'auth-panel-codes'].forEach(function (id) {
+      var el = $(id);
+      if (el) el.style.display = (id === 'auth-panel-' + name) ? '' : 'none';
+    });
+    var err = $('auth-error');
+    if (err) err.textContent = '';
+  }
+
+  function setAuthError(msg) {
+    var err = $('auth-error');
+    if (err) err.textContent = msg || '';
+  }
+
+  function wireAuthUi() {
+    var si = $('auth-btn-signin');
+    if (si) si.onclick = function () {
+      setAuthError('');
+      signIn($('auth-si-user').value, $('auth-si-pass').value)
+        .then(function () { return onAuthed(true); })
+        .catch(function (e) { setAuthError(e.message || String(e)); });
+    };
+    var su = $('auth-btn-signup');
+    if (su) su.onclick = function () {
+      setAuthError('');
+      var p1 = $('auth-su-pass').value;
+      var p2 = $('auth-su-pass2').value;
+      if (p1 !== p2) { setAuthError('Passwords do not match'); return; }
+      signUp($('auth-su-user').value, p1, $('auth-su-email').value)
+        .then(function (res) {
+          showAuthPanel('codes');
+          var box = $('auth-codes-list');
+          if (box) box.textContent = (res.codes || []).join('\n');
+        })
+        .catch(function (e) { setAuthError(e.message || String(e)); });
+    };
+    var codesDone = $('auth-btn-codes-done');
+    if (codesDone) codesDone.onclick = function () {
+      pendingSignupCodes = null;
+      onAuthed(true);
+    };
+    var copyCodes = $('auth-btn-copy-codes');
+    if (copyCodes) copyCodes.onclick = function () {
+      var box = $('auth-codes-list');
+      if (box) fallbackCopy(box.textContent);
+    };
+    var rec = $('auth-btn-recover');
+    if (rec) rec.onclick = function () {
+      setAuthError('');
+      recoverWithCode($('auth-rc-user').value, $('auth-rc-code').value, $('auth-rc-pass').value)
+        .then(function () {
+          setAuthError('');
+          alert('Password updated. Sign in with your new password.');
+          showAuthPanel('signin');
+        })
+        .catch(function (e) { setAuthError(e.message || String(e)); });
+    };
+    document.querySelectorAll('[data-auth-goto]').forEach(function (a) {
+      a.addEventListener('click', function (ev) {
+        ev.preventDefault();
+        showAuthPanel(a.getAttribute('data-auth-goto'));
+      });
+    });
+  }
+
+  window.addEventListener('regslayer-maps-tab', function () {
+    try { updateAuthChrome(); } catch (e) {}
+  });
+
+  function wireSettingsMapsUi() {
+    var createBtn = $('set-create-map-btn');
+    if (createBtn) createBtn.onclick = function () {
+      var name = ($('set-create-map-name') && $('set-create-map-name').value || '').trim();
+      if (!name) { alert('Enter a name for the shared map'); return; }
+      createSharedMap(name).then(function (m) {
+        var invite = inviteShareText(m.code, m.name);
+        alert('Shared map created!\n\nInvite copied to clipboard:\n\n' + invite);
+        if ($('set-create-map-name')) $('set-create-map-name').value = '';
+        updateAuthChrome();
+      }).catch(function (e) { alert(e.message || String(e)); });
+    };
+    var joinBtn = $('set-join-map-btn');
+    if (joinBtn) joinBtn.onclick = function () {
+      var code = ($('set-join-map-code') && $('set-join-map-code').value || '').trim();
+      joinSharedMap(code).then(function (m) {
+        alert('Joined shared map: ' + m.name + ' (' + m.code + ')');
+        if ($('set-join-map-code')) $('set-join-map-code').value = '';
+        updateAuthChrome();
+      }).catch(function (e) { alert(e.message || String(e)); });
+    };
+    var personalBtn = $('set-use-personal-btn');
+    if (personalBtn) personalBtn.onclick = function () {
+      switchToPersonal().catch(function (e) { alert(e.message || String(e)); });
+    };
+    var shareBtn = $('set-share-code-btn');
+    if (shareBtn) shareBtn.onclick = function () { shareCodeToClipboard(); };
+    var off = $('set-offline-mode');
+    if (off) off.onchange = function () { setOfflineMode(off.checked); };
+    var signOutBtn = $('set-signout-btn');
+    if (signOutBtn) signOutBtn.onclick = function () {
+      if (confirm('Sign out on this device? Map data stays on the device and in the cloud.')) {
+        signOut().catch(function (e) { alert(e.message || String(e)); });
+      }
+    };
+  }
+
+  function startPullLoop() {
+    if (pullTimer) clearInterval(pullTimer);
+    // Personal + shared: light poll so deletes/edits arrive on other devices
+    pullTimer = setInterval(function () {
+      if (document.visibilityState === 'hidden') return;
+      if (!isOnline() || isDirty()) return;
+      runWhenIdle(function () { pullMapFromCloud(false); });
+    }, 30000);
+  }
+
+  function captureJoinFromUrl() {
+    try {
+      var u = new URL(window.location.href);
+      var code = u.searchParams.get('join') || u.searchParams.get('map') || '';
+      code = String(code).replace(/\D/g, '').slice(0, 6);
+      if (code.length === 6) {
+        try { sessionStorage.setItem('reg_slayer_pending_join', code); } catch (eS) {}
+        u.searchParams.delete('join');
+        u.searchParams.delete('map');
+        var clean = u.pathname + (u.search || '') + (u.hash || '');
+        if (window.history && history.replaceState) history.replaceState({}, '', clean || '/');
+      }
+    } catch (e) {}
+  }
+
+  async function consumePendingJoin() {
+    var code = '';
+    try { code = sessionStorage.getItem('reg_slayer_pending_join') || ''; } catch (e) {}
+    if (!code || code.length !== 6) return;
+    try { sessionStorage.removeItem('reg_slayer_pending_join'); } catch (e2) {}
+    try {
+      await joinSharedMap(code);
+      alert('Joined shared map: ' + (viewState.sharedMapName || code));
+    } catch (err) {
+      alert('Could not join map ' + code + ': ' + (err.message || err));
+    }
+  }
+
+  function inviteShareText(code, mapName) {
+    var c = String(code || '').replace(/\D/g, '').slice(0, 6);
+    var link = 'https://regslayer.com/?join=' + c;
+    var nameLine = mapName ? ('Map: ' + mapName + '\n') : '';
+    return 'Join my HuntSlayer map!\n' + nameLine + 'Code: ' + c + '\n' + link;
+  }
+
+  async function onAuthed(fromLogin) {
+    showAuthGate(false);
+    restoreDirtyFlag();
+    loadViewState();
+    await restoreViewPrefsFromCloud();
+    // Apply last local cache for active map immediately (offline-first feel)
+    var slot = cacheSlotKey();
+    var cached = readLocalCache(slot);
+    if (cached && cached.state) {
+      applyMapState(cached.state);
+      if (cached.state.meta && cached.state.meta.revision) {
+        localRevision = cached.state.meta.revision;
+      }
+      refreshMapFromLocalState();
+    }
+    // Upload pending local deletes/edits BEFORE any cloud pull (prevents resurrect)
+    if (isDirty()) {
+      try { await pushMapToCloud(); } catch (eP) { console.warn(eP); }
+    }
+    await pullMapFromCloud(true);
+    if (isDirty()) scheduleCloudPush(true);
+    await consumePendingJoin();
+    updateAuthChrome();
+    startPullLoop();
+    if (authReadyResolve) { authReadyResolve(); authReadyResolve = null; }
+  }
+
+  async function bootstrapAuth() {
+    loadOfflineMode();
+    loadViewState();
+    restoreDirtyFlag();
+    captureJoinFromUrl();
+    wireAuthUi();
+    wireSettingsMapsUi();
+    updateAuthChrome();
+    showAuthPanel('signin');
+    try {
+      await ensureClient();
+      var { data } = await sb.auth.getSession();
+      if (data && data.session && data.session.user) {
+        sessionUser = data.session.user;
+        window.__rsUser = sessionUser;
+        window.__rsSb = sb;
+        try { await loadProfile(); } catch (e) {}
+        await onAuthed(false);
+      } else {
+        showAuthGate(true);
+      }
+      sb.auth.onAuthStateChange(function (event, session) {
+        if (session && session.user) {
+          sessionUser = session.user;
+          window.__rsUser = sessionUser;
+          window.__rsSb = sb;
+        } else if (event === 'SIGNED_OUT') {
+          sessionUser = null;
+          window.__rsUser = null;
+          profile = null;
+          showAuthGate(true);
+        }
+      });
+    } catch (e) {
+      console.error(e);
+      showAuthGate(true);
+      setAuthError('Could not reach sign-in service. Check connection.');
+    }
+
+    window.addEventListener('online', function () {
+      if (!offlineMode && isDirty()) scheduleCloudPush(true);
+      updateAuthChrome();
+    });
+    window.addEventListener('offline', function () { updateAuthChrome(); });
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'hidden' && isDirty() && isOnline()) {
+        pushMapToCloud();
+      } else if (document.visibilityState === 'visible' && !isDirty() && isOnline()) {
+        runWhenIdle(function () { pullMapFromCloud(true); });
+      }
+    });
+  }
+
+  // Expose for settings / debugging
+  window.RegSlayerCloud = {
+    bootstrapAuth: bootstrapAuth,
+    markDirty: markDirty,
+    forcePush: function () {
+      dirty = true;
+      try { localStorage.setItem(DIRTY_KEY, '1'); } catch (e) {}
+      try {
+        var st = collectMapState();
+        writeLocalCache(st);
+      } catch (e2) {}
+      scheduleCloudPush(true);
+    },
+    shareCodeToClipboard: shareCodeToClipboard,
+    switchToPersonal: switchToPersonal,
+    switchToPrivateMap: switchToPrivateMap,
+    _switchToPrivate: switchToPrivateMap,
+    createSharedMap: createSharedMap,
+    joinSharedMap: joinSharedMap,
+    listMySharedMaps: listMySharedMaps,
+    authReady: authReady,
+    getViewState: function () { return viewState; },
+    getProfile: function () { return profile; },
+    isOfflineMode: function () { return offlineMode; },
+    setOfflineMode: setOfflineMode,
+    getClient: function () { return sb; }
+  };
+  // Expose for party extension
+  Object.defineProperty(window, '__rsSbBridge', {
+    get: function () { return sb; }
+  });
+})();
+
+  </script>
   <script>
     // ========== STATE ==========
-    const APP_VERSION = '4.5-offline-test';
+    const APP_VERSION = '5.1-beta';
+    // v5.1: rehydrate map data after cloud pull / map switch (no full reload)
+    window.regSlayerRefreshMapData = function () {
+      try {
+        var pins = JSON.parse(localStorage.getItem('alabama_hunt_custom_pins') || '[]');
+        if (typeof locations !== 'undefined' && Array.isArray(locations)) {
+          // locations is const — mutate in place
+          for (var i = locations.length - 1; i >= 0; i--) {
+            if (locations[i] && locations[i].isPin) locations.splice(i, 1);
+          }
+          for (var p = 0; p < pins.length; p++) locations.push(pins[p]);
+        }
+        if (typeof historicalHunts !== 'undefined') {
+          historicalHunts = JSON.parse(localStorage.getItem('alabama_hunt_historical_hunts') || '[]');
+        }
+        if (typeof hiddenLocationIds !== 'undefined' && hiddenLocationIds && hiddenLocationIds.clear) {
+          try {
+            hiddenLocationIds.clear();
+            var hid = JSON.parse(localStorage.getItem('alabama_hunt_hidden_locations_v1') || '[]');
+            if (Array.isArray(hid)) hid.forEach(function (id) { hiddenLocationIds.add(String(id)); });
+          } catch (eH) {}
+        }
+        if (typeof loadCustomAreasIntoLocations === 'function') loadCustomAreasIntoLocations();
+        if (typeof drawPinsOnMap === 'function') drawPinsOnMap();
+        if (typeof drawHuntsOnMap === 'function') drawHuntsOnMap();
+        if (typeof drawCustomAreasOnMap === 'function') drawCustomAreasOnMap();
+        if (typeof drawMeasuredPathsOnMap === 'function') drawMeasuredPathsOnMap();
+        if (typeof loadUserStands === 'function') loadUserStands();
+        if (typeof updateAvailableList === 'function') updateAvailableList();
+      } catch (e) { console.warn('regSlayerRefreshMapData', e); }
+    };
+    function _rsMapChanged() {
+      try { if (window.regSlayerMapDataChanged) window.regSlayerMapDataChanged(); } catch (e) {}
+    }
     const APP_SETTINGS_KEY = 'reg_slayer_app_settings_v1';
 
     /** User preferences (tools, defaults, display) — persisted localStorage */
@@ -6631,7 +8290,10 @@
       } catch (e) { return new Set(); }
     }
     function saveHiddenLocationIds() {
-      try { localStorage.setItem(HIDDEN_LOCS_KEY, JSON.stringify(Array.from(hiddenLocationIds))); } catch (e) {}
+      try {
+        localStorage.setItem(HIDDEN_LOCS_KEY, JSON.stringify(Array.from(hiddenLocationIds)));
+        _rsMapChanged();
+      } catch (e) {}
     }
 
     const waterGauges = [
@@ -6707,6 +8369,7 @@
           data[standStorageNameKey(loc.name)] = payload;
         });
         localStorage.setItem(USER_STANDS_KEY, JSON.stringify(data));
+        _rsMapChanged();
       } catch (e) { /* ignore quota */ }
     }
     function attachUserStandsToLocation(loc) {
@@ -10226,36 +11889,12 @@
       leafletLoading = new Promise(function(resolve, reject) {
         var css = document.createElement('link');
         css.rel = 'stylesheet';
-        // Bundled with the site so the map works offline after first visit
-        css.href = './vendor/leaflet/leaflet.css';
+        css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
         document.head.appendChild(css);
         var s = document.createElement('script');
-        s.src = './vendor/leaflet/leaflet.js';
-        s.onload = function() {
-          try {
-            // Point default marker images at local vendor folder (not CDN images/)
-            if (L && L.Icon && L.Icon.Default) {
-              L.Icon.Default.mergeOptions({
-                iconUrl: './vendor/leaflet/marker-icon.png',
-                iconRetinaUrl: './vendor/leaflet/marker-icon-2x.png',
-                shadowUrl: './vendor/leaflet/marker-shadow.png'
-              });
-            }
-          } catch (eIcon) {}
-          resolve();
-        };
-        s.onerror = function() {
-          // Fallback to CDN only if local vendor missing (online recovery)
-          var css2 = document.createElement('link');
-          css2.rel = 'stylesheet';
-          css2.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-          document.head.appendChild(css2);
-          var s2 = document.createElement('script');
-          s2.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-          s2.onload = function() { resolve(); };
-          s2.onerror = function() { leafletLoading = null; reject(new Error('Leaflet failed to load')); };
-          document.head.appendChild(s2);
-        };
+        s.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+        s.onload = function() { resolve(); };
+        s.onerror = function() { leafletLoading = null; reject(new Error('Leaflet failed to load')); };
         document.head.appendChild(s);
       });
       return leafletLoading;
@@ -11081,12 +12720,8 @@
      * opts.addChooser: show Pin / Hunt / Stand picker (from compact "Add Pin" button).
      * Status banner already has land / owner / zone / peak rut — no duplicate black-space copy.
      */
-    /** Which marker owns the map-dot action menu: 'dot' | 'gps' */
-    var mapDotMenuSource = 'dot';
-
     function buildMapDotActionsHtml(opts) {
       opts = opts || {};
-      var fromGps = !!(opts.fromGps || mapDotMenuSource === 'gps');
       var pl = lastClickPublicLand;
       var st = null;
       try {
@@ -11117,7 +12752,6 @@
       var weatherHandler = hasPublicLand
         ? "window.handleMapDotPublicLandAction('weather')"
         : "window.handleMapDotAction('weather')";
-      var shareLabel = fromGps ? 'Share my location' : 'Share location';
 
       // Sub-menu: pick pin vs hunt vs stand (one button on main menu)
       if (opts.addChooser) {
@@ -11134,7 +12768,7 @@
         );
       }
 
-      // Main menu: share always last (bottom). GPS uses same actions, different share label.
+      // Main menu: status once → actions (regs above weather; single Add Pin → chooser)
       return (
         '<div class="map-dot-menu" onclick="event.stopPropagation();">' +
           statusBlock +
@@ -11143,23 +12777,9 @@
           '<button type="button" class="mdm-btn weather" onclick="event.preventDefault();event.stopPropagation();' + weatherHandler + ';return false;">Get weather</button>' +
           areaMapBtn +
           '<button type="button" class="mdm-btn pin" onclick="event.preventDefault();event.stopPropagation();window.handleMapDotAction(\'add-menu\');return false;">Add Pin</button>' +
-          '<button type="button" class="mdm-btn" style="background:#1a4a5c;" onclick="event.preventDefault();event.stopPropagation();window.handleMapDotAction(\'offline-save\');return false;">Save map offline (2 mi)</button>' +
-          '<button type="button" class="mdm-btn share" onclick="event.preventDefault();event.stopPropagation();window.handleMapDotAction(\'share\');return false;">' + shareLabel + '</button>' +
+          '<button type="button" class="mdm-btn share" onclick="event.preventDefault();event.stopPropagation();window.handleMapDotAction(\'share\');return false;">Share location</button>' +
         '</div>'
       );
-    }
-
-    /** Refresh open map-dot menu on orange dot or GPS arrow. */
-    function setMapDotMenuContent(opts) {
-      opts = opts || {};
-      var html = buildMapDotActionsHtml(opts);
-      if (mapDotMenuSource === 'gps' && gpsMarker && typeof gpsMarker.setPopupContent === 'function') {
-        try { gpsMarker.setPopupContent(html); } catch (eG) {}
-        return;
-      }
-      if (tempClickMarker && typeof tempClickMarker.setPopupContent === 'function') {
-        try { tempClickMarker.setPopupContent(html); } catch (eD) {}
-      }
     }
 
     function handleMapDotPublicLandAction(act) {
@@ -11470,9 +13090,8 @@
 
       function refreshDotPopup(openIt) {
         if (!tempClickMarker) return;
-        mapDotMenuSource = 'dot';
         try {
-          tempClickMarker.setPopupContent(buildMapDotActionsHtml({ fromGps: false }));
+          tempClickMarker.setPopupContent(buildMapDotActionsHtml());
         } catch (eSet) {}
         if (openIt) {
           try { tempClickMarker.openPopup(); } catch (eO) {}
@@ -11484,11 +13103,11 @@
         refreshDotPopup(false);
       } else {
         tempClickMarker = L.marker(latlng, { icon: icon, keyboard: true }).addTo(map);
-        tempClickMarker.bindPopup(buildMapDotActionsHtml({ fromGps: false }), {
+        tempClickMarker.bindPopup(buildMapDotActionsHtml(), {
           className: 'map-dot-popup',
           closeButton: true,
           autoPan: false,
-          maxWidth: 260,
+          maxWidth: 300,
           offset: L.point(0, 0),
           closeOnClick: false
         });
@@ -11498,11 +13117,9 @@
             L.DomEvent.stopPropagation(ev.originalEvent);
             L.DomEvent.preventDefault(ev.originalEvent);
           }
-          mapDotMenuSource = 'dot';
           refreshDotPopup(true);
         });
         tempClickMarker.on('popupopen', function() {
-          mapDotMenuSource = 'dot';
           var el = tempClickMarker.getPopup() && tempClickMarker.getPopup().getElement();
           if (!el) return;
           L.DomEvent.disableClickPropagation(el);
@@ -11553,11 +13170,15 @@
       try {
         // Compact "Add Pin" → show Pin / Hunt / Stand chooser in the same popup
         if (act === 'add-menu') {
-          setMapDotMenuContent({ addChooser: true, fromGps: mapDotMenuSource === 'gps' });
+          if (tempClickMarker && typeof tempClickMarker.setPopupContent === 'function') {
+            try { tempClickMarker.setPopupContent(buildMapDotActionsHtml({ addChooser: true })); } catch (eM) {}
+          }
           return false;
         }
         if (act === 'add-back') {
-          setMapDotMenuContent({ fromGps: mapDotMenuSource === 'gps' });
+          if (tempClickMarker && typeof tempClickMarker.setPopupContent === 'function') {
+            try { tempClickMarker.setPopupContent(buildMapDotActionsHtml()); } catch (eB) {}
+          }
           return false;
         }
 
@@ -11660,7 +13281,7 @@
           cancelToastForm();
           document.getElementById('dt-main-actions').style.display = 'none';
           document.getElementById('dt-hunt-form').style.display = 'none';
-          document.getElementById('dt-pin-form').style.display = 'block';
+          document.getElementById('dt-pin-form').style.display = 'block'; try { if (window.rsFillExtraMapChecks) window.rsFillExtraMapChecks('pin-extra-maps'); } catch (ePinMaps) {}
           document.getElementById('detection-toast').classList.add('active');
           if (map) map.closePopup();
           setTimeout(function() {
@@ -11671,19 +13292,7 @@
         }
 
         if (act === 'share') {
-          var shareName = mapDotMenuSource === 'gps'
-            ? 'My location'
-            : (detected.name || 'Map spot');
-          shareLocationLink(clickLat, clickLng, shareName);
-          return false;
-        }
-
-        if (act === 'offline-save') {
-          ensureHuntContext();
-          window.saveOfflineMapAround(clickLat, clickLng, {
-            label: (detected && detected.name) ? detected.name : 'Map spot',
-            source: 'pin'
-          });
+          shareLocationLink(clickLat, clickLng, detected.name || 'Map spot');
           return false;
         }
       } catch (err) {
@@ -11693,101 +13302,6 @@
       return false;
     }
     window.handleMapDotAction = handleMapDotAction;
-
-    /**
-     * Download basemap tiles for a 2-mile radius (TestOffline).
-     * Uses current basemap; works best on topo / street / lidar.
-     */
-    function saveOfflineMapAround(lat, lng, opts) {
-      opts = opts || {};
-      if (lat == null || lng == null || isNaN(lat) || isNaN(lng)) {
-        alert('No location to save offline.');
-        return Promise.resolve(null);
-      }
-      if (!window.RegSlayerOffline || typeof RegSlayerOffline.saveOfflineAround !== 'function') {
-        alert('Offline engine not loaded.');
-        return Promise.resolve(null);
-      }
-      if (!navigator.onLine) {
-        alert('You need a network connection once to download map tiles. After that, this area works offline.');
-        return Promise.resolve(null);
-      }
-      var basemap = (typeof activeBasemapKey === 'string' && activeBasemapKey) ? activeBasemapKey : 'topo';
-      var est = RegSlayerOffline.estimatePack(lat, lng, basemap);
-      var label = opts.label || 'Map spot';
-      var ok = confirm(
-        'Save offline map around this spot?\n\n' +
-        'Radius: 2 miles\n' +
-        'Basemap: ' + basemap + '\n' +
-        'About ' + est.tileCount + ' tiles (~' + est.approxMb + ' MB)\n\n' +
-        'Needs good signal while downloading. Online use is unchanged.'
-      );
-      if (!ok) return Promise.resolve(null);
-
-      if (typeof showAppCopyToast === 'function') {
-        showAppCopyToast('<span class="act">Downloading offline map…</span><br>2 mi · ' + escHtml(label));
-      }
-      if (map) try { map.closePopup(); } catch (eC) {}
-
-      return RegSlayerOffline.saveOfflineAround(lat, lng, {
-        label: label,
-        basemap: basemap,
-        source: opts.source || 'pin',
-        sourceId: opts.sourceId || null,
-        radiusMi: 2,
-        onProgress: function(p) {
-          if (window.RegSlayerOffline) {
-            RegSlayerOffline.updateOfflineBanner(
-              'Offline map ' + (p.pct || 0) + '% (' + p.ok + '/' + p.total + ' tiles)'
-            );
-          }
-        }
-      }).then(function(pack) {
-        var msg = pack && pack.status === 'ready'
-          ? ('Offline map ready · ' + (pack.ok || 0) + ' tiles · 2 mi around ' + label)
-          : ('Offline map finished with issues · ok ' + (pack && pack.ok) + ' / fail ' + (pack && pack.fail));
-        if (typeof showAppCopyToast === 'function') {
-          showAppCopyToast('<span class="act">Offline map</span><br>' + escHtml(msg));
-        } else {
-          alert(msg);
-        }
-        if (window.RegSlayerOffline) {
-          RegSlayerOffline.updateOfflineBanner(pack && pack.status === 'ready' ? 'Offline map saved' : null);
-        }
-        return pack;
-      }).catch(function(err) {
-        alert((err && err.message) || 'Offline map download failed.');
-        return null;
-      });
-    }
-    window.saveOfflineMapAround = saveOfflineMapAround;
-    window.saveOfflineMapForCustomArea = function(areaId) {
-      var areas = typeof loadCustomAreasFromStorage === 'function' ? loadCustomAreasFromStorage() : [];
-      var area = null;
-      for (var i = 0; i < areas.length; i++) {
-        if (String(areas[i].id) === String(areaId)) { area = areas[i]; break; }
-      }
-      if (!area) {
-        var loc = locations && locations.find(function(l) { return l && String(l.id) === String(areaId); });
-        area = loc;
-      }
-      if (!area) {
-        alert('Custom area not found.');
-        return;
-      }
-      var c = (area.ring && typeof ringCentroid === 'function')
-        ? (ringCentroid(area.ring) || { lat: area.lat, lng: area.lng })
-        : { lat: area.lat, lng: area.lng };
-      if (!c || c.lat == null) {
-        alert('Could not find center of custom area.');
-        return;
-      }
-      saveOfflineMapAround(c.lat, c.lng, {
-        label: area.name || 'Custom area',
-        source: 'custom-area',
-        sourceId: area.id
-      });
-    };
 
     // ========== MEASURE / DRAW CUSTOM HUNT AREAS ==========
     function haversineMiles(lat1, lng1, lat2, lng2) {
@@ -13041,6 +14555,7 @@
     function saveMeasuredPathsToStorage(paths) {
       try {
         localStorage.setItem(MEASURED_PATHS_KEY, JSON.stringify(paths || []));
+        _rsMapChanged();
       } catch (e) {
         console.warn('Could not save measured paths', e);
       }
@@ -13717,6 +15232,7 @@
     function saveCustomAreasToStorage(areas) {
       try {
         localStorage.setItem(CUSTOM_AREAS_KEY, JSON.stringify(areas || []));
+        _rsMapChanged();
       } catch (e) {
         console.warn('Could not save custom areas', e);
         alert('Could not save area (storage full?).');
@@ -13838,7 +15354,6 @@
             '</div>' +
             '<button type="button" class="mdm-btn weather" onclick="event.preventDefault();event.stopPropagation();window.selectLocationById(\'' + safeId + '\',{closePopup:true,showOverlay:true,skipScroll:true});return false;">Get weather</button>' +
             '<button type="button" class="mdm-btn regs" onclick="event.preventDefault();event.stopPropagation();window.openCustomAreaRegs(\'' + safeId + '\');return false;">Rules &amp; regs</button>' +
-            '<button type="button" class="mdm-btn" style="background:#1a4a5c;" onclick="event.preventDefault();event.stopPropagation();window.saveOfflineMapForCustomArea(\'' + safeId + '\');return false;">Save map offline (2 mi)</button>' +
             '<button type="button" class="mdm-btn share" onclick="event.preventDefault();event.stopPropagation();window.shareLocationLink(' + Number(area.lat) + ',' + Number(area.lng) + ',\'' + escJsStr(area.name) + '\');return false;">Share location</button>' +
             '<button type="button" class="mdm-btn danger" onclick="event.preventDefault();event.stopPropagation();window.deleteCustomArea(\'' + safeId + '\');return false;">Delete area</button>' +
           '</div>';
@@ -13972,23 +15487,6 @@
           }
         } catch (selErr) {}
       }
-      // TestOffline: shape geometry is always in localStorage; optionally cache map tiles (2 mi)
-      try {
-        if (navigator.onLine && window.saveOfflineMapAround) {
-          var wantTiles = confirm(
-            'Custom area “' + name + '” is saved on this device.\n\n' +
-            'Also download map tiles for offline use (2-mile radius around the area center)?\n' +
-            'Uses a little storage; only needed if you will be out of service.'
-          );
-          if (wantTiles) {
-            saveOfflineMapAround(c.lat, c.lng, {
-              label: name,
-              source: 'custom-area',
-              sourceId: area.id
-            });
-          }
-        }
-      } catch (offErr) {}
     }
     window.confirmSaveCustomShape = confirmSaveCustomShape;
 
@@ -14023,6 +15521,12 @@
       if (map) map.closePopup();
       drawCustomAreasOnMap();
       if (typeof updateAvailableList === 'function' && selectedDate && selectedWeapon) updateAvailableList();
+      // Immediate cloud flush after delete (saveCustomAreas already marked dirty)
+      try {
+        if (window.RegSlayerCloud && typeof window.RegSlayerCloud.forcePush === 'function') {
+          window.RegSlayerCloud.forcePush();
+        }
+      } catch (eDel) {}
     }
     window.deleteCustomArea = deleteCustomArea;
 
@@ -14178,61 +15682,6 @@
       });
     }
 
-    /**
-     * Open the same map-dot action menu on the GPS arrow (share label = Share my location).
-     */
-    function openGpsMapDotMenu() {
-      if (!map || !gpsMarker || userLat == null || userLng == null) return;
-      if (typeof mapRadarActive !== 'undefined' && mapRadarActive) return;
-      if (mapDrawMode === 'measure' || mapDrawMode === 'draw') return;
-      if (standPlaceMode) {
-        placeStandAt(userLat, userLng);
-        return;
-      }
-      mapDotMenuSource = 'gps';
-      clickLat = userLat;
-      clickLng = userLng;
-      lastClickTva = null;
-      lastClickParcel = null;
-      lastClickPublicLand = null; // same as free map-dot: unit context only from public-land click
-      try {
-        if (gpsMarker.isPopupOpen && gpsMarker.isPopupOpen()) {
-          /* keep open and refresh */
-        } else if (map) {
-          try { map.closePopup(); } catch (eCp) {}
-        }
-      } catch (eCl) {}
-
-      function refreshGpsPopup(openIt) {
-        if (!gpsMarker) return;
-        mapDotMenuSource = 'gps';
-        try {
-          gpsMarker.setPopupContent(buildMapDotActionsHtml({ fromGps: true }));
-        } catch (eSet) {}
-        if (openIt) {
-          try { gpsMarker.openPopup(); } catch (eO) {}
-        }
-      }
-
-      refreshGpsPopup(true);
-
-      // Parcel owner for status banner (async), same as free map-dot
-      var lat0 = userLat, lng0 = userLng;
-      queryParcelAt(lat0, lng0).then(function(parcel) {
-        if (clickLat !== lat0 || clickLng !== lng0 || mapDotMenuSource !== 'gps') return;
-        lastClickParcel = parcel;
-        if (gpsMarker && gpsMarker.isPopupOpen && gpsMarker.isPopupOpen()) {
-          refreshGpsPopup(false);
-        }
-      }).catch(function() {});
-
-      queryTvaLand(lat0, lng0).then(function(tva) {
-        if (clickLat !== lat0 || clickLng !== lng0 || mapDotMenuSource !== 'gps') return;
-        lastClickTva = tva;
-      }).catch(function() {});
-    }
-    window.openGpsMapDotMenu = openGpsMapDotMenu;
-
     function setGpsMarker(lat, lng, headingDeg) {
       if (!map || typeof L === 'undefined') return;
       if (headingDeg == null && typeof deviceHeadingDeg !== 'undefined') headingDeg = deviceHeadingDeg;
@@ -14240,40 +15689,19 @@
       if (gpsMarker) {
         gpsMarker.setLatLng([lat, lng]);
         try { gpsMarker.setIcon(icon); } catch (eI) {}
-        // Keep menu actions pointed at live GPS if that menu is open
-        if (mapDotMenuSource === 'gps' && gpsMarker.isPopupOpen && gpsMarker.isPopupOpen()) {
-          clickLat = lat;
-          clickLng = lng;
-        }
       } else {
-        // Clickable GPS arrow — same action menu as orange map-dot (no auto-open)
-        gpsMarker = L.marker([lat, lng], {
-          icon: icon,
-          interactive: true,
-          keyboard: true,
-          zIndexOffset: 1200
-        }).addTo(map);
-        gpsMarker.bindPopup(buildMapDotActionsHtml({ fromGps: true }), {
-          className: 'map-dot-popup',
-          closeButton: true,
-          autoPan: false,
-          maxWidth: 260,
-          offset: L.point(0, 0),
-          closeOnClick: false
-        });
-        gpsMarker.on('click', function(ev) {
-          if (ev && ev.originalEvent) {
-            L.DomEvent.stopPropagation(ev.originalEvent);
-            L.DomEvent.preventDefault(ev.originalEvent);
+        // Tap opens share-my-location options (party / clipboard)
+        gpsMarker = L.marker([lat, lng], { icon: icon, interactive: true, keyboard: true }).addTo(map);
+        gpsMarker.on('click', function (ev) {
+          try {
+            if (ev && ev.originalEvent) {
+              L.DomEvent.stopPropagation(ev);
+              L.DomEvent.preventDefault(ev);
+            }
+          } catch (eS) {}
+          if (window.RegSlayerParty && typeof window.RegSlayerParty.openShareMyLocationChooser === 'function') {
+            window.RegSlayerParty.openShareMyLocationChooser();
           }
-          openGpsMapDotMenu();
-        });
-        gpsMarker.on('popupopen', function() {
-          mapDotMenuSource = 'gps';
-          var el = gpsMarker.getPopup() && gpsMarker.getPopup().getElement();
-          if (!el) return;
-          L.DomEvent.disableClickPropagation(el);
-          L.DomEvent.disableScrollPropagation(el);
         });
       }
     }
@@ -14571,6 +15999,7 @@
       const pins = JSON.parse(localStorage.getItem('alabama_hunt_custom_pins') || '[]');
       pins.push(newLoc);
       localStorage.setItem('alabama_hunt_custom_pins', JSON.stringify(pins));
+      _rsMapChanged();
       document.getElementById('pin-name-input').value = '';
       document.getElementById('pin-notes-input').value = '';
       closeDetectionToast();
@@ -14606,6 +16035,7 @@
       };
       historicalHunts.push(newHunt);
       localStorage.setItem('alabama_hunt_historical_hunts', JSON.stringify(historicalHunts));
+      _rsMapChanged();
       document.getElementById('hunt-name-input').value = '';
       document.getElementById('hunt-notes-input').value = '';
       closeDetectionToast();
@@ -14695,6 +16125,7 @@
       if (!confirm('Delete this past hunt?')) return;
       historicalHunts = historicalHunts.filter(function(h) { return String(h.id) !== String(id); });
       localStorage.setItem('alabama_hunt_historical_hunts', JSON.stringify(historicalHunts));
+      _rsMapChanged();
       if (map) map.closePopup();
       drawHuntsOnMap();
     }
@@ -14707,6 +16138,7 @@
       var pins = JSON.parse(localStorage.getItem('alabama_hunt_custom_pins') || '[]');
       pins = pins.filter(function(p) { return String(p.id) !== String(id); });
       localStorage.setItem('alabama_hunt_custom_pins', JSON.stringify(pins));
+      _rsMapChanged();
       if (String(selectedLocationId) === String(id)) { resetDashboard(); selectedLocationId = null; }
       lastVisibleMarkerKey = '';
       if (map) map.closePopup();
@@ -15082,7 +16514,10 @@
       calendarTargetDate.setMonth(calendarTargetDate.getMonth() + dir);
       renderCalendar();
     }
-    function selectDateStep(day) {
+    function selectDateStep(day, opts) {
+      opts = opts || {};
+      var quiet = !!opts.skipScroll || !!opts.quiet || (typeof isAppBootQuiet === 'function' && isAppBootQuiet());
+      var locOpts = quiet ? { skipScroll: true, panMap: false } : {};
       selectedDate = new Date(calendarTargetDate.getFullYear(), calendarTargetDate.getMonth(), day);
       renderCalendar(); updateEventsList(); clearEventForm();
       document.getElementById('step-2-section').classList.remove('locked');
@@ -15098,7 +16533,7 @@
         usingCurrentLocation = true;
         if (currentLocationObj) {
           const rule = { weapon: 'General', target: 'Statewide Rules', limit: 'Statewide Limit', notes: 'Check regulations.' };
-          selectLocation(currentLocationObj, rule);
+          selectLocation(currentLocationObj, rule, locOpts);
         }
         if (!selectedWeapon) { lockStep3(); return; }
         updateAvailableList();
@@ -15111,7 +16546,7 @@
         if (currentLocationObj) {
           isShowingCurrentData = (daysAhead === 0);
           const rule = { weapon: 'General', target: 'Statewide Rules', limit: 'Statewide Limit', notes: 'Check regulations.' };
-          selectLocation(currentLocationObj, rule);
+          selectLocation(currentLocationObj, rule, locOpts);
         } else resetDashboard();
         return;
       }
@@ -15126,7 +16561,7 @@
           const match = matches.find(m => m.location.id == selectedLocationId);
           const rule = match ? match.rule : rules.find(r => r.locId == (loc.isPin ? loc.parentId : loc.id)) || { weapon: 'General', target: 'Statewide Rules', limit: 'Statewide Limit', notes: 'Check regulations.' };
           isShowingCurrentData = false;
-          selectLocation(loc, rule);
+          selectLocation(loc, rule, locOpts);
           return;
         }
       }
@@ -15136,7 +16571,7 @@
         const dateStr = selectedDate.toISOString().split('T')[0];
         const tid = currentLocationObj.zone === 'A' ? 10 : 11;
         const rule = rules.find(r => r.locId == tid && dateStr >= r.start && dateStr <= r.end) || { weapon:'General', target:'Statewide Rules', limit:'Statewide Limit', notes:'Check regulations.' };
-        selectLocation(currentLocationObj, rule);
+        selectLocation(currentLocationObj, rule, locOpts);
       }
     }
     function selectEventColor(c, el) { currentSelectedColor = c; document.querySelectorAll('.color-dot-btn').forEach(b => b.classList.remove('selected')); el.classList.add('selected'); }
@@ -16197,8 +17632,8 @@
         panZoom: opts.panZoom
       });
 
-      // Scroll to weather only for list picks on phone (not map taps)
-      if (!opts.skipScroll && isPhoneLayout()) {
+      // Scroll to weather only for list picks on phone (not map taps / not boot)
+      if (!opts.skipScroll && isPhoneLayout() && !(typeof isAppBootQuiet === 'function' && isAppBootQuiet())) {
         var dash = document.getElementById('dashboard-container');
         if (dash) {
           setTimeout(function() { dash.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 150);
@@ -16236,7 +17671,20 @@
      * Content above (or around) the map changing height was shoving the viewport "to the top".
      */
     var _mapInViewLock = null;
+    var _appBootQuietUntil = 0;
+    function isAppBootQuiet() {
+      return Date.now() < (_appBootQuietUntil || 0);
+    }
+    window.isAppBootQuiet = isAppBootQuiet;
+    function clearMapInViewLock() {
+      _mapInViewLock = null;
+    }
     function lockMapInView() {
+      // Never fight the user during cold start / GPS bootstrap
+      if (isAppBootQuiet()) {
+        _mapInViewLock = null;
+        return;
+      }
       if (typeof isPhoneLayout === 'function' && !isPhoneLayout()) {
         _mapInViewLock = null;
         return;
@@ -16248,12 +17696,13 @@
       }
       _mapInViewLock = {
         top: el.getBoundingClientRect().top,
-        until: Date.now() + 3200
+        until: Date.now() + 900
       };
     }
     function restoreMapInView() {
       var lock = _mapInViewLock;
       if (!lock || Date.now() > lock.until) return;
+      if (isAppBootQuiet()) { _mapInViewLock = null; return; }
       if (typeof isPhoneLayout === 'function' && !isPhoneLayout()) return;
       var el = document.getElementById('map-wrapper');
       if (!el) return;
@@ -16271,6 +17720,7 @@
       lock.top = el.getBoundingClientRect().top;
     }
     function scheduleMapInViewRestore() {
+      if (isAppBootQuiet()) { _mapInViewLock = null; return; }
       restoreMapInView();
       if (typeof requestAnimationFrame === 'function') {
         requestAnimationFrame(function() {
@@ -16278,10 +17728,25 @@
           requestAnimationFrame(restoreMapInView);
         });
       }
-      [30, 80, 160, 320, 600, 1000, 1600, 2400].forEach(function(ms) {
+      // Shorter window — long locks felt like the page "wouldn't scroll" on mobile launch
+      [30, 80, 160, 320, 600].forEach(function(ms) {
         setTimeout(restoreMapInView, ms);
       });
     }
+    // User scroll/touch cancels map-in-view lock so launch reflows never pin the viewport
+    (function wireMapInViewUserCancel() {
+      var cancel = function() {
+        if (_mapInViewLock) clearMapInViewLock();
+      };
+      window.addEventListener('wheel', cancel, { passive: true, capture: true });
+      window.addEventListener('touchmove', cancel, { passive: true, capture: true });
+      window.addEventListener('pointerdown', function(ev) {
+        // Only cancel when user is interacting outside forced restore frames
+        if (ev && ev.isPrimary === false) return;
+        // Keep lock only for non-gesture automatic restores; any pointer starts user control
+        if (_mapInViewLock && Date.now() > (_mapInViewLock.until - 700)) clearMapInViewLock();
+      }, { passive: true, capture: true });
+    })();
 
     /**
      * Select a location for weather/dashboard.
@@ -16443,36 +17908,17 @@
               '&timezone=auto&start_date=' + dateStr + '&end_date=' + dateStr;
       }
 
-      var doFetch = (typeof RegSlayerOffline !== 'undefined' && RegSlayerOffline.fetchWithTimeout)
-        ? function() { return RegSlayerOffline.fetchWithTimeout(url, {}, 14000); }
-        : function() { return fetch(url); };
-
-      weatherInflight[cacheKey] = doFetch().then(function(res) {
+      weatherInflight[cacheKey] = fetch(url).then(function(res) {
         if (!res.ok) throw new Error('Open-Meteo ' + res.status);
         return res.json();
       }).then(function(data) {
         data.isHistorical = daysAhead < 0;
         data.isCurrent = daysAhead === 0;
         weatherCache = { key: cacheKey, data: data, timestamp: Date.now() };
-        try {
-          if (window.RegSlayerOffline) RegSlayerOffline.saveWeatherDisk(lat, lon, dateStr, data);
-        } catch (eW) {}
         delete weatherInflight[cacheKey];
         return data;
       }).catch(function(err) {
         delete weatherInflight[cacheKey];
-        // Offline / failed: use last saved weather for this spot+date
-        try {
-          if (window.RegSlayerOffline) {
-            var disk = RegSlayerOffline.loadWeatherDisk(lat, lon, dateStr);
-            if (disk) {
-              disk.isHistorical = daysAhead < 0;
-              disk.isCurrent = daysAhead === 0;
-              weatherCache = { key: cacheKey, data: disk, timestamp: Date.now() };
-              return disk;
-            }
-          }
-        } catch (eD) {}
         throw err;
       });
       return weatherInflight[cacheKey];
@@ -17160,6 +18606,26 @@
         }
       } catch (eRe) {}
       syncSettingsUiFromState();
+      try {
+        if (window.RegSlayerCloud && window.RegSlayerCloud.getViewState) {
+          var vs = window.RegSlayerCloud.getViewState();
+          var modeLabel = document.getElementById('set-map-mode-label');
+          if (modeLabel) {
+            if (vs.mode === 'shared') modeLabel.textContent = 'Viewing: ' + (vs.sharedMapName || 'Shared') + ' (' + (vs.sharedMapCode || '') + ')';
+            else modeLabel.textContent = 'Viewing: My Map (personal)';
+          }
+          var chip = document.getElementById('auth-user-chip');
+          var prof = window.RegSlayerCloud.getProfile && window.RegSlayerCloud.getProfile();
+          if (chip) chip.textContent = prof && prof.username ? ('@' + prof.username) : 'Signed in';
+          var off = document.getElementById('set-offline-mode');
+          if (off) off.checked = !!(window.RegSlayerCloud.isOfflineMode && window.RegSlayerCloud.isOfflineMode());
+        }
+        // re-wire list when opening Maps
+        var list = document.getElementById('set-shared-maps-list');
+        if (list && window.RegSlayerCloud) {
+          /* populated by cloud module on chrome update */
+        }
+      } catch (eMaps) {}
       if (tab) switchSettingsTab(tab);
       modal.classList.add('active');
       modal.style.zIndex = '2147483640';
@@ -17183,6 +18649,9 @@
       document.querySelectorAll('.settings-pane').forEach(function(p) {
         p.classList.toggle('active', p.id === 'settings-pane-' + name);
       });
+      if (name === 'maps') {
+        try { window.dispatchEvent(new Event('regslayer-maps-tab')); } catch (eTab) {}
+      }
     }
     window.switchSettingsTab = switchSettingsTab;
 
@@ -17587,6 +19056,14 @@
 
     // ========== INIT (calendar first; map/Leaflet/USGS deferred until Step 3) ==========
     window.onload = function() {
+      // Suppress auto-scroll / map-lock fighting user for first few seconds (mobile launch)
+      _appBootQuietUntil = Date.now() + 4500;
+      // v5.1 auth bootstrap (session restore or gate)
+      try {
+        if (window.RegSlayerCloud && typeof window.RegSlayerCloud.bootstrapAuth === 'function') {
+          window.RegSlayerCloud.bootstrapAuth();
+        }
+      } catch (eAuth) { console.warn(eAuth); }
       // Phone vs desktop layout (also runs early in <head>; re-apply with body ready)
       applyDeviceLayout(true);
       // Wind (desktop) vs device compass (phone) top dial default
@@ -17599,22 +19076,17 @@
       if (typeof updateBottomBarContext === 'function') updateBottomBarContext();
       if (typeof updateSortByButtonLabel === 'function') updateSortByButtonLabel();
       if (typeof applyPlannerStepsMinState === 'function') applyPlannerStepsMinState();
-      // Phone: second pass after fonts/layout so calendar + map fill width on launch
+      // Phone: one coalesced second pass after fonts/layout (avoid thrashing scroll height)
       requestAnimationFrame(function() {
         syncPlannerCalendarSquare();
         fitPhoneMapSize();
         if (typeof fitDesktopMapHeight === 'function') fitDesktopMapHeight();
-        requestAnimationFrame(function() {
-          syncPlannerCalendarSquare();
-          fitPhoneMapSize();
-          if (typeof fitDesktopMapHeight === 'function') fitDesktopMapHeight();
-        });
       });
       setTimeout(function() {
         syncPlannerCalendarSquare();
         fitPhoneMapSize();
         if (typeof fitDesktopMapHeight === 'function') fitDesktopMapHeight();
-      }, 200);
+      }, 280);
       setLand('Public');
       updateDistStatus();
       // Color pickers (shape/line/pin) — presets + wheel tab + recent customs
@@ -17628,15 +19100,17 @@
       var _desktopMapScrollTimer = null;
       function onViewportChange() {
         clearTimeout(_plannerResizeTimer);
+        // Longer debounce during boot so iOS address-bar visualViewport thrash doesn't jank scroll
+        var delay = (typeof isAppBootQuiet === 'function' && isAppBootQuiet()) ? 320 : 140;
         _plannerResizeTimer = setTimeout(function() {
-          applyDeviceLayout(true);
+          applyDeviceLayout(false);
           syncPlannerCalendarSquare();
           fitPhoneMapSize();
           if (typeof fitDesktopMapHeight === 'function') fitDesktopMapHeight();
           if (map) {
-            try { map.invalidateSize(true); } catch (e) {}
+            try { map.invalidateSize(false); } catch (e) {}
           }
-        }, 140);
+        }, delay);
       }
       window.addEventListener('resize', onViewportChange);
       // Sticky map: re-measure available height as the page scrolls (desktop only)
@@ -17692,7 +19166,7 @@
           applyDisplayVisibility();
         } catch (eSet) { console.warn(eSet); }
       }, 400);
-      // Prefetch GPS without loading the map stack
+      // Prefetch GPS without loading the map stack (quiet — no scroll jumps on mobile)
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(pos) {
           userLat = pos.coords.latitude; userLng = pos.coords.longitude;
@@ -17706,7 +19180,8 @@
           usingCurrentLocation = true;
           isShowingCurrentData = true;
           isHistorical = false;
-          selectDateStep(selectedDate.getDate());
+          // Quiet: update selection/weather without page scroll or map-in-view fighting
+          selectDateStep(selectedDate.getDate(), { skipScroll: true, quiet: true });
           var dateStr = selectedDate.toISOString().split('T')[0];
           var tid = detected.zone==='A' ? 10 : 11;
           var rule = rules.find(function(r) { return r.locId==tid && dateStr>=r.start && dateStr<=r.end; }) || { weapon:'General', target:'Statewide Rules', limit:'Statewide Limit', notes:'Check regulations.' };
@@ -17718,47 +19193,1254 @@
         }, { maximumAge: 60000, timeout: 8000, enableHighAccuracy: false });
       } else initializeFallback(32.7794, -86.8287);
     };
-
-    // ----- TestOffline: settings helpers for map packs -----
-    window.refreshOfflinePacksSummary = function() {
-      var el = document.getElementById('offline-packs-summary');
-      if (!el) return;
-      var packs = (window.RegSlayerOffline && RegSlayerOffline.getPacks)
-        ? RegSlayerOffline.getPacks()
-        : [];
-      var areas = [];
-      try { areas = loadCustomAreasFromStorage() || []; } catch (eA) {}
-      var pins = [];
-      try { pins = JSON.parse(localStorage.getItem('alabama_hunt_custom_pins') || '[]'); } catch (eP) {}
-      var ready = packs.filter(function(p) { return p.status === 'ready'; }).length;
-      var down = packs.filter(function(p) { return p.status === 'downloading'; }).length;
-      el.textContent =
-        'Connection: ' + (navigator.onLine ? 'online' : 'OFFLINE') +
-        ' · Offline map packs: ' + ready + ' ready' + (down ? (', ' + down + ' downloading') : '') +
-        ' · Custom draw areas on device: ' + areas.length +
-        ' · Pins on device: ' + pins.length +
-        ' · Public lands cache + shape data stay in browser storage (not cookies).';
-    };
-    window.clearOfflineMapPacks = function() {
-      if (!confirm('Clear all downloaded offline map tiles from this browser?\n\nPins, stands, custom areas, and hunt history are NOT deleted.')) return;
-      var p = (window.RegSlayerOffline && RegSlayerOffline.clearAllOfflineTiles)
-        ? RegSlayerOffline.clearAllOfflineTiles()
-        : Promise.resolve();
-      Promise.resolve(p).then(function() {
-        if (typeof showAppCopyToast === 'function') {
-          showAppCopyToast('<span class="act">Offline map tiles cleared</span>');
-        }
-        window.refreshOfflinePacksSummary();
-      });
-    };
-    // Refresh summary when settings open
-    var _openSettingsModalOrig = typeof openSettingsModal === 'function' ? openSettingsModal : null;
-    if (_openSettingsModalOrig) {
-      window.openSettingsModal = function(tab) {
-        _openSettingsModalOrig(tab);
-        setTimeout(function() { window.refreshOfflinePacksSummary(); }, 50);
-      };
-    }
   </script>
+<script>
+/* REG SLAYER — multi private maps, party presence, share-to-map (extends RegSlayerCloud) */
+(function () {
+  'use strict';
+  if (!window.RegSlayerCloud) {
+    console.warn('RegSlayerCloud missing — party maps extension skipped');
+    return;
+  }
+
+  var C = window.RegSlayerCloud;
+  var PRESENCE_KEY = 'reg_slayer_sharing_loc_v1';
+  var ARROW_KEY = 'reg_slayer_my_arrow_color_v1';
+  var HIDDEN_MEMBERS_KEY = 'reg_slayer_hidden_party_content_v1';
+  var MOVE_M = 12; // meters = "moving"
+  var STILL_MS = 15 * 60 * 1000;
+  var MOVE_MS = 10 * 1000;
+  var MAX_SHARE_MS = 60 * 60 * 1000;
+
+  var presenceTimer = null;
+  var presenceWatch = null;
+  var sharing = false;
+  var shareStartedAt = 0;
+  var lastSent = { lat: null, lng: null, at: 0 };
+  var partyLayer = null;
+  var partyMarkers = {};
+  var myArrowColor = '#e11d1d';
+  var partyPrefs = {}; // memberId -> { nickname, arrow_color, show_content }
+  var hiddenContentOwners = {}; // userId -> true means HIDE their content
+
+  try {
+    var ac = localStorage.getItem(ARROW_KEY);
+    if (ac) myArrowColor = ac;
+  } catch (e) {}
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function getSb() {
+    return C._sb || (window.supabase && C.getClient && C.getClient());
+  }
+
+  // Expose helpers the original module doesn't
+  // Patch: we reach into original by re-wrapping public API after boot
+  function ensurePartyLayer() {
+    if (!window.map || typeof L === 'undefined') return null;
+    if (!partyLayer) {
+      partyLayer = L.layerGroup().addTo(window.map);
+    }
+    return partyLayer;
+  }
+
+  function haversineM(aLat, aLng, bLat, bLng) {
+    var R = 6371000;
+    var toR = Math.PI / 180;
+    var dLat = (bLat - aLat) * toR;
+    var dLng = (bLng - aLng) * toR;
+    var x = Math.sin(dLat / 2);
+    var y = Math.sin(dLng / 2);
+    var h = x * x + Math.cos(aLat * toR) * Math.cos(bLat * toR) * y * y;
+    return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+  }
+
+  function buildPartyArrowIcon(color, label, heading) {
+    var rot = heading != null && !isNaN(heading) ? (((Number(heading) % 360) + 360) % 360) : 0;
+    var c = color || '#2563eb';
+    var w = 22, h = 30;
+    var name = esc((label || '').slice(0, 16));
+    var html =
+      '<div style="display:flex;flex-direction:column;align-items:center;pointer-events:auto;">' +
+        '<div style="font-size:10px;font-weight:800;color:#fff;text-shadow:0 0 3px #000,0 1px 2px #000;background:rgba(0,0,0,.55);padding:1px 5px;border-radius:4px;margin-bottom:2px;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + name + '</div>' +
+        '<div style="width:' + w + 'px;height:' + h + 'px;transform:rotate(' + rot.toFixed(1) + 'deg);transform-origin:center center;">' +
+          '<svg viewBox="0 0 24 32" width="' + w + '" height="' + h + '">' +
+            '<path d="M12 1.5 L22.5 29.5 L12 23.2 L1.5 29.5 Z" fill="' + c + '" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/>' +
+          '</svg>' +
+        '</div>' +
+      '</div>';
+    return L.divIcon({
+      className: 'party-presence-icon',
+      html: html,
+      iconSize: [96, 52],
+      iconAnchor: [48, 40]
+    });
+  }
+
+  function formatAgo(iso) {
+    if (!iso) return 'unknown';
+    var t = new Date(iso).getTime();
+    if (isNaN(t)) return 'unknown';
+    var s = Math.max(0, Math.floor((Date.now() - t) / 1000));
+    if (s < 60) return s + 's ago';
+    if (s < 3600) return Math.floor(s / 60) + 'm ago';
+    return Math.floor(s / 3600) + 'h ago';
+  }
+
+  async function loadPartyPrefs(mapId) {
+    partyPrefs = {};
+    var sb = window.__rsSb;
+    var user = window.__rsUser;
+    if (!sb || !user || !mapId) return;
+    try {
+      var { data } = await sb.from('party_member_prefs')
+        .select('member_user_id, nickname, arrow_color, show_content')
+        .eq('map_id', mapId)
+        .eq('owner_user_id', user.id);
+      (data || []).forEach(function (r) {
+        partyPrefs[r.member_user_id] = r;
+      });
+    } catch (e) {}
+    try {
+      hiddenContentOwners = JSON.parse(localStorage.getItem(HIDDEN_MEMBERS_KEY + ':' + mapId) || '{}');
+    } catch (e2) { hiddenContentOwners = {}; }
+  }
+
+  async function savePartyPref(memberId, fields) {
+    var sb = window.__rsSb;
+    var user = window.__rsUser;
+    var vs = C.getViewState && C.getViewState();
+    if (!sb || !user || !vs || vs.mode !== 'shared' || !vs.sharedMapId) return;
+    var row = Object.assign({
+      map_id: vs.sharedMapId,
+      owner_user_id: user.id,
+      member_user_id: memberId,
+      updated_at: new Date().toISOString()
+    }, fields);
+    await sb.from('party_member_prefs').upsert(row);
+    partyPrefs[memberId] = Object.assign({}, partyPrefs[memberId] || {}, fields);
+  }
+
+  function memberLabel(m) {
+    var pref = partyPrefs[m.user_id];
+    if (pref && pref.nickname) return pref.nickname;
+    return m.display_name || m.username || 'Hunter';
+  }
+
+  function memberColor(m) {
+    var pref = partyPrefs[m.user_id];
+    if (pref && pref.arrow_color) return pref.arrow_color;
+    return m.arrow_color || '#2563eb';
+  }
+
+  async function pullPresence() {
+    var vs = C.getViewState && C.getViewState();
+    var sb = window.__rsSb;
+    var user = window.__rsUser;
+    if (!vs || vs.mode !== 'shared' || !vs.sharedMapId || !sb || !window.map) {
+      clearPartyMarkers();
+      return;
+    }
+    var layer = ensurePartyLayer();
+    if (!layer) return;
+    try {
+      var { data } = await sb.from('party_presence')
+        .select('user_id, is_sharing, lat, lng, heading, updated_at, started_at')
+        .eq('map_id', vs.sharedMapId)
+        .eq('is_sharing', true);
+      var members = window.__rsPartyMembers || [];
+      var byId = {};
+      members.forEach(function (m) { byId[m.user_id] = m; });
+      var seen = {};
+      (data || []).forEach(function (row) {
+        if (!row.is_sharing || row.lat == null || row.lng == null) return;
+        // Hide self from party layer (own GPS marker is separate)
+        if (user && row.user_id === user.id) return;
+        // Stale > 20 min hide
+        var age = Date.now() - new Date(row.updated_at).getTime();
+        if (age > 20 * 60 * 1000) return;
+        seen[row.user_id] = true;
+        var m = byId[row.user_id] || { user_id: row.user_id, username: 'Hunter', display_name: 'Hunter' };
+        var label = memberLabel(m);
+        var color = memberColor(m);
+        var icon = buildPartyArrowIcon(color, label, row.heading);
+        var popup = '<strong>' + esc(label) + '</strong><br>Last updated: ' + esc(formatAgo(row.updated_at));
+        if (partyMarkers[row.user_id]) {
+          partyMarkers[row.user_id].setLatLng([row.lat, row.lng]);
+          try { partyMarkers[row.user_id].setIcon(icon); } catch (eI) {}
+          partyMarkers[row.user_id].setPopupContent(popup);
+        } else {
+          var mk = L.marker([row.lat, row.lng], { icon: icon, zIndexOffset: 800 }).addTo(layer);
+          mk.bindPopup(popup);
+          partyMarkers[row.user_id] = mk;
+        }
+      });
+      Object.keys(partyMarkers).forEach(function (uid) {
+        if (!seen[uid]) {
+          try { layer.removeLayer(partyMarkers[uid]); } catch (e) {}
+          delete partyMarkers[uid];
+        }
+      });
+    } catch (e) {
+      console.warn('presence pull', e);
+    }
+  }
+
+  function clearPartyMarkers() {
+    if (partyLayer) {
+      try { partyLayer.clearLayers(); } catch (e) {}
+    }
+    partyMarkers = {};
+  }
+
+  async function pushPresence(lat, lng, heading, force) {
+    var vs = C.getViewState && C.getViewState();
+    var sb = window.__rsSb;
+    var user = window.__rsUser;
+    if (!sharing || !vs || vs.mode !== 'shared' || !vs.sharedMapId || !sb || !user) return;
+    if (Date.now() - shareStartedAt > MAX_SHARE_MS) {
+      stopSharing('auto');
+      return;
+    }
+    var now = Date.now();
+    var moved = true;
+    if (lastSent.lat != null) {
+      var d = haversineM(lastSent.lat, lastSent.lng, lat, lng);
+      moved = d >= MOVE_M;
+    }
+    var interval = moved ? MOVE_MS : STILL_MS;
+    if (!force && lastSent.at && (now - lastSent.at) < interval) return;
+
+    try {
+      await sb.from('party_presence').upsert({
+        map_id: vs.sharedMapId,
+        user_id: user.id,
+        is_sharing: true,
+        lat: lat,
+        lng: lng,
+        heading: heading != null ? heading : null,
+        started_at: new Date(shareStartedAt).toISOString(),
+        last_moved_at: moved || !lastSent.at ? new Date().toISOString() : undefined,
+        updated_at: new Date().toISOString()
+      });
+      // fix last_moved_at optional overwrite
+      await sb.from('party_presence').upsert({
+        map_id: vs.sharedMapId,
+        user_id: user.id,
+        is_sharing: true,
+        lat: lat,
+        lng: lng,
+        heading: heading != null ? heading : null,
+        started_at: new Date(shareStartedAt).toISOString(),
+        last_moved_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      });
+      lastSent = { lat: lat, lng: lng, at: now };
+    } catch (e) {
+      console.warn('presence push', e);
+    }
+  }
+
+  function startSharing() {
+    var vs = C.getViewState && C.getViewState();
+    if (!vs || vs.mode !== 'shared') {
+      alert('Share location only works on a shared map. Open a shared map first.');
+      return;
+    }
+    if (!navigator.geolocation) {
+      alert('Geolocation not available on this device.');
+      return;
+    }
+    sharing = true;
+    shareStartedAt = Date.now();
+    lastSent = { lat: null, lng: null, at: 0 };
+    try { localStorage.setItem(PRESENCE_KEY, JSON.stringify({ on: true, started: shareStartedAt, mapId: vs.sharedMapId })); } catch (e) {}
+    updateShareLocBtn();
+    if (presenceWatch != null) {
+      try { navigator.geolocation.clearWatch(presenceWatch); } catch (e2) {}
+    }
+    presenceWatch = navigator.geolocation.watchPosition(function (pos) {
+      var lat = pos.coords.latitude, lng = pos.coords.longitude;
+      var heading = pos.coords.heading;
+      if (heading == null || isNaN(heading)) {
+        try { if (typeof deviceHeadingDeg !== 'undefined') heading = deviceHeadingDeg; } catch (eH) {}
+      }
+      pushPresence(lat, lng, heading, false);
+    }, function (err) {
+      console.warn(err);
+    }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 });
+
+    if (presenceTimer) clearInterval(presenceTimer);
+    presenceTimer = setInterval(function () {
+      if (!sharing) return;
+      if (Date.now() - shareStartedAt > MAX_SHARE_MS) {
+        stopSharing('auto');
+        return;
+      }
+      pullPresence();
+      // still heartbeat if we have last coords
+      if (lastSent.lat != null) {
+        pushPresence(lastSent.lat, lastSent.lng, null, false);
+      }
+    }, 10000);
+
+    // immediate fix
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      pushPresence(pos.coords.latitude, pos.coords.longitude, pos.coords.heading, true);
+    }, function () {}, { enableHighAccuracy: true, timeout: 10000 });
+    pullPresence();
+  }
+
+  async function stopSharing(reason) {
+    sharing = false;
+    try { localStorage.removeItem(PRESENCE_KEY); } catch (e) {}
+    if (presenceWatch != null) {
+      try { navigator.geolocation.clearWatch(presenceWatch); } catch (e2) {}
+      presenceWatch = null;
+    }
+    if (presenceTimer) { clearInterval(presenceTimer); presenceTimer = null; }
+    updateShareLocBtn();
+    var vs = C.getViewState && C.getViewState();
+    var sb = window.__rsSb;
+    var user = window.__rsUser;
+    if (sb && user && vs && vs.sharedMapId) {
+      try {
+        await sb.from('party_presence').upsert({
+          map_id: vs.sharedMapId,
+          user_id: user.id,
+          is_sharing: false,
+          updated_at: new Date().toISOString()
+        });
+      } catch (e3) {}
+    }
+    if (reason === 'auto') {
+      try { showAppCopyToast && showAppCopyToast('<span class="act">Location sharing ended</span><br>Auto-off after 1 hour.'); } catch (e4) {}
+    }
+  }
+
+  function toggleSharing() {
+    if (sharing) stopSharing();
+    else startSharing();
+  }
+
+  function updateShareLocBtn() {
+    var btn = $('share-loc-btn');
+    if (!btn) return;
+    btn.classList.toggle('is-sharing', !!sharing);
+    btn.setAttribute('aria-pressed', sharing ? 'true' : 'false');
+    btn.title = sharing ? 'Sharing location with party (tap to stop)' : 'Share current location with party';
+  }
+
+  // ---- List maps / UI ----
+  async function listPrivateMaps() {
+    var sb = window.__rsSb;
+    if (!sb) return [];
+    var { data, error } = await sb.rpc('list_my_private_maps');
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function listMembers() {
+    var vs = C.getViewState && C.getViewState();
+    var sb = window.__rsSb;
+    if (!vs || vs.mode !== 'shared' || !vs.sharedMapId || !sb) {
+      window.__rsPartyMembers = [];
+      return [];
+    }
+    var { data, error } = await sb.rpc('list_shared_map_members', { p_map_id: vs.sharedMapId });
+    if (error) throw error;
+    window.__rsPartyMembers = data || [];
+    return window.__rsPartyMembers;
+  }
+
+  function showSimpleModal(title, bodyHtml, buttons) {
+    var existing = $('rs-simple-modal');
+    if (existing) existing.remove();
+    var wrap = document.createElement('div');
+    wrap.id = 'rs-simple-modal';
+    wrap.className = 'rs-simple-modal active';
+    wrap.onclick = function (e) { if (e.target === wrap) wrap.remove(); };
+    var card = document.createElement('div');
+    card.className = 'rs-simple-card';
+    card.onclick = function (e) { e.stopPropagation(); };
+    card.innerHTML = '<h3>' + esc(title) + '</h3><div class="rs-simple-body">' + bodyHtml + '</div><div class="rs-simple-actions" id="rs-simple-actions"></div>';
+    wrap.appendChild(card);
+    document.body.appendChild(wrap);
+    var act = card.querySelector('#rs-simple-actions');
+    (buttons || []).forEach(function (b) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'settings-subbtn' + (b.primary ? ' rs-btn-primary' : '');
+      btn.textContent = b.label;
+      btn.onclick = function () {
+        if (b.close !== false) wrap.remove();
+        if (b.onClick) b.onClick();
+      };
+      act.appendChild(btn);
+    });
+    return wrap;
+  }
+
+  async function openSharedMapActions(mapRow) {
+    showSimpleModal(mapRow.name || 'Shared map',
+      '<p class="settings-hint">Code: <strong>' + esc(mapRow.code) + '</strong></p>',
+      [
+        {
+          label: 'View this map',
+          primary: true,
+          onClick: function () {
+            C.switchToShared(mapRow.id).then(function () {
+              refreshMapsUi();
+              pullPresence();
+            }).catch(function (e) { alert(e.message || e); });
+          }
+        },
+        {
+          label: 'Share this map',
+          onClick: function () {
+            var text = 'Join my HuntSlayer map!\nMap: ' + (mapRow.name || '') + '\nCode: ' + mapRow.code +
+              '\nhttps://regslayer.com/?join=' + mapRow.code;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(text).then(function () {
+                alert('Copied:\n' + text);
+              }).catch(function () { window.prompt('Copy:', text); });
+            } else window.prompt('Copy:', text);
+          }
+        },
+        { label: 'Cancel' }
+      ]
+    );
+  }
+
+  async function openPrivateMapActions(mapRow) {
+    showSimpleModal(mapRow.name || 'Private map',
+      '<p class="settings-hint">Private — only you. Rename or open.</p>',
+      [
+        {
+          label: 'View this map',
+          primary: true,
+          onClick: function () {
+            switchToPrivate(mapRow.id).catch(function (e) { alert(e.message || e); });
+          }
+        },
+        {
+          label: 'Rename map',
+          onClick: function () {
+            var n = prompt('New name:', mapRow.name || '');
+            if (!n || !n.trim()) return;
+            renamePrivate(mapRow.id, n.trim()).then(refreshMapsUi).catch(function (e) { alert(e.message || e); });
+          }
+        },
+        { label: 'Cancel' }
+      ]
+    );
+  }
+
+  async function switchToPrivate(mapId) {
+    var sb = window.__rsSb;
+    if (!sb) throw new Error('Not ready');
+    // save current
+    if (C.forcePush) C.forcePush();
+    await new Promise(function (r) { setTimeout(r, 100); });
+    if (C.markDirty) { /* snapshot via collect happens in push */ }
+
+    // Use original snapshot/cache path via internal hooks we expose
+    if (typeof C._switchToPrivate === 'function') {
+      return C._switchToPrivate(mapId);
+    }
+    // Fallback: set view + pull
+    var { data, error } = await sb.from('private_maps').select('id, name, map_state, map_revision').eq('id', mapId).maybeSingle();
+    if (error || !data) throw error || new Error('Map not found');
+    var vs = C.getViewState();
+    vs.mode = 'private';
+    vs.privateMapId = data.id;
+    vs.privateMapName = data.name;
+    vs.sharedMapId = null;
+    vs.sharedMapName = '';
+    vs.sharedMapCode = '';
+    // personal alias
+    if (vs.mode === 'private') { /* ok */ }
+    try {
+      localStorage.setItem('reg_slayer_view_v1', JSON.stringify(vs));
+    } catch (e) {}
+    // apply state
+    if (window.applyMapStateFromCloud) {
+      window.applyMapStateFromCloud(data.map_state || {});
+    } else if (typeof C._applyRemoteState === 'function') {
+      C._applyRemoteState(data.map_state, data.map_revision);
+    }
+    // Write local keys via refresh helper
+    try {
+      var st = data.map_state || {};
+      localStorage.setItem('alabama_hunt_custom_pins', JSON.stringify(st.pins || []));
+      localStorage.setItem('alabama_hunt_historical_hunts', JSON.stringify(st.hunts || []));
+      localStorage.setItem('alabama_hunt_custom_areas_v1', JSON.stringify(st.customAreas || []));
+      localStorage.setItem('alabama_hunt_measured_paths_v1', JSON.stringify(st.measuredPaths || []));
+      localStorage.setItem('alabama_hunt_user_stands_v1', JSON.stringify(st.stands || {}));
+      localStorage.setItem('alabama_hunt_hidden_locations_v1', JSON.stringify(st.hiddenLocs || []));
+      if (window.regSlayerRefreshMapData) window.regSlayerRefreshMapData();
+    } catch (e2) {}
+    clearPartyMarkers();
+    stopSharing();
+    updateBrandName();
+    refreshMapsUi();
+    if (C.persistViewPrefsCloud) { /* optional */ }
+  }
+
+  async function renamePrivate(id, name) {
+    var sb = window.__rsSb;
+    var { data, error } = await sb.rpc('rename_private_map', { p_id: id, p_name: name });
+    if (error) throw error;
+    var vs = C.getViewState();
+    if (vs && vs.privateMapId === id) {
+      vs.privateMapName = data.name;
+      try { localStorage.setItem('reg_slayer_view_v1', JSON.stringify(vs)); } catch (e) {}
+      updateBrandName();
+    }
+    return data;
+  }
+
+  async function createPrivateMap(name) {
+    var sb = window.__rsSb;
+    var { data, error } = await sb.rpc('create_private_map', { p_name: name });
+    if (error) throw error;
+    await switchToPrivate(data.id);
+    return data;
+  }
+
+  function updateBrandName() {
+    var vs = C.getViewState && C.getViewState();
+    var el = $('brand-map-name');
+    if (!el || !vs) return;
+    if (vs.mode === 'shared') {
+      el.textContent = vs.sharedMapName || 'Shared';
+      el.title = 'Shared map · ' + (vs.sharedMapCode || '');
+    } else {
+      el.textContent = vs.privateMapName || vs.sharedMapName || 'My Map';
+      el.title = 'Private map';
+    }
+  }
+
+  async function refreshMapsUi() {
+    updateBrandName();
+    updateShareLocBtn();
+    var privBox = $('set-private-maps-list');
+    var sharedBox = $('set-shared-maps-list');
+    var partyBox = $('set-party-members');
+    var partySec = $('set-party-section');
+    var modeLabel = $('set-map-mode-label');
+    var vs = C.getViewState && C.getViewState();
+    if (modeLabel && vs) {
+      if (vs.mode === 'shared') {
+        modeLabel.textContent = 'Viewing: ' + (vs.sharedMapName || 'Shared') + ' (' + (vs.sharedMapCode || '') + ')';
+      } else {
+        modeLabel.textContent = 'Viewing: ' + (vs.privateMapName || 'My Map') + ' (private)';
+      }
+    }
+
+    if (privBox) {
+      try {
+        var pmaps = await listPrivateMaps();
+        if (!pmaps.length) privBox.innerHTML = '<p class="settings-hint">No private maps yet.</p>';
+        else {
+          privBox.innerHTML = pmaps.map(function (m) {
+            var active = vs && (vs.mode === 'private' || vs.mode === 'personal') && vs.privateMapId === m.id;
+            return '<div class="settings-map-row' + (active ? ' is-active' : '') + '">' +
+              '<button type="button" class="settings-subbtn settings-map-open" data-pid="' + m.id + '">' +
+              esc(m.name) + (m.is_default ? ' · default' : '') + '</button></div>';
+          }).join('');
+          privBox.querySelectorAll('[data-pid]').forEach(function (btn) {
+            btn.onclick = function () {
+              var id = btn.getAttribute('data-pid');
+              var row = pmaps.find(function (x) { return x.id === id; });
+              openPrivateMapActions(row || { id: id, name: btn.textContent });
+            };
+          });
+        }
+      } catch (e) {
+        privBox.innerHTML = '<p class="settings-hint">Could not load private maps.</p>';
+      }
+    }
+
+    if (sharedBox && C.listMySharedMaps) {
+      try {
+        var maps = await (C.listMySharedMaps ? C.listMySharedMaps() : []);
+        // Prefer RPC via original — if not exposed, call rpc
+        if (!maps || !maps.length) {
+          var sb = window.__rsSb;
+          if (sb) {
+            var r = await sb.rpc('list_my_shared_maps');
+            maps = r.data || [];
+          }
+        }
+        if (!maps.length) sharedBox.innerHTML = '<p class="settings-hint">No shared maps yet.</p>';
+        else {
+          sharedBox.innerHTML = maps.map(function (m) {
+            var active = vs && vs.mode === 'shared' && vs.sharedMapId === m.id;
+            return '<div class="settings-map-row' + (active ? ' is-active' : '') + '">' +
+              '<button type="button" class="settings-subbtn settings-map-open" data-sid="' + m.id + '">' +
+              esc(m.name) + ' <span class="settings-map-code">' + esc(m.code) + '</span></button></div>';
+          }).join('');
+          sharedBox.querySelectorAll('[data-sid]').forEach(function (btn) {
+            btn.onclick = function () {
+              var id = btn.getAttribute('data-sid');
+              var row = maps.find(function (x) { return x.id === id; });
+              openSharedMapActions(row || { id: id, name: 'Map', code: '' });
+            };
+          });
+        }
+      } catch (e2) {
+        sharedBox.innerHTML = '<p class="settings-hint">Could not load shared maps.</p>';
+      }
+    }
+
+    if (partySec && partyBox) {
+      if (vs && vs.mode === 'shared' && vs.sharedMapId) {
+        partySec.style.display = '';
+        await loadPartyPrefs(vs.sharedMapId);
+        try {
+          var members = await listMembers();
+          var user = window.__rsUser;
+          if (!members.length) partyBox.innerHTML = '<p class="settings-hint">Only you on this map so far.</p>';
+          else {
+            partyBox.innerHTML = members.map(function (m) {
+              var pref = partyPrefs[m.user_id] || {};
+              var nick = pref.nickname || '';
+              var col = pref.arrow_color || m.arrow_color || '#2563eb';
+              var show = pref.show_content !== false && !hiddenContentOwners[m.user_id];
+              var self = user && m.user_id === user.id;
+              return '<div class="party-member-row" data-uid="' + m.user_id + '">' +
+                '<div class="party-member-head">' +
+                  '<span class="party-dot" style="background:' + esc(col) + '"></span>' +
+                  '<strong>' + esc(memberLabel(m)) + '</strong>' +
+                  (self ? ' <span class="settings-hint">(you)</span>' : '') +
+                  (m.is_host ? ' · host' : '') +
+                '</div>' +
+                (!self ? (
+                  '<label class="settings-row"><input type="checkbox" class="party-show-content" ' + (show ? 'checked' : '') + '>' +
+                  '<span class="sr-text">Show their pins/areas on map</span></label>' +
+                  '<div class="settings-inline-row"><input type="text" class="party-nick" placeholder="Nickname" value="' + esc(nick) + '">' +
+                  '<input type="color" class="party-color" value="' + esc(col) + '" title="Arrow color" style="width:44px;height:36px;padding:0;border:none;">' +
+                  '<button type="button" class="party-save">Save</button></div>'
+                ) : '') +
+              '</div>';
+            }).join('');
+            partyBox.querySelectorAll('.party-member-row').forEach(function (row) {
+              var uid = row.getAttribute('data-uid');
+              var save = row.querySelector('.party-save');
+              if (save) save.onclick = function () {
+                var nick = (row.querySelector('.party-nick') || {}).value || '';
+                var col = (row.querySelector('.party-color') || {}).value || '#2563eb';
+                savePartyPref(uid, { nickname: nick.trim() || null, arrow_color: col }).then(function () {
+                  pullPresence();
+                  refreshMapsUi();
+                });
+              };
+              var chk = row.querySelector('.party-show-content');
+              if (chk) chk.onchange = function () {
+                if (!chk.checked) hiddenContentOwners[uid] = true;
+                else delete hiddenContentOwners[uid];
+                try {
+                  localStorage.setItem(HIDDEN_MEMBERS_KEY + ':' + vs.sharedMapId, JSON.stringify(hiddenContentOwners));
+                } catch (e) {}
+                savePartyPref(uid, { show_content: !!chk.checked });
+                applyContentOwnerFilter();
+              };
+            });
+          }
+        } catch (e3) {
+          partyBox.innerHTML = '<p class="settings-hint">Could not load party.</p>';
+        }
+        // presence pull when settings open
+        pullPresence();
+      } else {
+        partySec.style.display = 'none';
+        partyBox.innerHTML = '';
+        clearPartyMarkers();
+      }
+    }
+
+    // overlay party section
+    renderOverlayParty();
+  }
+
+  function applyContentOwnerFilter() {
+    // Filter pins/areas/hunts by ownerId when drawing — set flag for draw hooks
+    window.__rsHiddenContentOwners = hiddenContentOwners;
+    try {
+      if (typeof drawPinsOnMap === 'function') drawPinsOnMap();
+      if (typeof drawHuntsOnMap === 'function') drawHuntsOnMap();
+      if (typeof drawCustomAreasOnMap === 'function') drawCustomAreasOnMap();
+    } catch (e) {}
+  }
+
+  function renderOverlayParty() {
+    var box = $('ml-party-list');
+    var fold = $('ml-fold-body-party');
+    var vs = C.getViewState && C.getViewState();
+    if (!box) return;
+    if (!vs || vs.mode !== 'shared') {
+      box.innerHTML = '<p class="settings-hint" style="font-size:11px;">Open a shared map to see party members.</p>';
+      return;
+    }
+    var members = window.__rsPartyMembers || [];
+    if (!members.length) {
+      box.innerHTML = '<p class="settings-hint" style="font-size:11px;">Loading party…</p>';
+      listMembers().then(function () { renderOverlayParty(); refreshMapsUi(); });
+      return;
+    }
+    box.innerHTML = members.map(function (m) {
+      var show = !hiddenContentOwners[m.user_id];
+      return '<label class="ml-option"><input type="checkbox" data-party-uid="' + m.user_id + '" ' + (show ? 'checked' : '') + '>' +
+        '<span class="ml-opt-text">' + esc(memberLabel(m)) + ' <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + esc(memberColor(m)) + ';vertical-align:middle;"></span></span></label>';
+    }).join('') +
+      '<p class="settings-hint" style="font-size:10px;margin:6px 0 0;">Uncheck hides their pins/areas. Live location always shows while they share.</p>';
+    box.querySelectorAll('[data-party-uid]').forEach(function (inp) {
+      inp.onchange = function () {
+        var uid = inp.getAttribute('data-party-uid');
+        if (!inp.checked) hiddenContentOwners[uid] = true;
+        else delete hiddenContentOwners[uid];
+        try {
+          localStorage.setItem(HIDDEN_MEMBERS_KEY + ':' + vs.sharedMapId, JSON.stringify(hiddenContentOwners));
+        } catch (e) {}
+        applyContentOwnerFilter();
+      };
+    });
+  }
+
+  // ---- Share entity to another map ----
+  async function listAllTargetMaps() {
+    var out = [];
+    try {
+      var p = await listPrivateMaps();
+      p.forEach(function (m) { out.push({ kind: 'private', id: m.id, name: m.name + ' (private)' }); });
+    } catch (e) {}
+    try {
+      var sb = window.__rsSb;
+      var r = await sb.rpc('list_my_shared_maps');
+      (r.data || []).forEach(function (m) { out.push({ kind: 'shared', id: m.id, name: m.name + ' · ' + m.code, code: m.code }); });
+    } catch (e2) {}
+    var vs = C.getViewState && C.getViewState();
+    // exclude current
+    return out.filter(function (m) {
+      if (!vs) return true;
+      if (vs.mode === 'shared' && m.kind === 'shared' && m.id === vs.sharedMapId) return false;
+      if ((vs.mode === 'private' || vs.mode === 'personal') && m.kind === 'private' && m.id === vs.privateMapId) return false;
+      return true;
+    });
+  }
+
+  async function getMapStateRow(kind, id) {
+    var sb = window.__rsSb;
+    if (kind === 'private') {
+      var { data, error } = await sb.from('private_maps').select('map_state, map_revision').eq('id', id).maybeSingle();
+      if (error) throw error;
+      return data;
+    }
+    var r = await sb.from('shared_maps').select('map_state, map_revision').eq('id', id).maybeSingle();
+    if (r.error) throw r.error;
+    return r.data;
+  }
+
+  async function putMapStateRow(kind, id, state, rev) {
+    var sb = window.__rsSb;
+    if (kind === 'private') {
+      var { error } = await sb.from('private_maps').update({
+        map_state: state,
+        map_revision: rev,
+        updated_at: new Date().toISOString()
+      }).eq('id', id);
+      if (error) throw error;
+      return;
+    }
+    var r = await sb.from('shared_maps').update({
+      map_state: state,
+      map_revision: rev,
+      updated_at: new Date().toISOString()
+    }).eq('id', id);
+    if (r.error) throw r.error;
+  }
+
+  function stampOwner(entity) {
+    var user = window.__rsUser;
+    var prof = C.getProfile && C.getProfile();
+    if (!entity || !user) return entity;
+    entity.ownerId = user.id;
+    entity.ownerName = (prof && prof.username) || 'me';
+    entity.updatedAt = new Date().toISOString();
+    return entity;
+  }
+
+  async function copyEntityToMap(entity, entityType, target) {
+    var row = await getMapStateRow(target.kind, target.id);
+    var state = (row && row.map_state) || {};
+    state.pins = state.pins || [];
+    state.hunts = state.hunts || [];
+    state.customAreas = state.customAreas || [];
+    state.measuredPaths = state.measuredPaths || [];
+    state.stands = state.stands || {};
+    var copy = JSON.parse(JSON.stringify(entity));
+    copy.id = entityType + '_' + Date.now() + '_' + Math.floor(Math.random() * 9999);
+    stampOwner(copy);
+    if (entityType === 'pin') state.pins.push(copy);
+    else if (entityType === 'hunt') state.hunts.push(copy);
+    else if (entityType === 'area') state.customAreas.push(copy);
+    else if (entityType === 'stand') {
+      // stands keyed by loc — store as pin-like under stands.__shared
+      var key = 'shared';
+      if (!Array.isArray(state.stands[key])) state.stands[key] = [];
+      state.stands[key].push(copy);
+    }
+    var rev = ((row && row.map_revision) || 0) + 1;
+    if (!state.meta) state.meta = {};
+    state.meta.revision = rev;
+    state.meta.savedAt = new Date().toISOString();
+    await putMapStateRow(target.kind, target.id, state, rev);
+  }
+
+  async function openShareToMapFlow(entity, defaultType) {
+    var targets = await listAllTargetMaps();
+    if (!targets.length) {
+      alert('No other maps available. Create another private or shared map first.');
+      return;
+    }
+    var opts = targets.map(function (t, i) {
+      return '<option value="' + i + '">' + esc(t.name) + '</option>';
+    }).join('');
+    showSimpleModal('Share to another map',
+      '<label class="settings-hint">Which map?</label>' +
+      '<select id="rs-share-map-sel" style="width:100%;margin:6px 0 12px;padding:8px;background:#0f140e;color:#e8efe4;border:1px solid #2e3a2a;border-radius:8px;">' + opts + '</select>' +
+      '<label class="settings-hint">Save as</label>' +
+      '<select id="rs-share-type-sel" style="width:100%;margin:6px 0 4px;padding:8px;background:#0f140e;color:#e8efe4;border:1px solid #2e3a2a;border-radius:8px;">' +
+        '<option value="pin"' + (defaultType === 'pin' ? ' selected' : '') + '>Pin</option>' +
+        '<option value="hunt"' + (defaultType === 'hunt' ? ' selected' : '') + '>Hunt</option>' +
+        '<option value="stand"' + (defaultType === 'stand' ? ' selected' : '') + '>Stand</option>' +
+        (entity && entity.ring ? '<option value="area">Area</option>' : '') +
+      '</select>' +
+      '<p class="settings-hint">Keeps color, notes, and other details. Appears on the target map only (stays on this map too).</p>',
+      [
+        {
+          label: 'Share',
+          primary: true,
+          close: false,
+          onClick: function () {
+            var mi = parseInt(($('rs-share-map-sel') || {}).value, 10);
+            var typ = ($('rs-share-type-sel') || {}).value || 'pin';
+            var t = targets[mi];
+            if (!t) return;
+            var ent = entity || {};
+            // build minimal entity if only lat/lng
+            if (!ent.id) {
+              ent = {
+                id: 'tmp',
+                name: ent.name || 'Shared spot',
+                lat: ent.lat,
+                lng: ent.lng,
+                color: ent.color || '#e59a18',
+                notes: ent.notes || '',
+                isPin: typ === 'pin'
+              };
+            }
+            copyEntityToMap(ent, typ, t).then(function () {
+              var modal = $('rs-simple-modal');
+              if (modal) modal.remove();
+              alert('Saved to: ' + t.name);
+            }).catch(function (e) {
+              alert(e.message || String(e));
+            });
+          }
+        },
+        { label: 'Cancel' }
+      ]
+    );
+  }
+
+  function openShareLocationChooser(lat, lng, label, entity) {
+    showSimpleModal('Share location',
+      '<p class="settings-hint">' + esc(label || 'This spot') + '</p>',
+      [
+        {
+          label: 'Share to another map',
+          primary: true,
+          onClick: function () {
+            openShareToMapFlow(entity || { lat: lat, lng: lng, name: label || 'Spot' }, 'pin');
+          }
+        },
+        {
+          label: 'Copy to clipboard',
+          onClick: function () {
+            if (typeof shareLocationLink === 'function') shareLocationLink(lat, lng, label);
+            else if (typeof googleMapsShareUrl === 'function') {
+              var u = googleMapsShareUrl(lat, lng);
+              if (navigator.clipboard) navigator.clipboard.writeText(u);
+              else window.prompt('Copy:', u);
+            }
+          }
+        },
+        { label: 'Cancel' }
+      ]
+    );
+  }
+
+  function openShareMyLocationChooser() {
+    var lat = (typeof userLat !== 'undefined') ? userLat : null;
+    var lng = (typeof userLng !== 'undefined') ? userLng : null;
+    function go(la, lo) {
+      showSimpleModal('Share my location',
+        '<p class="settings-hint">Choose how to share your GPS position.</p>',
+        [
+          {
+            label: 'Share with party',
+            primary: true,
+            onClick: function () {
+              if (!sharing) startSharing();
+              else alert('Already sharing with party. Tap the red Share Location button to stop.');
+            }
+          },
+          {
+            label: 'Copy to clipboard',
+            onClick: function () {
+              if (typeof shareLocationLink === 'function') shareLocationLink(la, lo, 'My location');
+            }
+          },
+          { label: 'Cancel' }
+        ]
+      );
+    }
+    if (lat != null && lng != null) go(lat, lng);
+    else if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function (pos) {
+        go(pos.coords.latitude, pos.coords.longitude);
+      }, function () { alert('Could not get location'); });
+    } else alert('Location unavailable');
+  }
+
+  // Hook map dot share
+  var _origHandleMapDot = window.handleMapDotAction;
+  window.handleMapDotAction = function (act) {
+    if (act === 'share') {
+      openShareLocationChooser(clickLat, clickLng, 'Map spot', { lat: clickLat, lng: clickLng, name: 'Map spot' });
+      return false;
+    }
+    if (typeof _origHandleMapDot === 'function') return _origHandleMapDot(act);
+  };
+
+  var _origShareSaved = window.shareSavedPinLocation;
+  window.shareSavedPinLocation = function (id) {
+    var loc = (typeof locations !== 'undefined') ? locations.find(function (l) { return String(l.id) === String(id); }) : null;
+    if (!loc) {
+      if (_origShareSaved) return _origShareSaved(id);
+      return false;
+    }
+    openShareLocationChooser(loc.lat, loc.lng, loc.name || 'Pin', loc);
+    return false;
+  };
+
+  var _origShareLoc = window.shareLocationLink;
+  // keep original for clipboard path
+
+  // Stamp owner on saves
+  var _origRsChanged = window.regSlayerMapDataChanged;
+  window.regSlayerMapDataChanged = function () {
+    try {
+      // tag newest pin without owner
+      var pins = JSON.parse(localStorage.getItem('alabama_hunt_custom_pins') || '[]');
+      var user = window.__rsUser;
+      var prof = C.getProfile && C.getProfile();
+      var changed = false;
+      pins.forEach(function (p) {
+        if (p && !p.ownerId && user) {
+          p.ownerId = user.id;
+          p.ownerName = (prof && prof.username) || 'me';
+          changed = true;
+        }
+      });
+      if (changed) localStorage.setItem('alabama_hunt_custom_pins', JSON.stringify(pins));
+      var areas = JSON.parse(localStorage.getItem('alabama_hunt_custom_areas_v1') || '[]');
+      var ca = false;
+      areas.forEach(function (a) {
+        if (a && !a.ownerId && user) {
+          a.ownerId = user.id;
+          a.ownerName = (prof && prof.username) || 'me';
+          ca = true;
+        }
+      });
+      if (ca) localStorage.setItem('alabama_hunt_custom_areas_v1', JSON.stringify(areas));
+    } catch (e) {}
+    if (typeof _origRsChanged === 'function') _origRsChanged();
+  };
+
+  // Filter draws by hidden owners
+  var _origDrawPins = null;
+  function installDrawFilters() {
+    if (typeof drawPinsOnMap === 'function' && !drawPinsOnMap._rsWrapped) {
+      _origDrawPins = drawPinsOnMap;
+      window.drawPinsOnMap = function () {
+        var hidden = window.__rsHiddenContentOwners || {};
+        var backup;
+        if (typeof locations !== 'undefined' && Object.keys(hidden).length) {
+          backup = locations.slice();
+          // temporarily filter pins for draw — drawPins filters isPin from locations
+          // We'll filter inside by monkeypatching locations filter
+        }
+        var r = _origDrawPins.apply(this, arguments);
+        return r;
+      };
+      // Simpler: patch after draw clears and re-filter layers — skip, use pre-filter on locations isPin
+      window.drawPinsOnMap = function () {
+        if (!window.map || !window.pinMarkerGroup) return _origDrawPins.apply(this, arguments);
+        var hidden = window.__rsHiddenContentOwners || {};
+        var user = window.__rsUser;
+        pinMarkerGroup.clearLayers();
+        if (typeof locations === 'undefined') return;
+        locations.filter(function (l) {
+          if (!l.isPin) return false;
+          if (l.ownerId && hidden[l.ownerId] && (!user || l.ownerId !== user.id)) return false;
+          return true;
+        }).forEach(function (loc) {
+          // reuse original single-pin draw by temporary call is hard — call original logic
+        });
+        // Fall back to original then remove filtered
+        _origDrawPins.apply(this, arguments);
+        try {
+          pinMarkerGroup.eachLayer(function (layer) {
+            // can't easily map — re-run original only
+          });
+        } catch (e) {}
+      };
+      // Actually keep original drawPinsOnMap and filter at data level before draw:
+      window.drawPinsOnMap = function () {
+        var hidden = window.__rsHiddenContentOwners || {};
+        var user = window.__rsUser;
+        var removed = [];
+        if (typeof locations !== 'undefined' && Object.keys(hidden).length) {
+          for (var i = locations.length - 1; i >= 0; i--) {
+            var l = locations[i];
+            if (l && l.isPin && l.ownerId && hidden[l.ownerId] && (!user || l.ownerId !== user.id)) {
+              removed.push(locations.splice(i, 1)[0]);
+            }
+          }
+        }
+        try {
+          return _origDrawPins.apply(this, arguments);
+        } finally {
+          if (removed.length) {
+            removed.forEach(function (x) { locations.push(x); });
+          }
+        }
+      };
+      window.drawPinsOnMap._rsWrapped = true;
+    }
+  }
+
+  // Wire settings UI extras after DOM ready
+  function wireExtraSettings() {
+    var createPriv = $('set-create-private-btn');
+    if (createPriv) createPriv.onclick = function () {
+      var name = ($('set-create-private-name') && $('set-create-private-name').value || '').trim();
+      if (!name) { alert('Enter a name for your private map'); return; }
+      createPrivateMap(name).then(function (m) {
+        if ($('set-create-private-name')) $('set-create-private-name').value = '';
+        alert('Private map created: ' + m.name);
+        refreshMapsUi();
+      }).catch(function (e) { alert(e.message || e); });
+    };
+    var renameCur = $('set-rename-current-btn');
+    if (renameCur) renameCur.onclick = function () {
+      var vs = C.getViewState && C.getViewState();
+      if (!vs) return;
+      var cur = vs.mode === 'shared' ? vs.sharedMapName : (vs.privateMapName || 'My Map');
+      var n = prompt('Rename current map:', cur);
+      if (!n || !n.trim()) return;
+      var sb = window.__rsSb;
+      if (vs.mode === 'shared' && vs.sharedMapId) {
+        sb.rpc('rename_shared_map', { p_id: vs.sharedMapId, p_name: n.trim() }).then(function (r) {
+          if (r.error) throw r.error;
+          vs.sharedMapName = r.data.name;
+          try { localStorage.setItem('reg_slayer_view_v1', JSON.stringify(vs)); } catch (e) {}
+          updateBrandName();
+          refreshMapsUi();
+        }).catch(function (e) { alert(e.message || e); });
+      } else if (vs.privateMapId) {
+        renamePrivate(vs.privateMapId, n.trim()).then(refreshMapsUi).catch(function (e) { alert(e.message || e); });
+      } else alert('Open a map first');
+    };
+    var arrowInp = $('set-my-arrow-color');
+    if (arrowInp) {
+      arrowInp.value = myArrowColor;
+      arrowInp.onchange = function () {
+        myArrowColor = arrowInp.value || '#e11d1d';
+        try { localStorage.setItem(ARROW_KEY, myArrowColor); } catch (e) {}
+        // persist profile
+        var sb = window.__rsSb;
+        var user = window.__rsUser;
+        if (sb && user) {
+          sb.from('profiles').update({ arrow_color: myArrowColor }).eq('id', user.id).then(function () {});
+        }
+        // recolor own GPS if possible
+        try {
+          if (typeof setGpsMarker === 'function' && typeof userLat !== 'undefined' && userLat != null) {
+            // patch buildGpsMarkerIcon via CSS variable
+            document.documentElement.style.setProperty('--gps-arrow-color', myArrowColor);
+            setGpsMarker(userLat, userLng);
+          }
+        } catch (e2) {}
+      };
+      document.documentElement.style.setProperty('--gps-arrow-color', myArrowColor);
+    }
+    var shareBtn = $('share-loc-btn');
+    if (shareBtn) {
+      shareBtn.onclick = function () { toggleSharing(); };
+    }
+    // gps long-press / secondary: after snap offer share? User asked: when clicking current location arrow icon on map
+    // Own GPS marker is non-interactive. Make share via toolbar. Also hook snapToGPS secondary menu:
+  }
+
+  // Patch buildGpsMarkerIcon color via CSS if path fill hardcoded — override after load
+  var _origBuildGps = null;
+  function installGpsColor() {
+    if (typeof buildGpsMarkerIcon === 'function' && !buildGpsMarkerIcon._rsColor) {
+      _origBuildGps = buildGpsMarkerIcon;
+      window.buildGpsMarkerIcon = function (headingDeg) {
+        var icon = _origBuildGps(headingDeg);
+        try {
+          if (icon && icon.options && icon.options.html) {
+            icon.options.html = icon.options.html.replace(/#e11d1d/g, myArrowColor).replace(/#ff4d4d/g, myArrowColor);
+          }
+        } catch (e) {}
+        return icon;
+      };
+      window.buildGpsMarkerIcon._rsColor = true;
+    }
+  }
+
+  // Capture sb + user from auth client used by main module
+  function bindClientRefs() {
+    // Create our own client with same keys if needed
+    if (!window.__rsSb && window.supabase && window.supabase.createClient) {
+      try {
+        // reuse session from existing
+        var url = 'https://grvhmktqzrivbqbczkii.supabase.co';
+        var key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdydmhta3RxenJpdmJxYmN6a2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3MDQ0MTIsImV4cCI6MjEwMTI4MDQxMn0.fFfrS-7w45IzxwOvvyYDB5ngLnyTz-Ru7XVL5LZXm4o';
+        window.__rsSb = window.supabase.createClient(url, key, {
+          auth: { persistSession: true, autoRefreshToken: true, storage: window.localStorage }
+        });
+      } catch (e) {}
+    }
+    if (window.__rsSb) {
+      window.__rsSb.auth.getSession().then(function (res) {
+        if (res.data && res.data.session) window.__rsUser = res.data.session.user;
+      });
+    }
+  }
+
+  // Hook maps tab refresh
+  window.addEventListener('regslayer-maps-tab', function () {
+    refreshMapsUi();
+  });
+
+  // After auth
+  function onReady() {
+    bindClientRefs();
+    wireExtraSettings();
+    installGpsColor();
+    installDrawFilters();
+    // Restore sharing state
+    try {
+      var raw = localStorage.getItem(PRESENCE_KEY);
+      if (raw) {
+        var o = JSON.parse(raw);
+        if (o && o.on && o.started && (Date.now() - o.started) < MAX_SHARE_MS) {
+          shareStartedAt = o.started;
+          // resume only if still on that shared map
+          var vs = C.getViewState && C.getViewState();
+          if (vs && vs.mode === 'shared' && vs.sharedMapId === o.mapId) startSharing();
+          else localStorage.removeItem(PRESENCE_KEY);
+        }
+      }
+    } catch (e) {}
+    setTimeout(function () {
+      refreshMapsUi();
+      pullPresence();
+      // presence poll when on shared
+      setInterval(function () {
+        var vs = C.getViewState && C.getViewState();
+        if (vs && vs.mode === 'shared' && document.visibilityState === 'visible') pullPresence();
+      }, 12000);
+    }, 800);
+  }
+
+  if (C.authReady && C.authReady.then) {
+    C.authReady.then(onReady).catch(onReady);
+  } else {
+    setTimeout(onReady, 1200);
+  }
+
+  // Public API
+  window.RegSlayerParty = {
+    refreshMapsUi: refreshMapsUi,
+    toggleSharing: toggleSharing,
+    startSharing: startSharing,
+    stopSharing: stopSharing,
+    openShareToMapFlow: openShareToMapFlow,
+    openShareLocationChooser: openShareLocationChooser,
+    openShareMyLocationChooser: openShareMyLocationChooser,
+    listPrivateMaps: listPrivateMaps,
+    createPrivateMap: createPrivateMap,
+    switchToPrivate: switchToPrivate,
+    isSharing: function () { return sharing; },
+    stampOwner: stampOwner
+  };
+
+  // Multi-map on create pin: inject checkboxes after save forms appear — hook savePinFromMap
+  var _origSavePin = null;
+  function waitForSavePin() {
+    if (typeof savePinFromMap === 'function' && !savePinFromMap._rsMulti) {
+      _origSavePin = savePinFromMap;
+      window.savePinFromMap = function () {
+        var r = _origSavePin.apply(this, arguments);
+        // After save, offer multi-map if checked
+        setTimeout(function () {
+          var boxes = document.querySelectorAll('.rs-extra-map-chk:checked');
+          if (!boxes.length) return;
+          try {
+            var pins = JSON.parse(localStorage.getItem('alabama_hunt_custom_pins') || '[]');
+            var last = pins[pins.length - 1];
+            if (!last) return;
+            boxes.forEach(function (chk) {
+              var kind = chk.getAttribute('data-kind');
+              var id = chk.getAttribute('data-id');
+              copyEntityToMap(last, 'pin', { kind: kind, id: id }).catch(function (e) { console.warn(e); });
+            });
+          } catch (e) {}
+        }, 100);
+        return r;
+      };
+      savePinFromMap._rsMulti = true;
+    }
+  }
+  setInterval(waitForSavePin, 2000);
+
+  // Pin form multi-map targets
+  window.rsFillExtraMapChecks = async function (containerId) {
+    var el = $(containerId);
+    if (!el) return;
+    el.innerHTML = '<span class="settings-hint">Also save to:</span>';
+    try {
+      var maps = await listAllTargetMaps();
+      maps.forEach(function (m) {
+        var lab = document.createElement('label');
+        lab.className = 'settings-row';
+        lab.innerHTML = '<input type="checkbox" class="rs-extra-map-chk" data-kind="' + m.kind + '" data-id="' + m.id + '"><span class="sr-text">' + esc(m.name) + '</span>';
+        el.appendChild(lab);
+      });
+    } catch (e) {}
+  };
+})();
+
+</script>
 </body>
 </html>
