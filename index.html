@@ -3692,15 +3692,16 @@
     }
 
     /*
-     * Mobile bottom bar — compact single row that fits phone widths without
-     * left/center/right clusters overlapping. All icons equal size + gap.
-     * Math target (~360–390px): 9 icons + slim date slot + gaps ≤ viewport.
+     * Mobile bottom bar:
+     *  - Date + weapon reserved on the far left (readable, never crushed)
+     *  - Tool icons keep tight spacing but pack toward the middle
+     *  - Bar height = buttons × 1.05 (same ratio as desktop); safe-area is extra below
      */
     html.layout-phone .map-bottom-bar {
       --mbb-h: 34px;
       --mbb-icon: 34px;
       --mbb-gap: 2px;
-      --mbb-bar-h: 38px;
+      --mbb-bar-h: calc(var(--mbb-h) * 1.05);
       left: 0;
       right: 0;
       bottom: 0 !important;
@@ -3709,23 +3710,23 @@
       height: calc(var(--mbb-bar-h) + env(safe-area-inset-bottom, 0px)) !important;
       min-height: calc(var(--mbb-bar-h) + env(safe-area-inset-bottom, 0px)) !important;
       max-height: calc(var(--mbb-bar-h) + env(safe-area-inset-bottom, 0px)) !important;
-      padding: 0 3px;
+      padding: 0 4px;
       padding-bottom: env(safe-area-inset-bottom, 0px);
       border-radius: 0;
-      /* left | center | right — equal side tracks so center stays true middle */
+      /* equal side tracks so GPS stays centered; tools hug the center from both sides */
       grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
       grid-template-rows: var(--mbb-bar-h) !important;
-      column-gap: 3px !important;
+      column-gap: 4px !important;
       transform: none;
       align-items: center;
-      /* Keep vertical overflow for radar HUD / layers panel above the bar */
       overflow: visible;
     }
     html.layout-phone .map-wrapper.fullscreen .map-bottom-bar {
       transform: none;
       bottom: 0 !important;
+      height: calc(var(--mbb-bar-h) + env(safe-area-inset-bottom, 0px)) !important;
+      max-height: calc(var(--mbb-bar-h) + env(safe-area-inset-bottom, 0px)) !important;
     }
-    /* Side zones stay in their grid cells — no paint over GPS/share */
     html.layout-phone .mbb-left,
     html.layout-phone .mbb-right,
     html.layout-phone .mbb-center {
@@ -3738,12 +3739,18 @@
       min-width: 0;
       box-sizing: border-box;
     }
+    /* Far-left date/weapon; measure/draw/track pushed toward center */
     html.layout-phone .mbb-left {
       justify-content: flex-start !important;
-      justify-self: start !important;
+      justify-self: stretch !important;
+      width: 100%;
       max-width: 100%;
       overflow: hidden;
-      padding-right: 1px;
+      gap: 0 !important; /* gap lives between tools only; context is reserved */
+    }
+    html.layout-phone .mbb-left .map-draw-tools {
+      margin-left: auto; /* sit next to the center cluster */
+      padding-left: 6px;
     }
     html.layout-phone .mbb-center {
       justify-content: center !important;
@@ -3751,42 +3758,46 @@
       flex: 0 0 auto;
       z-index: 3;
       overflow: visible;
-      padding: 0 1px;
+      padding: 0 2px;
     }
+    /* Right tools pack toward center (not the far right edge) */
     html.layout-phone .mbb-right {
-      justify-content: flex-end !important;
-      justify-self: end !important;
+      justify-content: flex-start !important;
+      justify-self: stretch !important;
+      width: 100%;
       max-width: 100%;
-      overflow: hidden; /* clip rather than overlap center */
-      padding-left: 1px;
+      overflow: hidden;
       line-height: 0;
+      padding-right: 0;
     }
     html.layout-phone .mbb-right > * {
       flex: 0 0 auto !important;
       height: var(--mbb-h) !important;
       max-height: var(--mbb-h) !important;
     }
-    /* Slim date/weapon so tools fit */
+    /* Reserved date + weapon slot — far left, always readable */
     html.layout-phone .mbb-context {
-      width: 38px;
-      min-width: 38px;
-      max-width: 38px;
+      width: 56px;
+      min-width: 56px;
+      max-width: 56px;
       height: var(--mbb-h) !important;
-      gap: 0;
-      padding: 0;
-      flex: 0 0 38px;
+      gap: 1px;
+      padding: 0 2px 0 0;
+      flex: 0 0 56px;
       overflow: hidden;
+      justify-content: center;
     }
     html.layout-phone .mbb-date {
-      font-size: 8px;
-      letter-spacing: 0;
-      line-height: 1.05;
+      font-size: 9px;
+      letter-spacing: 0.01em;
+      line-height: 1.1;
+      font-weight: 800;
     }
     html.layout-phone .mbb-weapon {
-      height: 12px;
-      padding: 0 3px;
-      font-size: 7px;
-      border-radius: 3px;
+      height: 13px;
+      padding: 0 4px;
+      font-size: 8px;
+      border-radius: 4px;
       display: inline-flex !important;
     }
     html.layout-phone .map-draw-tools {
@@ -3797,9 +3808,9 @@
       height: var(--mbb-h) !important;
       max-height: var(--mbb-h) !important;
       min-width: 0;
-      overflow: hidden;
+      overflow: visible;
     }
-    /* Every chrome button: identical square, light shadow (no messy double-glow) */
+    /* Equal square controls — same inter-button gap as before */
     html.layout-phone .map-bottom-bar .mdt-btn.mdt-icon-btn,
     html.layout-phone .map-bottom-bar .map-layers-toggle-btn,
     html.layout-phone .map-bottom-bar .map-radar-toggle,
@@ -3843,7 +3854,6 @@
       border-radius: 8px;
       letter-spacing: 0;
     }
-    /* Glyphs scale with button size */
     html.layout-phone .mbb-icon-btn svg,
     html.layout-phone .mbb-compass-btn svg,
     html.layout-phone .map-radar-toggle svg {
@@ -3869,31 +3879,32 @@
       max-width: var(--mbb-icon) !important;
       height: var(--mbb-h) !important;
       max-height: var(--mbb-h) !important;
-      overflow: visible; /* allow panels/HUD to rise above */
+      overflow: visible;
       position: relative;
     }
     html.layout-phone .map-layers-toggle-btn .ml-caret {
-      display: none; /* save space; panel still opens on tap */
+      display: none;
     }
-    /* Common phones (~360–390px): slightly tighter */
+    /* Common phones — same 5% bar ratio; keep date slot readable */
     @media (max-width: 390px) {
       html.layout-phone .map-bottom-bar,
       html.layout-phone .map-wrapper.fullscreen .map-bottom-bar {
         --mbb-h: 32px;
         --mbb-icon: 32px;
         --mbb-gap: 2px;
-        --mbb-bar-h: 36px;
-        padding: 0 2px;
-        column-gap: 2px !important;
+        --mbb-bar-h: calc(var(--mbb-h) * 1.05);
+        padding: 0 3px;
+        column-gap: 3px !important;
       }
       html.layout-phone .mbb-context {
-        width: 34px;
-        min-width: 34px;
-        max-width: 34px;
-        flex-basis: 34px;
+        width: 52px;
+        min-width: 52px;
+        max-width: 52px;
+        flex: 0 0 52px;
       }
-      html.layout-phone .mbb-date { font-size: 7.5px; }
-      html.layout-phone .mbb-weapon { height: 11px; font-size: 6.5px; padding: 0 2px; }
+      html.layout-phone .mbb-date { font-size: 8.5px; }
+      html.layout-phone .mbb-weapon { height: 12px; font-size: 7.5px; padding: 0 3px; }
+      html.layout-phone .mbb-left .map-draw-tools { padding-left: 4px; }
       html.layout-phone .mbb-icon-btn svg,
       html.layout-phone .mbb-compass-btn svg,
       html.layout-phone .map-radar-toggle svg {
@@ -3907,23 +3918,26 @@
       }
       html.layout-phone .map-settings-btn { font-size: 15px !important; }
     }
-    /* Very narrow phones */
+    /* Very narrow phones — still reserve date/weapon; tools stay mid-clustered */
     @media (max-width: 340px) {
       html.layout-phone .map-bottom-bar,
       html.layout-phone .map-wrapper.fullscreen .map-bottom-bar {
         --mbb-h: 28px;
         --mbb-icon: 28px;
         --mbb-gap: 1px;
-        --mbb-bar-h: 32px;
+        --mbb-bar-h: calc(var(--mbb-h) * 1.05);
         padding: 0 2px;
         column-gap: 2px !important;
       }
       html.layout-phone .mbb-context {
-        width: 30px;
-        min-width: 30px;
-        max-width: 30px;
-        flex-basis: 30px;
+        width: 46px;
+        min-width: 46px;
+        max-width: 46px;
+        flex: 0 0 46px;
       }
+      html.layout-phone .mbb-date { font-size: 8px; }
+      html.layout-phone .mbb-weapon { height: 11px; font-size: 7px; padding: 0 2px; }
+      html.layout-phone .mbb-left .map-draw-tools { padding-left: 3px; }
       html.layout-phone .mbb-icon-btn svg,
       html.layout-phone .mbb-compass-btn svg,
       html.layout-phone .map-radar-toggle svg {
