@@ -932,16 +932,8 @@
     } else alert('Location unavailable');
   }
 
-  // Hook map dot share
-  var _origHandleMapDot = window.handleMapDotAction;
-  window.handleMapDotAction = function (act) {
-    if (act === 'share') {
-      openShareLocationChooser(clickLat, clickLng, 'Map spot', { lat: clickLat, lng: clickLng, name: 'Map spot' });
-      return false;
-    }
-    if (typeof _origHandleMapDot === 'function') return _origHandleMapDot(act);
-  };
-
+  // Map-dot share is handled in index.html (same-size popup chooser).
+  // Keep openShareToMapFlow / openShareLocationChooser available for pin popups.
   var _origShareSaved = window.shareSavedPinLocation;
   window.shareSavedPinLocation = function (id) {
     var loc = (typeof locations !== 'undefined') ? locations.find(function (l) { return String(l.id) === String(id); }) : null;
@@ -949,6 +941,7 @@
       if (_origShareSaved) return _origShareSaved(id);
       return false;
     }
+    // Use centered modal sized like map-dot card
     openShareLocationChooser(loc.lat, loc.lng, loc.name || 'Pin', loc);
     return false;
   };
@@ -1107,10 +1100,10 @@
     }
     var shareBtn = $('share-loc-btn');
     if (shareBtn) {
-      // Popup: share to map / copy location / party live share
+      // Toolbar: party live location only — on/off, pulse when active, no multi-option popup
       shareBtn.onclick = function (ev) {
         if (ev) { try { ev.preventDefault(); ev.stopPropagation(); } catch (e0) {} }
-        openShareMyLocationChooser();
+        toggleSharing();
         return false;
       };
     }

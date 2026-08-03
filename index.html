@@ -1469,12 +1469,12 @@
       -webkit-user-select: none;
     }
     @-webkit-keyframes peakRutBuckFlash {
-      0%, 100% { opacity: 0.3; }
-      50% { opacity: 1; }
+      0%, 100% { opacity: 0.2; filter: brightness(0.85); }
+      50% { opacity: 1; filter: brightness(1.35) drop-shadow(0 0 4px rgba(255,80,80,0.85)); }
     }
     @keyframes peakRutBuckFlash {
-      0%, 100% { opacity: 0.3; }
-      50% { opacity: 1; }
+      0%, 100% { opacity: 0.2; filter: brightness(0.85); }
+      50% { opacity: 1; filter: brightness(1.35) drop-shadow(0 0 4px rgba(255,80,80,0.85)); }
     }
     /* When JS drives opacity, kill CSS animation so they do not fight */
     .peak-rut-buck.rut-js-pulse {
@@ -1911,16 +1911,17 @@
       flex-shrink: 0;
     }
     .map-draw-tools .mdt-btn {
-      background: rgba(22, 26, 18, 0.95);
-      border: 1px solid var(--border);
-      color: var(--ink);
+      /* Match settings-adjacent chrome: green field + light silhouette icons */
+      background: var(--green, #486a2f);
+      border: 1px solid #3a5626;
+      color: #fff;
       border-radius: 10px;
       padding: 0 8px;
-      height: var(--mbb-h, 40px);
-      min-height: var(--mbb-h, 40px);
-      max-height: var(--mbb-h, 40px);
-      width: var(--mbb-h, 40px);
-      min-width: var(--mbb-h, 40px);
+      height: var(--mbb-h, 36px);
+      min-height: var(--mbb-h, 36px);
+      max-height: var(--mbb-h, 36px);
+      width: var(--mbb-h, 36px);
+      min-width: var(--mbb-h, 36px);
       font-size: 10px;
       font-weight: 800;
       cursor: pointer;
@@ -1936,50 +1937,62 @@
     }
     .map-draw-tools .mdt-btn.mdt-icon-btn {
       padding: 0;
+      background: var(--green, #486a2f);
     }
     .map-draw-tools .mdt-btn.mdt-track-stop {
       width: auto;
-      min-width: 52px;
-      padding: 0 10px;
+      min-width: 48px;
+      padding: 0 8px;
+      background: #8b2e2e;
+      border-color: #a33;
     }
     .map-draw-tools .mdt-icon,
     .map-layers-toggle-btn .mdt-icon {
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
       display: block;
       pointer-events: none;
     }
     .map-draw-tools .mdt-icon-img,
     .map-layers-toggle-btn .mdt-icon-img {
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
       object-fit: contain;
       display: block;
       pointer-events: none;
-      border-radius: 3px;
+      border-radius: 0;
+      /* Silhouette: white glyph on green button */
+      filter: brightness(0) invert(1);
+      opacity: 0.95;
     }
-    .map-draw-tools .mdt-btn:hover { border-color: var(--accent); color: #fff; }
+    .map-draw-tools .mdt-btn:hover { border-color: #9fd06a; filter: brightness(1.06); }
     .map-draw-tools .mdt-btn.active {
       border-color: var(--accent);
-      background: rgba(229, 154, 24, 0.18);
-      color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
     }
     /* Track lights up red when GPS tracking is active */
     .map-draw-tools.tracking .mdt-track-idle,
     .map-draw-tools .mdt-track-idle.active {
       border-color: #f87171;
-      background: rgba(220, 38, 38, 0.28);
+      background: #7f1d1d;
       box-shadow: 0 0 10px rgba(248, 113, 113, 0.55);
     }
     .map-layers-toggle-btn.mdt-icon-btn {
-      width: var(--mbb-h, 40px);
-      min-width: var(--mbb-h, 40px);
-      height: var(--mbb-h, 40px);
+      width: var(--mbb-h, 36px);
+      min-width: var(--mbb-h, 36px);
+      height: var(--mbb-h, 36px);
       padding: 0;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       font-size: 0;
+      background: var(--green, #486a2f);
+      border: 1px solid #3a5626;
+      border-radius: 10px;
+      color: #fff;
+    }
+    .map-layers-toggle-btn.mdt-icon-btn:hover {
+      border-color: #9fd06a;
     }
     .map-draw-tools .mdt-btn:disabled { opacity: 0.45; cursor: default; }
     /* Active tool chrome (Undo/Finish/Cancel) — top-left like v3.5 */
@@ -3151,9 +3164,9 @@
      * balanced mid-zones around GPS (not between individual buttons).
      */
     .map-bottom-bar {
-      --mbb-h: 40px;
+      --mbb-h: 36px;
       --mbb-gap: 4px;
-      --mbb-icon: 40px;
+      --mbb-icon: 36px;
       position: absolute;
       left: 0;
       right: 0;
@@ -3171,8 +3184,11 @@
       pointer-events: none;
       width: 100%;
       max-width: 100%;
-      padding: 6px 8px;
-      padding-bottom: max(6px, env(safe-area-inset-bottom, 0px));
+      /* Just a little taller than the buttons themselves */
+      padding: 3px 6px;
+      padding-bottom: max(3px, env(safe-area-inset-bottom, 0px));
+      min-height: calc(var(--mbb-h) + 6px);
+      height: auto;
       box-sizing: border-box;
       background: rgba(14, 18, 12, 0.92);
       border: none;
@@ -3407,19 +3423,32 @@
      * on very narrow phones so the row stays one cohesive strip.
      */
     html.layout-phone .map-bottom-bar {
-      --mbb-h: 32px;
+      --mbb-h: 34px;
       --mbb-gap: 3px;
-      --mbb-icon: 32px;
+      --mbb-icon: 34px;
       left: 0;
       right: 0;
       bottom: 0 !important;
       width: 100%;
       max-width: 100%;
-      padding: 5px 6px;
-      padding-bottom: max(5px, env(safe-area-inset-bottom, 0px));
+      padding: 2px 4px;
+      padding-bottom: max(2px, env(safe-area-inset-bottom, 0px));
+      min-height: calc(var(--mbb-h) + 4px);
       border-radius: 0;
       column-gap: var(--mbb-gap);
       transform: none;
+      align-items: center;
+    }
+    /* Keep every control on one baseline (no wrap / no vertical stagger) */
+    html.layout-phone .mbb-left,
+    html.layout-phone .mbb-right {
+      flex-wrap: nowrap;
+      align-items: center;
+      overflow: hidden;
+    }
+    html.layout-phone .map-draw-tools {
+      flex-wrap: nowrap;
+      align-items: center;
     }
     html.layout-phone .map-wrapper.fullscreen .map-bottom-bar {
       transform: none;
@@ -4619,10 +4648,70 @@
     .mbb-icon-btn.mbb-share-loc { color: #38bdf8; }
     .mbb-icon-btn.mbb-share-loc.is-sharing {
       color: #f87171;
-      box-shadow: 0 0 10px rgba(248, 113, 113, 0.55);
       border-color: #f87171;
+      background: rgba(220, 38, 38, 0.22);
+      box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.7);
+      animation: shareLocPulse 1.2s ease-out infinite;
+    }
+    @keyframes shareLocPulse {
+      0% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.65); }
+      70% { box-shadow: 0 0 0 12px rgba(248, 113, 113, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0); }
     }
     .mbb-icon-btn.mbb-share-loc svg { width: 20px; height: 20px; }
+
+    /* Centered share / simple modals (same family as map-dot card size) */
+    .rs-simple-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 2147483645;
+      background: rgba(0,0,0,0.55);
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+    .rs-simple-modal.active { display: flex; }
+    .rs-simple-card {
+      width: min(260px, 92vw);
+      max-width: 280px;
+      background: rgba(14, 18, 12, 0.96);
+      border: 1px solid rgba(141, 156, 132, 0.45);
+      border-radius: 10px;
+      padding: 12px 12px 10px;
+      color: var(--ink, #e8efe4);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.5);
+      max-height: min(80vh, 420px);
+      overflow: auto;
+    }
+    .rs-simple-card h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .rs-simple-body { font-size: 12px; color: #c5d0be; margin-bottom: 4px; }
+    .rs-simple-actions { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+    .rs-simple-actions .settings-subbtn,
+    .rs-simple-actions button {
+      width: 100%;
+      text-align: center;
+      padding: 9px 10px;
+      min-height: 38px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: var(--panel-light, #222a1c);
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .rs-btn-primary, .rs-simple-actions .rs-btn-primary {
+      background: var(--accent, #e59a18) !important;
+      color: #111 !important;
+      border-color: var(--accent) !important;
+    }
     .settings-inline-row { display: flex; gap: 6px; margin: 6px 0 10px; }
     .settings-inline-row input {
       flex: 1; min-width: 0; padding: 8px 10px; border-radius: 6px;
@@ -5117,10 +5206,6 @@
           
                           <div class="ml-section">Overlays</div>
                           <label class="ml-option">
-                            <input type="checkbox" id="toggle-prev-hunts-chk" onchange="drawHuntsOnMap()">
-                            <span class="ml-opt-text">Past Hunts</span>
-                          </label>
-                          <label class="ml-option">
                             <input type="checkbox" id="toggle-parcels-chk" onchange="togglePropertyLines(this.checked)">
                             <span class="ml-opt-text">Property lines</span>
                           </label>
@@ -5132,6 +5217,19 @@
                             <input type="checkbox" id="toggle-topo-overlay-chk" onchange="toggleTopoOverlay(this.checked)">
                             <span class="ml-opt-text">Topo lines</span>
                           </label>
+
+                          <button type="button" class="ml-fold-btn" id="ml-fold-pins" onclick="toggleLayersFold('pins')" aria-expanded="false">
+                            Pins<span class="ml-fold-caret" aria-hidden="true">▸</span>
+                          </button>
+                          <div class="ml-fold-body" id="ml-fold-body-pins" hidden>
+                            <div class="pl-toggles" id="pin-type-toggles" role="group" aria-label="Toggle pin types on this map"></div>
+                            <div class="zone-toggle-actions">
+                              <button type="button" onclick="setAllPinTypesVisible(true)">All on</button>
+                              <button type="button" onclick="setAllPinTypesVisible(false)">All off</button>
+                            </div>
+                            <!-- Legacy master for past hunts (driven by pin-type toggle) -->
+                            <input type="checkbox" id="toggle-prev-hunts-chk" checked style="display:none;" aria-hidden="true" onchange="drawHuntsOnMap()">
+                          </div>
           
                           <button type="button" class="ml-fold-btn" id="ml-fold-public-lands" onclick="toggleLayersFold('public-lands')" aria-expanded="false">
                             Public lands<span class="ml-fold-caret" aria-hidden="true">▸</span>
@@ -7505,7 +7603,7 @@
       var t = title || 'Peak rut';
       return (
         '<span class="peak-rut-buck" title="' + escHtml(t) + '" aria-label="' + escHtml(t) + '">' +
-          '<img src="' + PEAK_RUT_ANTLERS_DATA_URI + '" width="26" height="26" alt="" draggable="false" decoding="async" />' +
+          '<img src="' + PEAK_RUT_ANTLERS_DATA_URI + '" width="28" height="28" alt="" draggable="false" decoding="async" />' +
         '</span>'
       );
     }
@@ -7538,12 +7636,16 @@
         }
         var t0 = _peakRutListFlashStart;
         var t = (((typeof now === 'number' ? now : Date.now()) - t0) % 1000) / 1000;
-        // Triangle wave 0.3 → 1 → 0.3 over 1s
-        var o = t < 0.5 ? (0.3 + 1.4 * t) : (1.7 - 1.4 * t);
-        if (o < 0.3) o = 0.3;
+        // Brighter flash: near-off → full bright with red glow
+        var o = t < 0.5 ? (0.15 + 1.7 * t) : (1.85 - 1.7 * t);
+        if (o < 0.15) o = 0.15;
         if (o > 1) o = 1;
         var s = String(o);
-        for (var j = 0; j < els.length; j++) els[j].style.opacity = s;
+        var br = (0.9 + o * 0.55).toFixed(2);
+        for (var j = 0; j < els.length; j++) {
+          els[j].style.opacity = s;
+          els[j].style.filter = 'brightness(' + br + ') drop-shadow(0 0 ' + (2 + o * 4).toFixed(1) + 'px rgba(255,70,70,' + (0.35 + o * 0.5).toFixed(2) + '))';
+        }
         _peakRutListFlashRaf = requestAnimationFrame(tick);
       }
       _peakRutListFlashRaf = requestAnimationFrame(tick);
@@ -11675,6 +11777,21 @@
         );
       }
 
+      // Share sub-menu: same map-dot popup size (not a bottom sheet)
+      if (opts.shareChooser) {
+        var sn = opts.shareName || (fromGps ? 'My location' : 'Map spot');
+        return (
+          '<div class="map-dot-menu" onclick="event.stopPropagation();">' +
+            statusBlock +
+            '<div class="mdm-title">Share location</div>' +
+            '<div class="mdm-sub">' + String(sn).replace(/</g, '&lt;') + '</div>' +
+            '<button type="button" class="mdm-btn pin" onclick="event.preventDefault();event.stopPropagation();window.handleMapDotAction(\'share-to-map\');return false;">Share to another map</button>' +
+            '<button type="button" class="mdm-btn share" onclick="event.preventDefault();event.stopPropagation();window.handleMapDotAction(\'share-copy\');return false;">Copy location</button>' +
+            '<button type="button" class="mdm-btn" style="background:#3a4234;" onclick="event.preventDefault();event.stopPropagation();window.handleMapDotAction(\'add-back\');return false;">Back</button>' +
+          '</div>'
+        );
+      }
+
       // Main menu: 2×2 primary actions; offline + share below. ADCNR area map lives in Rules & regs.
       return (
         '<div class="map-dot-menu" onclick="event.stopPropagation();">' +
@@ -12221,17 +12338,28 @@
           var shareName = mapDotMenuSource === 'gps'
             ? 'My location'
             : (detected.name || 'Map spot');
-          // Popup: share to another map OR copy location (Google Maps link)
-          if (window.RegSlayerParty && typeof window.RegSlayerParty.openShareLocationChooser === 'function') {
-            window.RegSlayerParty.openShareLocationChooser(
-              clickLat, clickLng, shareName,
-              { lat: clickLat, lng: clickLng, name: shareName }
+          // Keep options inside the same map-dot popup size (not a bottom-sheet)
+          setMapDotMenuContent({
+            shareChooser: true,
+            fromGps: mapDotMenuSource === 'gps',
+            shareName: shareName
+          });
+          return false;
+        }
+        if (act === 'share-copy') {
+          shareLocationLink(clickLat, clickLng,
+            mapDotMenuSource === 'gps' ? 'My location' : (detected.name || 'Map spot'));
+          setMapDotMenuContent({ fromGps: mapDotMenuSource === 'gps' });
+          return false;
+        }
+        if (act === 'share-to-map') {
+          if (window.RegSlayerParty && typeof window.RegSlayerParty.openShareToMapFlow === 'function') {
+            window.RegSlayerParty.openShareToMapFlow(
+              { lat: clickLat, lng: clickLng, name: mapDotMenuSource === 'gps' ? 'My location' : (detected.name || 'Map spot') },
+              'pin'
             );
-          } else if (mapDotMenuSource === 'gps' && window.RegSlayerParty &&
-                     typeof window.RegSlayerParty.openShareMyLocationChooser === 'function') {
-            window.RegSlayerParty.openShareMyLocationChooser();
           } else {
-            shareLocationLink(clickLat, clickLng, shareName);
+            alert('Sign in and open Settings → My Maps to share to another map.');
           }
           return false;
         }
@@ -15181,32 +15309,37 @@
     }
     function pinIconSvgMarkup(iconId, glyphColor, size) {
       var img = pinIconImageSrc(iconId);
-      var s = size || 14;
+      var s = size || 18;
+      var gc = glyphColor || '#000000';
       if (img) {
-        // CSS filter forces black detail; color can still tint via opacity layer if needed
-        var tint = (glyphColor && glyphColor !== '#000000' && glyphColor !== '#000')
-          ? ' style="filter:brightness(0) saturate(100%);opacity:0.95;"'
-          : ' style="filter:brightness(0) saturate(100%);"';
-        return '<img src="' + img + '" width="' + s + '" height="' + s + '" alt="" draggable="false"' + tint + '>';
+        // High-contrast silhouette: black detail with slight white halo for glanceability
+        return '<img src="' + img + '" width="' + s + '" height="' + s + '" alt="" draggable="false" ' +
+          'style="filter:drop-shadow(0 0 1px #fff) drop-shadow(0 0 1px #fff) brightness(0);opacity:1;display:block;">';
       }
       var ic = getPinIconById(iconId);
       if (!ic) return '';
-      return '<svg viewBox="0 0 24 24" width="' + s + '" height="' + s + '" aria-hidden="true"><path fill="none" stroke="' + (glyphColor || '#000') + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="' + ic.d + '"/></svg>';
+      return '<svg viewBox="0 0 24 24" width="' + s + '" height="' + s + '" aria-hidden="true" style="filter:drop-shadow(0 0 1px #fff);">' +
+        '<path fill="none" stroke="' + gc + '" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="' + ic.d + '"/></svg>';
     }
     function buildCustomPinMarkerHtml(loc) {
       var outer = loc.color || '#e59a18';
-      var inner = loc.innerColor || '#111111';
+      var inner = loc.innerColor || '#f5f5f5';
       var glyph = loc.iconColor || '#000000';
       var iconId = loc.iconId || null;
       var letter = getFirstLetter(loc.name);
       if (loc.isStand && !iconId) letter = 'S';
+      // Larger pin + roomy white/light inner disc so icon reads at a glance
+      var pinW = 34, pinH = 42, disc = 22;
       var innerContent = iconId
-        ? pinIconSvgMarkup(iconId, glyph, 12)
-        : '<span style="font-size:10px;font-weight:800;color:' + glyph + ';line-height:1;">' + letter + '</span>';
+        ? pinIconSvgMarkup(iconId, glyph, 16)
+        : '<span style="font-size:12px;font-weight:900;color:' + glyph + ';line-height:1;text-shadow:0 0 2px #fff;">' + letter + '</span>';
       return (
-        '<div style="width:28px;height:36px;position:relative;">' +
-          '<div style="width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:' + outer + ';border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,0.45);position:absolute;left:1px;top:0;"></div>' +
-          '<div style="position:absolute;left:5px;top:4px;width:18px;height:18px;border-radius:50%;background:' + inner + ';display:flex;align-items:center;justify-content:center;">' +
+        '<div style="width:' + pinW + 'px;height:' + pinH + 'px;position:relative;">' +
+          '<div style="width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:' + outer +
+            ';border:2.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.5);position:absolute;left:2px;top:0;"></div>' +
+          '<div style="position:absolute;left:6px;top:4px;width:' + disc + 'px;height:' + disc +
+            'px;border-radius:50%;background:' + inner + ';border:1.5px solid rgba(0,0,0,0.35);' +
+            'display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.35);">' +
             innerContent +
           '</div>' +
         '</div>'
@@ -15323,10 +15456,14 @@
         notes = notes ? (notes + '\n' + tvaLine) : tvaLine;
       }
       onPinColorInputsChange();
-      const newId = 'pin_' + Date.now();
-      const newLoc = {
-        id: newId,
-        name: name + ' (Pin - ' + detected.name + (tva ? ' / TVA' : '') + ')',
+      var isEdit = !!editingPinId;
+      var pinId = isEdit ? editingPinId : ('pin_' + Date.now());
+      var displayName = isEdit
+        ? name
+        : (name + ' (Pin - ' + detected.name + (tva ? ' / TVA' : '') + ')');
+      var newLoc = {
+        id: pinId,
+        name: displayName,
         type: tva ? 'TVA Pin' : 'Custom Pin',
         zone: detected.zone,
         lat: clickLat,
@@ -15342,6 +15479,19 @@
         tva: tva ? { reservoir: tva.reservoir, recType: tva.recType, restricted: tva.restricted, url: tva.url } : null,
         tvaChecked: true
       };
+      // Preserve stand flag + owner meta on edit
+      if (isEdit) {
+        var prev = locations.find(function(l) { return String(l.id) === String(editingPinId); });
+        if (prev) {
+          if (prev.isStand) newLoc.isStand = true;
+          if (prev.ownerId) newLoc.ownerId = prev.ownerId;
+          if (prev.ownerName) newLoc.ownerName = prev.ownerName;
+          if (prev.createdAt) newLoc.createdAt = prev.createdAt;
+          newLoc.updatedAt = new Date().toISOString();
+        }
+      } else {
+        newLoc.createdAt = new Date().toISOString();
+      }
       if (selectedPinIconId) {
         pushPinIconRecent(selectedPinIconId);
         savePinIconScheme(selectedPinIconId, {
@@ -15350,25 +15500,46 @@
           icon: selectedPinGlyphColor
         });
       }
-      locations.push(newLoc);
-      const pins = JSON.parse(localStorage.getItem('alabama_hunt_custom_pins') || '[]');
-      pins.push(newLoc);
-      localStorage.setItem('alabama_hunt_custom_pins', JSON.stringify(pins));
+      if (isEdit) {
+        var idxL = locations.findIndex(function(l) { return String(l.id) === String(pinId); });
+        if (idxL >= 0) locations[idxL] = newLoc;
+        else locations.push(newLoc);
+        var pinsE = [];
+        try { pinsE = JSON.parse(localStorage.getItem('alabama_hunt_custom_pins') || '[]'); } catch (eE) { pinsE = []; }
+        if (!Array.isArray(pinsE)) pinsE = [];
+        var idxP = pinsE.findIndex(function(p) { return String(p.id) === String(pinId); });
+        if (idxP >= 0) pinsE[idxP] = newLoc;
+        else pinsE.push(newLoc);
+        localStorage.setItem('alabama_hunt_custom_pins', JSON.stringify(pinsE));
+      } else {
+        locations.push(newLoc);
+        const pins = JSON.parse(localStorage.getItem('alabama_hunt_custom_pins') || '[]');
+        pins.push(newLoc);
+        localStorage.setItem('alabama_hunt_custom_pins', JSON.stringify(pins));
+      }
       document.getElementById('pin-name-input').value = '';
       document.getElementById('pin-notes-input').value = '';
       selectedPinIconId = null;
+      editingPinId = null;
+      var saveBtn = document.querySelector('#dt-pin-form button[onclick="savePinFromMap()"]');
+      if (saveBtn) saveBtn.textContent = 'Save Pin';
       closeDetectionToast();
       clearMapDot();
       lastVisibleMarkerKey = '';
       updateAvailableList();
       drawPinsOnMap();
+      if (typeof refreshPinTypeToggles === 'function') refreshPinTypeToggles();
+      try {
+        if (typeof window.regSlayerMapDataChanged === 'function') window.regSlayerMapDataChanged();
+        else if (window.RegSlayerCloud && typeof window.RegSlayerCloud.markDirty === 'function') window.RegSlayerCloud.markDirty();
+      } catch (eCloudP) {}
       const tid = detected.zone === 'A' ? 10 : 11;
       const rule = rules.find(r => r.locId == tid) || rules[rules.length-1];
       usingCurrentLocation = false;
       isShowingCurrentData = false;
       isHistorical = getDaysFromToday(selectedDate) < 0;
       selectLocation(newLoc, rule);
-      alert('Pin "' + name + '" saved!' + (tva ? '\n\nMarked as TVA Undeveloped Recreation Land (' + tva.reservoir + ').' : ''));
+      alert((isEdit ? 'Pin updated: "' : 'Pin "') + name + (isEdit ? '"' : '" saved!') + (tva && !isEdit ? '\n\nMarked as TVA Undeveloped Recreation Land (' + tva.reservoir + ').' : ''));
     }
     function saveHuntFromMap() {
       const name = document.getElementById('hunt-name-input').value.trim();
@@ -15382,28 +15553,54 @@
       }
       const d = new Date(dateStr + 'T12:00:00');
       const w = generateSimulatedWeather(clickLat, clickLng, d);
+      var dayHL = typeof getDayHighLow === 'function' ? getDayHighLow(w) : { high: null, low: null };
       const newHunt = {
         id: 'hunt_' + Date.now(), name: name + (tva ? ' [TVA]' : ''), date: dateStr,
         lat: clickLat, lng: clickLng, color: selectedHuntColor, notes: notes,
         iconId: selectedHuntStandType || 'rifle_stand',
         temp: w.hourly.temperature_2m[7], windSpeed: w.hourly.wind_speed_10m[7], windDir: w.hourly.wind_direction_10m[7],
+        highTemp: dayHL.high, lowTemp: dayHL.low,
         tva: tva ? { reservoir: tva.reservoir, recType: tva.recType, restricted: tva.restricted } : null
       };
-      historicalHunts.push(newHunt);
-      localStorage.setItem('alabama_hunt_historical_hunts', JSON.stringify(historicalHunts));
-      document.getElementById('hunt-name-input').value = '';
-      document.getElementById('hunt-notes-input').value = '';
-      closeDetectionToast();
-      clearMapDot();
-      // Make sure past-hunt markers are visible so the new hunt can be clicked / deleted
-      var huntToggle = document.getElementById('toggle-prev-hunts-chk');
-      if (huntToggle) huntToggle.checked = true;
-      drawHuntsOnMap();
+      // Prefer live Open-Meteo high/low for that day when online
+      function finishHuntSave(hunt) {
+        historicalHunts.push(hunt);
+        localStorage.setItem('alabama_hunt_historical_hunts', JSON.stringify(historicalHunts));
+        document.getElementById('hunt-name-input').value = '';
+        document.getElementById('hunt-notes-input').value = '';
+        closeDetectionToast();
+        clearMapDot();
+        var huntToggle = document.getElementById('toggle-prev-hunts-chk');
+        if (huntToggle) huntToggle.checked = true;
+        if (typeof pinTypeVisibility !== 'undefined') pinTypeVisibility.past_hunts = true;
+        drawHuntsOnMap();
+        if (typeof refreshPinTypeToggles === 'function') refreshPinTypeToggles();
+        try {
+          if (typeof window.regSlayerMapDataChanged === 'function') window.regSlayerMapDataChanged();
+          else if (window.RegSlayerCloud && typeof window.RegSlayerCloud.markDirty === 'function') window.RegSlayerCloud.markDirty();
+        } catch (eHuntCloud) {}
+        var tempNote = (hunt.highTemp != null && hunt.lowTemp != null)
+          ? ('\nHigh ' + hunt.highTemp + '° / Low ' + hunt.lowTemp + '° on ' + dateStr)
+          : '';
+        alert('Hunt "' + name + '" logged!' + tempNote + (tva ? '\n\nOn TVA land: ' + tva.reservoir + '.' : ''));
+      }
       try {
-        if (typeof window.regSlayerMapDataChanged === 'function') window.regSlayerMapDataChanged();
-        else if (window.RegSlayerCloud && typeof window.RegSlayerCloud.markDirty === 'function') window.RegSlayerCloud.markDirty();
-      } catch (eHuntCloud) {}
-      alert('Hunt "' + name + '" logged!' + (tva ? '\n\nOn TVA land: ' + tva.reservoir + '.' : ''));
+        var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + clickLat + '&longitude=' + clickLng +
+          '&daily=temperature_2m_max,temperature_2m_min&timezone=America%2FChicago&start_date=' + dateStr + '&end_date=' + dateStr;
+        if (getDaysFromToday(d) < -5) {
+          url = 'https://archive-api.open-meteo.com/v1/archive?latitude=' + clickLat + '&longitude=' + clickLng +
+            '&daily=temperature_2m_max,temperature_2m_min&timezone=America%2FChicago&start_date=' + dateStr + '&end_date=' + dateStr;
+        }
+        fetch(url).then(function(r) { return r.ok ? r.json() : null; }).then(function(j) {
+          if (j && j.daily) {
+            if (j.daily.temperature_2m_max && j.daily.temperature_2m_max[0] != null) newHunt.highTemp = Math.round(j.daily.temperature_2m_max[0]);
+            if (j.daily.temperature_2m_min && j.daily.temperature_2m_min[0] != null) newHunt.lowTemp = Math.round(j.daily.temperature_2m_min[0]);
+          }
+          finishHuntSave(newHunt);
+        }).catch(function() { finishHuntSave(newHunt); });
+      } catch (eWx) {
+        finishHuntSave(newHunt);
+      }
     }
 
     function escHtml(s) {
@@ -15415,11 +15612,144 @@
       return String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     }
 
+    /** Pin-type visibility (Overlays → Pins). Keys: past_hunts | plain | stand | iconId */
+    var PIN_TYPE_VIS_KEY = 'reg_slayer_pin_type_vis_v1';
+    var pinTypeVisibility = (function() {
+      try {
+        var o = JSON.parse(localStorage.getItem(PIN_TYPE_VIS_KEY) || '{}');
+        return o && typeof o === 'object' ? o : {};
+      } catch (e) { return {}; }
+    })();
+    function isPinTypeVisible(key) {
+      if (pinTypeVisibility[key] === false) return false;
+      return true; // default on
+    }
+    function setPinTypeVisible(key, on) {
+      pinTypeVisibility[key] = !!on;
+      try { localStorage.setItem(PIN_TYPE_VIS_KEY, JSON.stringify(pinTypeVisibility)); } catch (e) {}
+      if (key === 'past_hunts') {
+        var chk = document.getElementById('toggle-prev-hunts-chk');
+        if (chk) chk.checked = !!on;
+      }
+      drawPinsOnMap();
+      drawHuntsOnMap();
+      refreshPinTypeToggles();
+    }
+    function setAllPinTypesVisible(on) {
+      var keys = collectPinTypeKeysOnMap();
+      keys.forEach(function(k) { pinTypeVisibility[k] = !!on; });
+      try { localStorage.setItem(PIN_TYPE_VIS_KEY, JSON.stringify(pinTypeVisibility)); } catch (e) {}
+      var chk = document.getElementById('toggle-prev-hunts-chk');
+      if (chk) chk.checked = !!on;
+      drawPinsOnMap();
+      drawHuntsOnMap();
+      refreshPinTypeToggles();
+    }
+    window.setAllPinTypesVisible = setAllPinTypesVisible;
+    window.setPinTypeVisible = setPinTypeVisible;
+
+    function pinTypeKeyForLoc(loc) {
+      if (!loc) return 'plain';
+      if (loc.isStand) return 'stand';
+      if (loc.iconId) return 'icon:' + loc.iconId;
+      return 'plain';
+    }
+    function pinTypeLabel(key) {
+      if (key === 'past_hunts') return 'Past hunts';
+      if (key === 'stand') return 'Stands';
+      if (key === 'plain') return 'Pins (no icon)';
+      if (key.indexOf('icon:') === 0) {
+        var id = key.slice(5);
+        var ic = typeof getPinIconById === 'function' ? getPinIconById(id) : null;
+        return (ic && ic.name) ? ic.name : id.replace(/_/g, ' ');
+      }
+      return key;
+    }
+    function collectPinTypeKeysOnMap() {
+      var keys = {};
+      locations.forEach(function(l) {
+        if (l && l.isPin) keys[pinTypeKeyForLoc(l)] = true;
+      });
+      if (historicalHunts && historicalHunts.length) keys.past_hunts = true;
+      // Always offer past hunts toggle if any ever saved
+      try {
+        var h = JSON.parse(localStorage.getItem('alabama_hunt_historical_hunts') || '[]');
+        if (Array.isArray(h) && h.length) keys.past_hunts = true;
+      } catch (e) {}
+      return Object.keys(keys).sort(function(a, b) {
+        if (a === 'past_hunts') return -1;
+        if (b === 'past_hunts') return 1;
+        return pinTypeLabel(a).localeCompare(pinTypeLabel(b));
+      });
+    }
+    function refreshPinTypeToggles() {
+      var host = document.getElementById('pin-type-toggles');
+      if (!host) return;
+      var keys = collectPinTypeKeysOnMap();
+      if (!keys.length) {
+        host.innerHTML = '<p class="settings-hint" style="margin:4px 0;font-size:11px;">No pins on this map yet.</p>';
+        return;
+      }
+      host.innerHTML = keys.map(function(k) {
+        var on = isPinTypeVisible(k);
+        var bg = k === 'past_hunts' ? '#3498db' : (k === 'stand' ? '#1f6f9f' : '#e59a18');
+        return '<button type="button" class="pl-toggle-btn' + (on ? ' on' : '') + '" data-pt="' + escHtml(k) +
+          '" style="background:' + bg + ';color:#fff;" onclick="togglePinTypeVis(this.getAttribute(\'data-pt\'))" aria-pressed="' +
+          (on ? 'true' : 'false') + '">' + escHtml(pinTypeLabel(k)) +
+          '<span class="pl-sub">' + (on ? 'on' : 'off') + '</span></button>';
+      }).join('');
+    }
+    function togglePinTypeVis(key) {
+      setPinTypeVisible(key, !isPinTypeVisible(key));
+    }
+    window.togglePinTypeVis = togglePinTypeVis;
+    window.refreshPinTypeToggles = refreshPinTypeToggles;
+
+    var editingPinId = null;
+
+    function openEditPin(id) {
+      var loc = locations.find(function(l) { return String(l.id) === String(id); });
+      if (!loc || !loc.isPin) return;
+      editingPinId = loc.id;
+      clickLat = loc.lat;
+      clickLng = loc.lng;
+      ensureHuntContext();
+      document.getElementById('dt-name').innerText = loc.name || 'Pin';
+      document.getElementById('dt-zone').innerText = '';
+      document.getElementById('dt-desc').innerText = 'Edit this pin.';
+      document.getElementById('dt-zone').style.display = 'none';
+      cancelToastForm();
+      document.getElementById('dt-main-actions').style.display = 'none';
+      document.getElementById('dt-hunt-form').style.display = 'none';
+      document.getElementById('dt-pin-form').style.display = 'block';
+      var bare = String(loc.name || '').replace(/\s*\(Pin - .*\)\s*$/, '');
+      document.getElementById('pin-name-input').value = bare;
+      document.getElementById('pin-notes-input').value = loc.notes || '';
+      selectedPinColor = loc.color || '#e59a18';
+      selectedPinInnerColor = loc.innerColor || '#f5f5f5';
+      selectedPinGlyphColor = loc.iconColor || '#000000';
+      selectedPinIconId = loc.iconId || null;
+      if (typeof selectPinColor === 'function') selectPinColor(selectedPinColor);
+      var inn = document.getElementById('pin-inner-color');
+      var gly = document.getElementById('pin-glyph-color');
+      if (inn) inn.value = selectedPinInnerColor;
+      if (gly) gly.value = selectedPinGlyphColor;
+      var cpI = document.getElementById('cp-pin-inner');
+      var cpG = document.getElementById('cp-pin-glyph');
+      if (cpI && typeof setColorPickerValue === 'function') setColorPickerValue(cpI, selectedPinInnerColor);
+      if (cpG && typeof setColorPickerValue === 'function') setColorPickerValue(cpG, selectedPinGlyphColor);
+      var saveBtn = document.querySelector('#dt-pin-form button[onclick="savePinFromMap()"]');
+      if (saveBtn) saveBtn.textContent = 'Save changes';
+      document.getElementById('detection-toast').classList.add('active');
+      if (map) map.closePopup();
+    }
+    window.openEditPin = openEditPin;
+
     function drawPinsOnMap() {
       if (!map || !pinMarkerGroup) return;
       pinMarkerGroup.clearLayers();
-      // Always show saved user pins so they can be reopened / deleted
       locations.filter(function(l) { return l.isPin; }).forEach(function(loc) {
+        if (!isPinTypeVisible(pinTypeKeyForLoc(loc))) return;
         var isStandPin = !!loc.isStand;
         var m = L.marker([loc.lat, loc.lng], {
           icon: L.divIcon({
@@ -15427,8 +15757,8 @@
             html: (typeof buildCustomPinMarkerHtml === 'function')
               ? buildCustomPinMarkerHtml(loc)
               : '<div style="background:' + (loc.color || (isStandPin ? '#1f6f9f' : '#e59a18')) + ';width:20px;height:20px;border-radius:50%;border:2px solid white;"></div>',
-            iconSize: [28, 36],
-            iconAnchor: [14, 34]
+            iconSize: [34, 42],
+            iconAnchor: [17, 40]
           })
         });
         var safeId = escJsStr(loc.id);
@@ -15437,6 +15767,7 @@
             '<div class="mdm-title">' + (isStandPin ? 'Stand' : 'Pin') + '</div>' +
             '<div class="mdm-sub">' + escHtml(loc.name) + '</div>' +
             '<button type="button" class="mdm-btn weather" onclick="event.preventDefault();event.stopPropagation();window.selectSavedPin(\'' + safeId + '\');return false;">Get weather</button>' +
+            '<button type="button" class="mdm-btn pin" onclick="event.preventDefault();event.stopPropagation();window.openEditPin(\'' + safeId + '\');return false;">Edit pin</button>' +
             '<button type="button" class="mdm-btn share" onclick="event.preventDefault();event.stopPropagation();window.shareSavedPinLocation(\'' + safeId + '\');return false;">Share location</button>' +
             '<button type="button" class="mdm-btn danger" onclick="event.preventDefault();event.stopPropagation();window.deletePin(\'' + safeId + '\');return false;">Delete ' + (isStandPin ? 'stand' : 'pin') + '</button>' +
           '</div>';
@@ -15450,16 +15781,22 @@
         });
         pinMarkerGroup.addLayer(m);
       });
+      if (typeof refreshPinTypeToggles === 'function') {
+        try { refreshPinTypeToggles(); } catch (eR) {}
+      }
     }
     function drawHuntsOnMap() {
       if (!map || !huntMarkerGroup) return;
       huntMarkerGroup.clearLayers();
-      if (!document.getElementById('toggle-prev-hunts-chk').checked) return;
+      var huntsOn = isPinTypeVisible('past_hunts');
+      var chk = document.getElementById('toggle-prev-hunts-chk');
+      if (chk) huntsOn = !!chk.checked && huntsOn;
+      if (!huntsOn && !isPinTypeVisible('past_hunts')) return;
+      if (!isPinTypeVisible('past_hunts')) return;
       historicalHunts.forEach(function(hunt) {
-        // Rifle / bow hunt uses stand pin art; color from hunt form
         var huntLoc = {
           color: hunt.color || '#3498db',
-          innerColor: hunt.innerColor || '#111111',
+          innerColor: hunt.innerColor || '#f5f5f5',
           iconColor: hunt.iconColor || '#000000',
           iconId: hunt.iconId || 'rifle_stand',
           name: hunt.name || 'Hunt'
@@ -15470,15 +15807,21 @@
             html: (typeof buildCustomPinMarkerHtml === 'function')
               ? buildCustomPinMarkerHtml(huntLoc)
               : '<div style="background:' + (hunt.color||'#3498db') + ';width:20px;height:20px;border-radius:50%;border:2px solid white;"></div>',
-            iconSize: [28, 36],
-            iconAnchor: [14, 34]
+            iconSize: [34, 42],
+            iconAnchor: [17, 40]
           })
         });
         var safeId = escJsStr(hunt.id);
+        var tempLine = '';
+        if (hunt.highTemp != null && hunt.lowTemp != null) {
+          tempLine = '<br>High ' + hunt.highTemp + '° / Low ' + hunt.lowTemp + '°';
+        } else if (hunt.temp != null) {
+          tempLine = '<br>Temp ~' + Math.round(hunt.temp) + '°';
+        }
         var popupHtml =
           '<div class="map-dot-menu" onclick="event.stopPropagation();">' +
             '<div class="mdm-title">Past hunt</div>' +
-            '<div class="mdm-sub">' + escHtml(hunt.name) + '<br>' + escHtml(hunt.date) + '</div>' +
+            '<div class="mdm-sub">' + escHtml(hunt.name) + '<br>' + escHtml(hunt.date) + tempLine + '</div>' +
             '<button type="button" class="mdm-btn danger" onclick="event.preventDefault();event.stopPropagation();window.deleteHunt(\'' + safeId + '\');return false;">Delete hunt</button>' +
           '</div>';
         m.bindPopup(popupHtml, { className: 'saved-item-popup map-dot-popup', closeButton: true, autoPan: false, maxWidth: 280, closeOnClick: false });
