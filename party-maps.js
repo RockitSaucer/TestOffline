@@ -1160,24 +1160,14 @@
     wireExtraSettings();
     installGpsColor();
     installDrawFilters();
-    // Restore sharing state
-    try {
-      var raw = localStorage.getItem(PRESENCE_KEY);
-      if (raw) {
-        var o = JSON.parse(raw);
-        if (o && o.on && o.started && (Date.now() - o.started) < MAX_SHARE_MS) {
-          shareStartedAt = o.started;
-          // resume only if still on that shared map
-          var vs = C.getViewState && C.getViewState();
-          if (vs && vs.mode === 'shared' && vs.sharedMapId === o.mapId) startSharing();
-          else localStorage.removeItem(PRESENCE_KEY);
-        }
-      }
-    } catch (e) {}
+    // Share location is OFF by default — do not auto-resume previous session
+    sharing = false;
+    try { localStorage.removeItem(PRESENCE_KEY); } catch (e) {}
+    updateShareLocBtn();
     setTimeout(function () {
       refreshMapsUi();
       pullPresence();
-      // presence poll when on shared
+      // presence poll when on shared (others' locations only; does not turn our share on)
       setInterval(function () {
         var vs = C.getViewState && C.getViewState();
         if (vs && vs.mode === 'shared' && document.visibilityState === 'visible') pullPresence();

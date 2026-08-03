@@ -1966,18 +1966,21 @@
       display: block;
       pointer-events: none;
       border-radius: 0;
-      /* Default: black silhouette on green */
-      filter: brightness(0);
-      opacity: 0.95;
+      /* Assets are already black silhouettes on transparent — no pin frame */
+      filter: none;
+      opacity: 1;
     }
     /* Measure / Draw: yellow silhouettes (tape & pencil) */
     .map-draw-tools #mdt-measure .mdt-icon-img,
     .map-draw-tools #mdt-draw .mdt-icon-img {
       filter: brightness(0) saturate(100%) invert(78%) sepia(72%) saturate(1200%) hue-rotate(2deg) brightness(1.08);
     }
-    /* Track: red silhouette always; pulses when tracking */
+    /* Track: red silhouette always; button pulses when tracking */
     .map-draw-tools #mdt-track .mdt-icon-img {
       filter: brightness(0) saturate(100%) invert(16%) sepia(95%) saturate(5000%) hue-rotate(348deg) brightness(1.05);
+    }
+    .map-layers-toggle-btn .mdt-icon-img {
+      filter: brightness(0) invert(1);
     }
     .map-draw-tools #mdt-track {
       background: var(--green, #486a2f);
@@ -2015,9 +2018,7 @@
     .map-layers-toggle-btn.mdt-icon-btn:hover {
       border-color: #9fd06a;
     }
-    .map-layers-toggle-btn .mdt-icon-img {
-      filter: brightness(0);
-    }
+
     .map-draw-tools .mdt-btn:disabled { opacity: 0.45; cursor: default; }
     /* Active tool chrome (Undo/Finish/Cancel) — top-left like v3.5 */
     .mdt-tools-panel {
@@ -5338,8 +5339,8 @@
               <span style="font-size:11px; font-weight:bold; color:var(--accent); text-transform:uppercase;">Save Spot as Pin</span>
               <input type="text" id="pin-name-input" class="toast-form-control" placeholder="Name (optional — defaults to pin type)">
               <div style="margin-top:6px;">
-                <button type="button" id="pin-icon-toggle" class="filter-btn" style="width:100%;font-size:11px;" onclick="togglePinIconPicker()">Choose pin icon (optional)</button>
-                <div id="pin-icon-picker" style="display:none;margin-top:6px;">
+                <span style="font-size:10px;color:var(--muted);font-weight:700;display:block;margin-bottom:4px;">Pin icon (optional)</span>
+                <div id="pin-icon-picker" style="display:block;margin-top:4px;">
                   <div id="pin-icon-recent" style="display:none;margin-bottom:6px;"></div>
                   <input type="search" id="pin-icon-search" class="toast-form-control" placeholder="Search icons..." oninput="renderPinIconGrid()" style="margin-bottom:6px;">
                   <div id="pin-icon-grid" class="pin-icon-grid"></div>
@@ -12346,6 +12347,7 @@
           document.getElementById('dt-hunt-form').style.display = 'none';
           document.getElementById('dt-pin-form').style.display = 'block';
           document.getElementById('detection-toast').classList.add('active');
+          if (typeof renderPinIconGrid === 'function') renderPinIconGrid();
           if (map) map.closePopup();
           setTimeout(function() {
             var inp = document.getElementById('pin-name-input');
@@ -15335,24 +15337,25 @@
     }
     /** CSS filter to recolor black silhouette to a hex (approx) — blood uses fixed red. */
     function pinIconColorFilter(hex, iconId) {
+      // Glyph-only assets (black/colored on transparent). No nested pin frame.
       if (iconId === 'blood') {
-        // Keep original blood artwork (always red) — pin outer/inner still customizable
-        return 'drop-shadow(0 0 1px rgba(255,255,255,0.9)) contrast(1.05)';
+        // Always red blood drop
+        return 'none';
       }
-      // Default: black silhouette with white halo for glanceability
       if (!hex || hex === '#000' || hex === '#000000') {
-        return 'brightness(0) drop-shadow(0 0 1px #fff) drop-shadow(0 0 1px #fff)';
+        return 'brightness(0)';
       }
       if (hex === '#fff' || hex === '#ffffff') {
-        return 'brightness(0) invert(1) drop-shadow(0 0 1px #000)';
+        return 'brightness(0) invert(1)';
       }
-      // Colored silhouette: black shape + colored drop-shadow stack reads as tinted icon
-      return 'brightness(0) drop-shadow(0 0 0 ' + hex + ') drop-shadow(0 0 0.6px ' + hex + ') drop-shadow(0 0 1px #fff)';
+      // Approximate tint of black silhouette
+      return 'brightness(0) drop-shadow(0 0 0 ' + hex + ')';
     }
     function pinIconMarkup(iconId, glyphColor, size) {
       var img = pinIconImageSrc(iconId);
       var s = size || 22;
       if (!img) return '';
+      // Glyph-only PNGs (pin frame already stripped) — color via filter
       var filt = pinIconColorFilter(glyphColor, iconId);
       return '<img src="' + img + '" width="' + s + '" height="' + s + '" alt="" draggable="false" ' +
         'style="filter:' + filt + ';opacity:1;display:block;object-fit:contain;">';
@@ -15363,10 +15366,10 @@
       var glyph = loc.iconColor || '#000000';
       var iconId = loc.iconId || null;
       if (iconId === 'blood') glyph = '#dc2626';
-      // +25% from previous 34×42 → ~43×53
+      // Custom pin body + inner disc; image is glyph-only (no nested black pin)
       var pinW = 43, pinH = 53, disc = 28, body = 38;
       var innerContent = iconId
-        ? pinIconMarkup(iconId, glyph, 20)
+        ? pinIconMarkup(iconId, glyph, 22)
         : '';
       return (
         '<div style="width:' + pinW + 'px;height:' + pinH + 'px;position:relative;">' +
@@ -15374,7 +15377,7 @@
             ';border:2.5px solid #fff;box-shadow:0 2px 7px rgba(0,0,0,0.55);position:absolute;left:2px;top:0;"></div>' +
           '<div style="position:absolute;left:7px;top:5px;width:' + disc + 'px;height:' + disc +
             'px;border-radius:50%;background:' + inner + ';border:1.5px solid rgba(0,0,0,0.35);' +
-            'display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.4);">' +
+            'display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.4);overflow:hidden;">' +
             innerContent +
           '</div>' +
         '</div>'
@@ -15383,9 +15386,8 @@
     function togglePinIconPicker() {
       var el = document.getElementById('pin-icon-picker');
       if (!el) return;
-      var show = el.style.display === 'none' || !el.style.display;
-      el.style.display = show ? 'block' : 'none';
-      if (show) renderPinIconGrid();
+      el.style.display = 'block';
+      renderPinIconGrid();
     }
     function clearSelectedPinIcon() {
       selectedPinIconId = null;
@@ -15777,6 +15779,7 @@
       document.getElementById('dt-main-actions').style.display = 'none';
       document.getElementById('dt-hunt-form').style.display = 'none';
       document.getElementById('dt-pin-form').style.display = 'block';
+      if (typeof renderPinIconGrid === 'function') renderPinIconGrid();
       var bare = String(loc.name || '').replace(/\s*\(Pin - .*\)\s*$/, '');
       document.getElementById('pin-name-input').value = bare;
       document.getElementById('pin-notes-input').value = loc.notes || '';
