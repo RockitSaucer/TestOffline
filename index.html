@@ -540,7 +540,27 @@
     .step-section { margin-bottom: 25px; transition: all 0.3s ease; }
     .step-section.locked { opacity: 0.35; pointer-events: none; filter: grayscale(70%); }
     .step-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-    .step-num { background: var(--border); color: var(--muted); width: 24px; height: 24px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 12px; font-weight: bold; }
+    .step-num {
+      background: var(--border);
+      color: var(--muted);
+      width: 26px;
+      height: 26px;
+      min-width: 26px;
+      min-height: 26px;
+      max-width: 26px;
+      max-height: 26px;
+      border-radius: 50%;
+      aspect-ratio: 1 / 1;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 12px;
+      font-weight: bold;
+      flex-shrink: 0;
+      box-sizing: border-box;
+      line-height: 1;
+      padding: 0;
+    }
     .active .step-num { background: var(--accent); color: #000; }
     .step-title { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
     .active .step-title { color: #fff; }
@@ -598,10 +618,17 @@
     .planner-mini-steps .step-num {
       width: 26px;
       height: 26px;
+      min-width: 26px;
+      min-height: 26px;
+      max-width: 26px;
+      max-height: 26px;
+      aspect-ratio: 1 / 1;
       font-size: 12px;
       background: var(--accent);
       color: #000;
       margin: 0;
+      border-radius: 50%;
+      flex-shrink: 0;
     }
     .planner-mini-label {
       font-size: 11px;
@@ -892,6 +919,71 @@
     .locations-in-step3 .location-item strong {
       font-size: 12px;
     }
+    /* Full-width available tracts under steps 1–3 */
+    .available-tracts-panel {
+      margin: 0 0 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--panel-light);
+      overflow: hidden;
+    }
+    .available-tracts-toggle {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border: none;
+      background: rgba(229, 154, 24, 0.1);
+      color: var(--ink);
+      cursor: pointer;
+      text-align: left;
+    }
+    .available-tracts-title {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+    }
+    .available-tracts-caret {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .available-tracts-body {
+      padding: 8px 10px 10px;
+    }
+    .available-tracts-panel.is-minimized .available-tracts-body {
+      display: none;
+    }
+    .available-tracts-panel .location-list {
+      max-height: min(340px, 38vh);
+    }
+    .selected-area-distance {
+      margin-top: 8px;
+      padding: 7px 9px;
+      border-radius: 6px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: #7dd3fc;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+    .db-distance-line { color: #7dd3fc; }
+    /* Desktop: scale planner chrome with viewport width */
+    html.layout-desktop .card-planner {
+      font-size: clamp(12px, 0.95vw, 15px);
+    }
+    html.layout-desktop .planner-row {
+      gap: clamp(8px, 1vw, 14px);
+    }
+    html.layout-desktop .step-section {
+      min-width: 0;
+    }
 
     .calendar-container {
       background: var(--panel-light);
@@ -912,23 +1004,34 @@
       gap: 6px;
       flex-shrink: 0;
     }
-    .calendar-header button {
+    .calendar-header button,
+    .calendar-header .cal-nav-btn {
       background: var(--green);
       color: white;
       border: none;
-      padding: 7px 12px;
+      padding: 5px 9px;
       border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
-      font-size: 13px;
+      font-size: 11px;
       flex-shrink: 0;
+      /* ~20% smaller than previous 7px/12px/13px chrome */
+      transform: scale(0.9);
+      transform-origin: center;
     }
     .calendar-header button:hover { background: var(--green-hover); }
-    .calendar-header h3 {
-      font-size: 14px !important;
+    .calendar-header h3,
+    #calendar-month-year {
+      margin: 0 !important;
+      flex: 1 1 auto;
+      min-width: 0;
+      text-align: center;
+      font-size: clamp(11px, 1.35vw, 15px) !important;
+      font-weight: 800 !important;
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      overflow: visible;
+      text-overflow: clip;
+      letter-spacing: -0.01em;
     }
     /* Square grid: width fills column; height matched in JS → taller when wider */
     .calendar-grid {
@@ -4323,6 +4426,32 @@
     .regs-modal-card a { color: var(--accent); }
     .regs-link-row { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
     .regs-link-btn { display: block; text-align: center; background: var(--panel-light); border: 1px solid var(--border); color: var(--ink); text-decoration: none; border-radius: 8px; padding: 9px 12px; font-size: 12px; font-weight: 600; }
+    /* Map-dot main actions: compact 2×2 grid (saves vertical space) */
+    .map-dot-menu .mdm-actions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .map-dot-menu .mdm-actions-grid .mdm-btn {
+      margin: 0;
+      padding: 8px 6px;
+      font-size: 11px;
+      line-height: 1.2;
+      min-height: 0;
+      white-space: normal;
+    }
+    .map-dot-menu .mdm-actions-below {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .map-dot-menu .mdm-actions-below .mdm-btn {
+      margin: 0;
+      padding: 8px 10px;
+      font-size: 11px;
+    }
     .regs-link-btn:hover { border-color: var(--accent); color: #fff; }
     .regs-link-btn.primary { background: rgba(229,154,24,0.15); border-color: var(--accent); color: var(--accent); }
     .regs-disclaimer { font-size: 11px; color: var(--muted); margin-top: 12px; line-height: 1.4; }
@@ -4375,6 +4504,10 @@
       <div class="regs-modal-section" id="regs-modal-oa-section" style="display:none;">
         <h4>Outdoor Alabama - this area</h4>
         <div class="regs-link-row" id="regs-modal-oa"></div>
+      </div>
+      <div class="regs-modal-section" id="regs-modal-area-map-section" style="display:none;">
+        <h4>Area rules &amp; map</h4>
+        <div class="regs-link-row" id="regs-modal-area-map"></div>
       </div>
       <p class="regs-disclaimer">Summary only for planning. Always verify the current AREA permit, refuge brochure, and full code before hunting. Seasons and weapons can change by year and unit.</p>
     </div>
@@ -4488,21 +4621,28 @@
               </div>
               <div id="dist-status">Using GPS when available · default 50 mi</div>
             </div>
-
-            <!-- List fills dead space under step-3 filters -->
-            <div class="locations-in-step3" id="locations-under-steps">
-              <div class="list-toolbar">
-                <div class="list-toolbar-left">
-                  <button class="filter-btn active" id="v-toggle-all" onclick="setViewFilterMode('all')">Show All</button>
-                  <button class="filter-btn" id="v-toggle-sel" onclick="setViewFilterMode('selected')">Selected</button>
-                  <button type="button" class="filter-btn" id="sort-by-btn" onclick="openSortHuntsModal()" title="Change list order">Sort by</button>
-                </div>
-                <button id="restore-hidden-btn" onclick="restoreAllHidden()" style="background:var(--green);border:none;color:#fff;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:10px;font-weight:bold;display:none;">Restore</button>
-                <span id="hidden-count-label" style="font-size:10px;color:var(--muted);"></span>
-              </div>
-              <div class="location-list" id="location-list"></div>
-            </div>
+            <div id="selected-area-distance" class="selected-area-distance" style="display:none;" aria-live="polite"></div>
           </div>
+        </div>
+      </div>
+
+      <!-- Available tracts: full width under steps 1–3 (collapsible, like steps) -->
+      <div class="available-tracts-panel" id="locations-under-steps">
+        <button type="button" class="available-tracts-toggle" id="available-tracts-toggle" onclick="toggleAvailableTractsMin()" aria-expanded="true" title="Minimize available tracts">
+          <span class="available-tracts-title">Available tracts / huntable areas</span>
+          <span class="available-tracts-caret" id="available-tracts-caret" aria-hidden="true">−</span>
+        </button>
+        <div class="available-tracts-body" id="available-tracts-body">
+          <div class="list-toolbar">
+            <div class="list-toolbar-left">
+              <button class="filter-btn active" id="v-toggle-all" onclick="setViewFilterMode('all')">Show All</button>
+              <button class="filter-btn" id="v-toggle-sel" onclick="setViewFilterMode('selected')">Selected</button>
+              <button type="button" class="filter-btn" id="sort-by-btn" onclick="openSortHuntsModal()" title="Change list order">Sort by</button>
+            </div>
+            <button id="restore-hidden-btn" onclick="restoreAllHidden()" style="background:var(--green);border:none;color:#fff;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:10px;font-weight:bold;display:none;">Restore</button>
+            <span id="hidden-count-label" style="font-size:10px;color:var(--muted);"></span>
+          </div>
+          <div class="location-list" id="location-list"></div>
         </div>
       </div>
 
@@ -4522,6 +4662,7 @@
           <h2 id="db-title">Location Name</h2>
           <span id="db-reg-summary" style="font-weight:bold;color:var(--accent);">Season Open Rules</span>
           <p id="db-subtitle" style="color:var(--muted);font-size:12.5px;margin:5px 0 0;">Area specifics</p>
+          <p id="db-distance-line" class="db-distance-line" style="display:none;margin:6px 0 0;font-size:13px;font-weight:700;color:#7dd3fc;"></p>
           <div id="weather-source-badge">Source: Open-Meteo</div>
           <!-- Hidden mirrors kept for any legacy references; live wind UI is on the map -->
           <div id="wind-speed-text" style="display:none;"></div>
@@ -6311,6 +6452,26 @@
         oa.innerHTML = '';
       }
 
+      // Area rules & map (ADCNR) — shown in regs modal (removed from map-dot stack to save space)
+      var areaMapSec = document.getElementById('regs-modal-area-map-section');
+      var areaMapEl = document.getElementById('regs-modal-area-map');
+      if (areaMapSec && areaMapEl) {
+        var mapRules = null;
+        try {
+          if (layerKey && layerKey !== 'private') {
+            mapRules = resolveAreaMapRulesLink(layerKey, name, attrs);
+          }
+        } catch (eMapR) { mapRules = null; }
+        if (mapRules && mapRules.url) {
+          areaMapSec.style.display = 'block';
+          areaMapEl.innerHTML = '<a class="regs-link-btn primary" href="' + String(mapRules.url).replace(/"/g, '&quot;') +
+            '" target="_blank" rel="noopener">' + String(mapRules.label || 'Area rules & map (ADCNR)').replace(/</g, '&lt;') + '</a>';
+        } else {
+          areaMapSec.style.display = 'none';
+          areaMapEl.innerHTML = '';
+        }
+      }
+
       document.getElementById('regs-modal').classList.add('active');
     }
 
@@ -6695,6 +6856,17 @@
           '</div>'
         );
       } catch (eRut) {}
+      // Distance from From-origin (GPS/ZIP/address) — miles only
+      try {
+        if (typeof clickLat === 'number' && typeof clickLng === 'number' &&
+            typeof distOriginLat === 'number' && typeof distOriginLng === 'number' &&
+            typeof getDistanceMiles === 'function') {
+          var miSt = getDistanceMiles(distOriginLat, distOriginLng, clickLat, clickLng);
+          if (miSt != null && isFinite(miSt)) {
+            lines.push('<div class="mhs-line" style="color:#7dd3fc;">' + miSt.toFixed(1) + ' mi from your From location</div>');
+          }
+        }
+      } catch (eDistSt) {}
       // closedReason omitted here — Can/Cannot (tense by selected date) already covers open/closed;
       // full detail lives in Rules & regs (saves popup space, less redundancy).
       if (selectedWeapon) {
@@ -11194,20 +11366,12 @@
       var statusBlock = st ? buildHuntStatusBannerHtml(st) : '';
       var hasPublicLand = !!(pl && pl.name && pl.layer);
 
-      // Public-land area map link (unique info — not in the status banner)
-      var areaMapBtn = '';
+      // Ensure regs cache has public-land entry so Rules & regs can show ADCNR area map link
       if (hasPublicLand) {
         window.__regsCache = window.__regsCache || {};
         if (!pl.cacheId || !window.__regsCache[pl.cacheId]) {
           pl.cacheId = cachePublicLandRegs(pl.layer, pl.attrs || {}, pl.name);
         }
-        var mapRules = resolveAreaMapRulesLink(pl.layer, pl.name, pl.attrs || {});
-        var mapHref = String(mapRules.url || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
-        var mapLabel = String(mapRules.label || 'Area map & rules').replace(/&/g, '&amp;').replace(/</g, '&lt;');
-        areaMapBtn =
-          '<a href="' + mapHref + '" target="_blank" rel="noopener" class="mdm-btn" style="display:block;text-align:center;text-decoration:none;box-sizing:border-box;margin-top:0;background:#374151;" onclick="event.stopPropagation();">' +
-            mapLabel +
-          '</a>';
       }
 
       var regsHandler = hasPublicLand
@@ -11224,26 +11388,31 @@
           '<div class="map-dot-menu" onclick="event.stopPropagation();">' +
             statusBlock +
             '<div class="mdm-title">Add to this spot</div>' +
-            '<div class="mdm-sub">Choose what you want to save</div>' +
-            '<button type="button" class="mdm-btn pin" onclick="event.preventDefault();event.stopPropagation();window.handleMapDotAction(\'pin\');return false;">Pin</button>' +
-            '<button type="button" class="mdm-btn hunt" onclick="event.preventDefault();event.stopPropagation();window.handleMapDotAction(\'hunt\');return false;">Hunt</button>' +
-            '<button type="button" class="mdm-btn stand" onclick="event.preventDefault();event.stopPropagation();window.handleMapDotAction(\'stand\');return false;">Stand</button>' +
+            '<div class="mdm-sub">Add hunt, add stand, or add pin</div>' +
+            '<div class="mdm-actions-grid">' +
+            '<button type="button" class="mdm-btn hunt" onclick="event.preventDefault();event.stopPropagation();window.handleMapDotAction(\'hunt\');return false;">Add hunt</button>' +
+            '<button type="button" class="mdm-btn stand" onclick="event.preventDefault();event.stopPropagation();window.handleMapDotAction(\'stand\');return false;">Add stand</button>' +
+            '<button type="button" class="mdm-btn pin" onclick="event.preventDefault();event.stopPropagation();window.handleMapDotAction(\'pin\');return false;">Add pin</button>' +
             '<button type="button" class="mdm-btn" style="background:#3a4234;" onclick="event.preventDefault();event.stopPropagation();window.handleMapDotAction(\'add-back\');return false;">Back</button>' +
+            '</div>' +
           '</div>'
         );
       }
 
-      // Main menu: share always last (bottom). GPS uses same actions, different share label.
+      // Main menu: 2×2 primary actions; offline + share below. ADCNR area map lives in Rules & regs.
       return (
         '<div class="map-dot-menu" onclick="event.stopPropagation();">' +
           statusBlock +
           '<div class="mdm-title">What do you want to do?</div>' +
+          '<div class="mdm-actions-grid">' +
           '<button type="button" class="mdm-btn regs" onclick="event.preventDefault();event.stopPropagation();' + regsHandler + ';return false;">Rules &amp; regs</button>' +
           '<button type="button" class="mdm-btn weather" onclick="event.preventDefault();event.stopPropagation();' + weatherHandler + ';return false;">Get weather</button>' +
-          areaMapBtn +
-          '<button type="button" class="mdm-btn pin" onclick="event.preventDefault();event.stopPropagation();window.handleMapDotAction(\'add-menu\');return false;">Add Pin</button>' +
-          '<button type="button" class="mdm-btn" style="background:#1a4a5c;" onclick="event.preventDefault();event.stopPropagation();window.handleMapDotAction(\'offline-save\');return false;">Save map offline (2 mi)</button>' +
+          '<button type="button" class="mdm-btn pin" onclick="event.preventDefault();event.stopPropagation();window.handleMapDotAction(\'add-menu\');return false;">Add pin</button>' +
+          '<button type="button" class="mdm-btn" style="background:#1a4a5c;" onclick="event.preventDefault();event.stopPropagation();window.handleMapDotAction(\'offline-save\');return false;">Offline map</button>' +
+          '</div>' +
+          '<div class="mdm-actions-below">' +
           '<button type="button" class="mdm-btn share" onclick="event.preventDefault();event.stopPropagation();window.handleMapDotAction(\'share\');return false;">' + shareLabel + '</button>' +
+          '</div>' +
         '</div>'
       );
     }
@@ -11711,19 +11880,22 @@
         }
 
         if (act === 'stand') {
-          if (!selectedLocationId || selectedLocationId === 9999) {
-            alert('Select a hunt area in the list first, then use Add stand on the map spot.');
-            return false;
-          }
-          var loc = locations.find(function(l) { return String(l.id) === String(selectedLocationId); });
-          if (!loc || loc.type === 'Current Location') {
-            alert('Select a WMA, refuge, or other hunt area first.');
-            return false;
-          }
+          // Stand is like any other pin — no WMA/list selection required
           var standName = prompt('Stand / blind name:');
           if (!standName || !standName.trim()) return false;
-          standPlaceMode = { locId: loc.id, name: standName.trim() };
-          placeStandAt(clickLat, clickLng);
+          var attachedLoc = null;
+          if (selectedLocationId && selectedLocationId !== 9999) {
+            attachedLoc = locations.find(function(l) {
+              return String(l.id) === String(selectedLocationId) &&
+                l.type !== 'Current Location' && !l.isPin && !l.isStand;
+            }) || null;
+          }
+          if (attachedLoc) {
+            standPlaceMode = { locId: attachedLoc.id, name: standName.trim() };
+            placeStandAt(clickLat, clickLng);
+          } else {
+            saveFreeStandAt(clickLat, clickLng, standName.trim());
+          }
           if (map) map.closePopup();
           return false;
         }
@@ -14731,10 +14903,13 @@
       // Always show saved user pins so they can be reopened / deleted
       locations.filter(function(l) { return l.isPin; }).forEach(function(loc) {
         var letter = getFirstLetter(loc.name);
+        var isStandPin = !!loc.isStand;
+        var pinColor = loc.color || (isStandPin ? '#1f6f9f' : '#e59a18');
+        var pinLabel = isStandPin ? 'S' : letter;
         var m = L.marker([loc.lat, loc.lng], {
           icon: L.divIcon({
             className: '',
-            html: '<div style="background:' + (loc.color||'#e59a18') + ';width:20px;height:20px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:bold;box-shadow:0 1px 5px rgba(0,0,0,0.45);">' + letter + '</div>',
+            html: '<div style="background:' + pinColor + ';width:20px;height:20px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:bold;box-shadow:0 1px 5px rgba(0,0,0,0.45);">' + pinLabel + '</div>',
             iconSize: [20, 20],
             iconAnchor: [10, 10]
           })
@@ -14742,11 +14917,11 @@
         var safeId = escJsStr(loc.id);
         var popupHtml =
           '<div class="map-dot-menu" onclick="event.stopPropagation();">' +
-            '<div class="mdm-title">Pin</div>' +
+            '<div class="mdm-title">' + (isStandPin ? 'Stand' : 'Pin') + '</div>' +
             '<div class="mdm-sub">' + escHtml(loc.name) + '</div>' +
             '<button type="button" class="mdm-btn weather" onclick="event.preventDefault();event.stopPropagation();window.selectSavedPin(\'' + safeId + '\');return false;">Get weather</button>' +
             '<button type="button" class="mdm-btn share" onclick="event.preventDefault();event.stopPropagation();window.shareSavedPinLocation(\'' + safeId + '\');return false;">Share location</button>' +
-            '<button type="button" class="mdm-btn danger" onclick="event.preventDefault();event.stopPropagation();window.deletePin(\'' + safeId + '\');return false;">Delete pin</button>' +
+            '<button type="button" class="mdm-btn danger" onclick="event.preventDefault();event.stopPropagation();window.deletePin(\'' + safeId + '\');return false;">Delete ' + (isStandPin ? 'stand' : 'pin') + '</button>' +
           '</div>';
         m.bindPopup(popupHtml, { className: 'saved-item-popup map-dot-popup', closeButton: true, autoPan: false, maxWidth: 280, closeOnClick: false });
         m.on('popupopen', function() {
@@ -14819,6 +14994,25 @@
       selectLocationById(id, { closePopup: true, showOverlay: isMapFullscreen() });
     }
     window.selectSavedPin = selectSavedPin;
+    function buildWaterGaugePopupHtml(st) {
+      var isFlood = st.baseHeight >= st.floodStage;
+      return (
+        '<div class="gauge-detail-popup" style="min-width:200px;max-width:280px;">' +
+          '<div style="font-size:11px;font-weight:800;color:#00838f;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:4px;">USGS Stream Gauge</div>' +
+          '<div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:8px;">' + String(st.name || '').replace(/</g, '&lt;') + '</div>' +
+          '<div style="font-size:12px;line-height:1.5;">' +
+            'Gage height: <strong>' + (st.baseHeight != null ? st.baseHeight.toFixed(2) : '—') + ' ft</strong><br>' +
+            'Discharge: <strong>' + (st.cfs != null ? Math.round(st.cfs) + ' cfs' : '—') + '</strong><br>' +
+            'Trend: <strong>' + String(st.trend || '—').replace(/</g, '&lt;') + '</strong>' +
+            (st.floodStage != null ? '<br>Flood stage: <strong>' + st.floodStage.toFixed(1) + ' ft</strong>' : '') +
+            (isFlood ? '<br><span style="color:#f87171;font-weight:800;">Flooding!</span>' : '') +
+          '</div>' +
+          '<a href="https://waterdata.usgs.gov/nwis/uv?site_no=' + encodeURIComponent(st.id) +
+            '" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;font-size:11px;font-weight:700;color:#38bdf8;">Open USGS page ↗</a>' +
+        '</div>'
+      );
+    }
+
     function drawWaterGaugesOnMap(force) {
       if (!map || !gaugeMarkerGroup) return;
       if (!force && gaugesDrawn) return;
@@ -14826,8 +15020,19 @@
       waterGauges.forEach(function(st) {
         var isFlood = st.baseHeight >= st.floodStage;
         var m = L.marker([st.lat, st.lng], { icon: L.divIcon({ className: '', html: '<div style="background:' + (isFlood?'var(--danger)':'var(--water-cyan)') + ';width:16px;height:16px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:9px;color:#000;font-weight:bold;">~</div>', iconSize:[16,16], iconAnchor:[8,8] }) });
-        m.bindPopup('<strong style="color:#00838f;">USGS Stream Gauge</strong><br><strong>' + st.name + '</strong><br>Gage Height: <strong>' + st.baseHeight.toFixed(2) + ' ft</strong><br>Discharge: <strong>' + Math.round(st.cfs) + ' cfs</strong><br>Trend: <strong>' + st.trend + '</strong>' + (isFlood ? '<br><span style="color:red;font-weight:bold;">Flooding!</span>' : '') + '<br><a href="https://waterdata.usgs.gov/nwis/uv?site_no=' + st.id + '" target="_blank" style="font-size:10px;color:#00838f;">View USGS Page</a>');
-        m.on('click', function() {
+        var popupHtml = buildWaterGaugePopupHtml(st);
+        // Fullscreen: Leaflet popup on the gauge. Min mode: still open popup (above weather when both show).
+        m.bindPopup(popupHtml, {
+          className: 'saved-item-popup map-dot-popup gauge-popup',
+          closeButton: true,
+          autoPan: true,
+          maxWidth: 300,
+          minWidth: 200,
+          closeOnClick: false
+        });
+        m.on('click', function(ev) {
+          if (ev && ev.originalEvent) L.DomEvent.stopPropagation(ev.originalEvent);
+          try { m.openPopup(); } catch (ePop) {}
           var detected = detectBoundaryAndZone(st.lat, st.lng);
           var fakeLoc = { id: st.id, name: st.name, type: 'Water Station', zone: detected.zone, lat: st.lat, lng: st.lng, subSections: [], isWaterGauge: true, gaugeData: st };
           var dateStr = selectedDate ? selectedDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
@@ -14835,7 +15040,10 @@
           usingCurrentLocation = false;
           isShowingCurrentData = false;
           isHistorical = getDaysFromToday(selectedDate) < 0;
-          selectLocation(fakeLoc, rule);
+          // Keep popup open; still load weather/water panel when not fullscreen
+          if (!isMapFullscreen()) {
+            selectLocation(fakeLoc, rule);
+          }
         });
         gaugeMarkerGroup.addLayer(m);
       });
@@ -16806,6 +17014,11 @@
       document.getElementById('db-reg-summary').innerText = 'Open Season: ' + rule.weapon + ' (' + (rule.target||'State limits') + ')';
       document.getElementById('db-rules-text').innerText = rule.notes || 'Wear hunter orange. Submit harvests within 48 hours.';
 
+      // Distance (miles) under dashboard title + under steps (left panel)
+      try {
+        updateSelectedAreaDistance(location, lat, lng);
+      } catch (eDistUi) {}
+
       // TVA land notice for this spot (uses pin data if already known, else async lookup)
       if (location.tva && location.tvaChecked) {
         setTvaNoteEl('db-tva-note', location.tva);
@@ -17023,6 +17236,69 @@
     }
     window.cancelStandPlacement = cancelStandPlacement;
 
+    /** Distance (miles only) for selected huntable area — left under steps + dashboard. */
+    function updateSelectedAreaDistance(location, lat, lng) {
+      var stepEl = document.getElementById('selected-area-distance');
+      var dbEl = document.getElementById('db-distance-line');
+      var la = lat != null ? Number(lat) : (location && location.lat != null ? Number(location.lat) : null);
+      var ln = lng != null ? Number(lng) : (location && location.lng != null ? Number(location.lng) : null);
+      var txt = '';
+      if (la != null && ln != null && !isNaN(la) && !isNaN(ln) &&
+          typeof distOriginLat === 'number' && typeof distOriginLng === 'number' &&
+          typeof getDistanceMiles === 'function') {
+        var mi = getDistanceMiles(distOriginLat, distOriginLng, la, ln);
+        if (mi != null && isFinite(mi)) {
+          txt = mi.toFixed(1) + ' mi from your From location';
+        }
+      }
+      if (stepEl) {
+        if (txt) {
+          stepEl.style.display = 'block';
+          stepEl.textContent = txt;
+        } else {
+          stepEl.style.display = 'none';
+          stepEl.textContent = '';
+        }
+      }
+      if (dbEl) {
+        if (txt) {
+          dbEl.style.display = 'block';
+          dbEl.textContent = txt;
+        } else {
+          dbEl.style.display = 'none';
+          dbEl.textContent = '';
+        }
+      }
+    }
+    window.updateSelectedAreaDistance = updateSelectedAreaDistance;
+
+    function toggleAvailableTractsMin() {
+      var panel = document.getElementById('locations-under-steps');
+      var btn = document.getElementById('available-tracts-toggle');
+      var caret = document.getElementById('available-tracts-caret');
+      if (!panel) return;
+      var min = !panel.classList.contains('is-minimized');
+      panel.classList.toggle('is-minimized', min);
+      if (btn) btn.setAttribute('aria-expanded', min ? 'false' : 'true');
+      if (caret) caret.textContent = min ? '+' : '−';
+      try {
+        localStorage.setItem('reg_slayer_tracts_min', min ? '1' : '0');
+      } catch (eT) {}
+    }
+    window.toggleAvailableTractsMin = toggleAvailableTractsMin;
+
+    function applyAvailableTractsMinState() {
+      var panel = document.getElementById('locations-under-steps');
+      var btn = document.getElementById('available-tracts-toggle');
+      var caret = document.getElementById('available-tracts-caret');
+      if (!panel) return;
+      var min = false;
+      try { min = localStorage.getItem('reg_slayer_tracts_min') === '1'; } catch (e0) {}
+      panel.classList.toggle('is-minimized', min);
+      if (btn) btn.setAttribute('aria-expanded', min ? 'false' : 'true');
+      if (caret) caret.textContent = min ? '+' : '−';
+    }
+
     function startStandPlacement(locId, standName) {
       var loc = locations.find(function(l) { return String(l.id) === String(locId); });
       if (!loc) return;
@@ -17043,10 +17319,21 @@
 
     function placeStandAt(lat, lng) {
       if (!standPlaceMode) return;
-      var loc = locations.find(function(l) { return String(l.id) === String(standPlaceMode.locId); });
       var standName = standPlaceMode.name;
-      if (!loc || lat == null || lng == null) {
+      if (lat == null || lng == null) {
         cancelStandPlacement();
+        return;
+      }
+      // Free stand (no parent WMA) — same rules as pins
+      if (standPlaceMode.free || !standPlaceMode.locId) {
+        cancelStandPlacement();
+        saveFreeStandAt(lat, lng, standName);
+        return;
+      }
+      var loc = locations.find(function(l) { return String(l.id) === String(standPlaceMode.locId); });
+      if (!loc) {
+        cancelStandPlacement();
+        saveFreeStandAt(lat, lng, standName);
         return;
       }
       if (!loc.subSections) loc.subSections = [];
@@ -17067,20 +17354,63 @@
     }
     window.placeStandAt = placeStandAt;
 
+    /**
+     * Free stand (no parent WMA) — same storage pattern as custom pins, classified as stand.
+     */
+    function saveFreeStandAt(lat, lng, name) {
+      if (lat == null || lng == null) return;
+      var standId = 'stand_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+      var entry = {
+        id: standId,
+        name: name || 'Stand',
+        lat: lat,
+        lng: lng,
+        isPin: true,
+        isStand: true,
+        color: '#1f6f9f',
+        notes: '',
+        createdAt: new Date().toISOString()
+      };
+      locations.push(entry);
+      try {
+        var pins = JSON.parse(localStorage.getItem('alabama_hunt_custom_pins') || '[]');
+        if (!Array.isArray(pins)) pins = [];
+        pins.push(entry);
+        localStorage.setItem('alabama_hunt_custom_pins', JSON.stringify(pins));
+      } catch (eSave) {}
+      drawPinsOnMap();
+      updateAvailableList();
+      if (map && typeof L !== 'undefined') {
+        L.popup().setLatLng([lat, lng]).setContent('<strong>' + String(name || 'Stand').replace(/</g, '&lt;') + '</strong><br>Stand saved').openOn(map);
+        setTimeout(function() { if (map) map.closePopup(); }, 1600);
+      }
+    }
+    window.saveFreeStandAt = saveFreeStandAt;
+
     function promptAddSubsection() {
-      if (!selectedLocationId) {
-        alert('Select a hunt location first, then add a stand.');
-        return;
-      }
-      var loc = locations.find(function(l) { return String(l.id) === String(selectedLocationId); });
-      if (!loc) return;
-      if (loc.id === 9999 || loc.type === 'Current Location') {
-        alert('Pick a WMA, refuge, or other hunt area before adding a stand.');
-        return;
-      }
       var name = prompt('Stand / blind name:');
       if (!name || !name.trim()) return;
-      startStandPlacement(loc.id, name.trim());
+      var loc = null;
+      if (selectedLocationId && selectedLocationId !== 9999) {
+        loc = locations.find(function(l) {
+          return String(l.id) === String(selectedLocationId) &&
+            l.type !== 'Current Location' && !l.isPin && !l.isStand;
+        }) || null;
+      }
+      if (loc) {
+        // Optional: attach to selected hunt area if one is selected
+        startStandPlacement(loc.id, name.trim());
+      } else {
+        // No area required — place free stand on next map click
+        standPlaceMode = { locId: null, name: name.trim(), free: true };
+        var banner = document.getElementById('stand-place-banner');
+        var bannerText = document.getElementById('stand-place-banner-text');
+        var wrap = document.querySelector('.map-wrapper');
+        if (banner) banner.classList.add('active');
+        if (banner) banner.style.display = 'flex';
+        if (bannerText) bannerText.textContent = 'Click the map to place stand “' + name.trim() + '”';
+        if (wrap) wrap.classList.add('stand-placing');
+      }
     }
     window.promptAddSubsection = promptAddSubsection;
 
@@ -17713,6 +18043,7 @@
       if (typeof updateBottomBarContext === 'function') updateBottomBarContext();
       if (typeof updateSortByButtonLabel === 'function') updateSortByButtonLabel();
       if (typeof applyPlannerStepsMinState === 'function') applyPlannerStepsMinState();
+      if (typeof applyAvailableTractsMinState === 'function') applyAvailableTractsMinState();
       // Phone: second pass after fonts/layout so calendar + map fill width on launch
       requestAnimationFrame(function() {
         syncPlannerCalendarSquare();
