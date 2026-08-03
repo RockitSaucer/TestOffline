@@ -1,6 +1,7 @@
 """Isolate toolbar tool glyphs from HuntApp Tool Icons → transparent PNGs.
 
 Same background-removal pipeline as process_pin_icons.py.
+Full rules: docs/PIN_AND_TOOL_ICONS.md (and TestOffline/AGENTS.md).
 """
 from __future__ import annotations
 

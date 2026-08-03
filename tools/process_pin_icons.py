@@ -1,9 +1,15 @@
 """Isolate pin glyphs from HuntApp Layers naked JPGs → clean transparent PNGs.
 
+CANONICAL PROCEDURE for new hunt-app / TestOffline map pins:
+  docs/PIN_AND_TOOL_ICONS.md  (and TestOffline/AGENTS.md)
+
 Aggressive white/background removal:
   1) Flood-fill from image edges (any light / near-bg fringe)
   2) Global pass: kill remaining high-luminance, low-saturation pixels
   3) Crop tight, fit square with almost no padding so glyphs can fill the pin
+
+After running this script, update PIN_ICON_CATALOG in index.html from
+icons/pins/_catalog.json and bump sw.js SHELL_CACHE.
 """
 from __future__ import annotations
 

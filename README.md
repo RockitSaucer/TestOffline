@@ -43,6 +43,14 @@ python -m http.server 8080
 # then open http://localhost:8080/
 ```
 
+## Custom pins & toolbar icons
+
+How pins and tool icons are built (background strip, catalog, defaults) is documented for agents and future work:
+
+- **[`docs/PIN_AND_TOOL_ICONS.md`](docs/PIN_AND_TOOL_ICONS.md)** — full pipeline  
+- **[`AGENTS.md`](AGENTS.md)** — short agent checklist  
+- Scripts: `tools/process_pin_icons.py`, `tools/process_tool_icons.py`
+
 ## Production note
 
 **Hunt-Slayer** (and any `to deploy/Hunt_app4.x` folders) are intentionally **unchanged**.  
