@@ -974,6 +974,34 @@
       line-height: 1.35;
     }
     .db-distance-line { color: #7dd3fc; }
+    .pin-icon-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 4px;
+      max-height: 140px;
+      overflow: auto;
+    }
+    .pin-icon-grid button {
+      aspect-ratio: 1;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--panel);
+      color: var(--ink);
+      font-size: 9px;
+      padding: 2px;
+      cursor: pointer;
+      line-height: 1.1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+    }
+    .pin-icon-grid button.selected {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+    .pin-icon-grid button svg { width: 16px; height: 16px; }
     /* Desktop: scale planner chrome with viewport width */
     html.layout-desktop .card-planner {
       font-size: clamp(12px, 0.95vw, 15px);
@@ -5017,7 +5045,21 @@
               <span style="font-size:11px; font-weight:bold; color:var(--accent); text-transform:uppercase;">Save Spot as Pin</span>
               <input type="text" id="pin-name-input" class="toast-form-control" placeholder="Pin Name...">
               <div style="margin-top:6px;">
-                <span style="font-size:11px; color:var(--muted);">Color:</span>
+                <button type="button" id="pin-icon-toggle" class="filter-btn" style="width:100%;font-size:11px;" onclick="togglePinIconPicker()">Choose pin icon (optional)</button>
+                <div id="pin-icon-picker" style="display:none;margin-top:6px;">
+                  <div id="pin-icon-recent" style="display:none;margin-bottom:6px;"></div>
+                  <input type="search" id="pin-icon-search" class="toast-form-control" placeholder="Search icons..." oninput="renderPinIconGrid()" style="margin-bottom:6px;">
+                  <div id="pin-icon-grid" class="pin-icon-grid"></div>
+                  <button type="button" class="filter-btn" style="width:100%;margin-top:6px;font-size:10px;" onclick="clearSelectedPinIcon()">No icon (plain pin)</button>
+                </div>
+              </div>
+              <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+                <label style="font-size:10px;color:var(--muted);">Pin <input type="color" id="pin-outer-color" value="#e59a18" onchange="onPinColorInputsChange()" style="width:28px;height:22px;border:none;background:transparent;vertical-align:middle;"></label>
+                <label style="font-size:10px;color:var(--muted);">Inside <input type="color" id="pin-inner-color" value="#111111" onchange="onPinColorInputsChange()" style="width:28px;height:22px;border:none;background:transparent;vertical-align:middle;"></label>
+                <label style="font-size:10px;color:var(--muted);">Icon <input type="color" id="pin-glyph-color" value="#ffffff" onchange="onPinColorInputsChange()" style="width:28px;height:22px;border:none;background:transparent;vertical-align:middle;"></label>
+              </div>
+              <div style="margin-top:6px;">
+                <span style="font-size:11px; color:var(--muted);">Quick color:</span>
                 <div class="color-picker" id="cp-pin" data-input-id="pin-color-value" data-initial="#e59a18" data-bind-var="selectedPinColor"></div>
                 <input type="hidden" id="pin-color-value" value="#e59a18" />
               </div>
@@ -5029,6 +5071,10 @@
             </div>
             <div id="dt-hunt-form" style="display:none; margin-top:8px; border-top:1px solid var(--border); padding-top:8px;">
               <span style="font-size:11px; font-weight:bold; color:var(--blue-refuge); text-transform:uppercase;">Log Past Hunt</span>
+              <div id="hunt-stand-type-row" style="display:flex;gap:6px;margin:6px 0;">
+                <button type="button" class="filter-btn active" id="hunt-stand-rifle" onclick="setHuntStandType('rifle_stand')" style="flex:1;font-size:11px;">Rifle Stand</button>
+                <button type="button" class="filter-btn" id="hunt-stand-bow" onclick="setHuntStandType('bow_stand')" style="flex:1;font-size:11px;">Bow Stand</button>
+              </div>
               <input type="text" id="hunt-name-input" class="toast-form-control" placeholder="Hunt Title...">
               <input type="date" id="hunt-date-input" class="toast-form-control">
               <div style="margin-top:6px;">
@@ -14803,6 +14849,8 @@
       selectedPinColor = c;
       var root = document.getElementById('cp-pin');
       if (root) setColorPickerValue(root, c);
+      var outer = document.getElementById('pin-outer-color');
+      if (outer) outer.value = c;
     }
     function selectHuntColor(c) {
       selectedHuntColor = c;
@@ -14811,6 +14859,192 @@
     }
     window.selectPinColor = selectPinColor;
     window.selectHuntColor = selectHuntColor;
+
+    // ---- Custom pin icons (#8) ----
+    var PIN_ICON_CATALOG = [
+      { id: 'blood', name: 'Blood', d: 'M12 3c-2 4-5 6.5-5 10a5 5 0 0 0 10 0c0-3.5-3-6-5-10z' },
+      { id: 'buck', name: 'Buck', d: 'M8 10c0-2 1.8-4 4-4s4 2 4 4c1.2.4 2 1.6 2 3s-1.2 3-3 3h-6c-1.8 0-3-1.6-3-3s.8-2.6 2-3z' },
+      { id: 'doe', name: 'Doe', d: 'M9 10c0-1.7 1.3-3 3-3s3 1.3 3 3c1 .4 1.8 1.4 1.8 2.6S15 16 13.2 16H10.8C9 16 8 14.8 8 13.6S8 10.4 9 10z' },
+      { id: 'rifle_stand', name: 'Rifle Stand', d: 'M6 18h12v1.5H6V18zm5-2V7l-3 2V7l4-3 4 3v2l-3-2v9h-2z' },
+      { id: 'bow_stand', name: 'Bow Stand', d: 'M12 4v16M8 7c3 2 5 2 8 0M8 17c3-2 5-2 8 0M10 12h4' },
+      { id: 'scrape', name: 'Scrape', d: 'M5 16c2-4 4-6 7-6s5 2 7 6M9 10l1-3 2 1 2-1 1 3' },
+      { id: 'rub', name: 'Rub', d: 'M12 4v16M9 7l3-2 3 2M9 17l3 2 3-2M8 12h8' },
+      { id: 'feeder', name: 'Feeder', d: 'M8 6h8v3H8V6zm1 3h6l1 10H8l1-10z' },
+      { id: 'camera', name: 'Camera', d: 'M8 8h2l1-1.5h2L14 8h2a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2zm4 2.5a2.5 2.5 0 1 0 .001 5.001A2.5 2.5 0 0 0 12 10.5z' },
+      { id: 'blind', name: 'Blind', d: 'M4 18h16L12 5 4 18zm8-4v3' },
+      { id: 'creek', name: 'Creek', d: 'M4 8c2 1 3 1 5 0s3-1 5 0 3 1 5 0M4 12c2 1 3 1 5 0s3-1 5 0 3 1 5 0M4 16c2 1 3 1 5 0s3-1 5 0 3 1 5 0' },
+      { id: 'road', name: 'Road', d: 'M8 4h8l2 16H6L8 4zm4 2v2m0 3v2m0 3v2' },
+      { id: 'parking', name: 'Parking', d: 'M7 5h7a4 4 0 0 1 0 8H9v6H7V5zm2 2v4h5a2 2 0 0 0 0-4H9z' },
+      { id: 'camp', name: 'Camp', d: 'M4 18h16L12 6 4 18zm4 0l4-7 4 7' },
+      { id: 'gate', name: 'Gate', d: 'M5 6v12M19 6v12M5 8h14M5 12h14M5 16h14' },
+      { id: 'food_plot', name: 'Food Plot', d: 'M6 18c2-6 4-10 6-12 2 2 4 6 6 12H6zm3-3h6' },
+      { id: 'tree', name: 'Tree', d: 'M12 3l5 7h-3l3 5h-3l2 4H8l2-4H7l3-5H7l5-7z' },
+      { id: 'water', name: 'Water', d: 'M12 4c-4 5-6 8-6 11a6 6 0 0 0 12 0c0-3-2-6-6-11z' },
+      { id: 'shed', name: 'Shed', d: 'M6 10l6-5 6 5v9H6v-9zm3 4h6v5H9v-5z' },
+      { id: 'sign', name: 'Sign', d: 'M11 4h2v3h5v8H6V7h5V4zm-3 5v4h8V9H8z' }
+    ].sort(function(a, b) { return a.name.localeCompare(b.name); });
+
+    var selectedPinIconId = null;
+    var selectedPinInnerColor = '#111111';
+    var selectedPinGlyphColor = '#ffffff';
+    var selectedHuntStandType = 'rifle_stand';
+    var PIN_ICON_RECENT_KEY = 'reg_slayer_pin_icon_recent_v1';
+    var PIN_ICON_SCHEME_KEY = 'reg_slayer_pin_icon_schemes_v1';
+
+    function loadPinIconRecent() {
+      try {
+        var a = JSON.parse(localStorage.getItem(PIN_ICON_RECENT_KEY) || '[]');
+        return Array.isArray(a) ? a.slice(0, 5) : [];
+      } catch (e) { return []; }
+    }
+    function pushPinIconRecent(id) {
+      if (!id) return;
+      var a = loadPinIconRecent().filter(function(x) { return x !== id; });
+      a.unshift(id);
+      try { localStorage.setItem(PIN_ICON_RECENT_KEY, JSON.stringify(a.slice(0, 5))); } catch (e2) {}
+    }
+    function loadPinIconSchemes() {
+      try {
+        var o = JSON.parse(localStorage.getItem(PIN_ICON_SCHEME_KEY) || '{}');
+        return o && typeof o === 'object' ? o : {};
+      } catch (e) { return {}; }
+    }
+    function savePinIconScheme(id, scheme) {
+      if (!id || !scheme) return;
+      var o = loadPinIconSchemes();
+      o[id] = scheme;
+      try { localStorage.setItem(PIN_ICON_SCHEME_KEY, JSON.stringify(o)); } catch (e3) {}
+    }
+    function getPinIconById(id) {
+      for (var i = 0; i < PIN_ICON_CATALOG.length; i++) {
+        if (PIN_ICON_CATALOG[i].id === id) return PIN_ICON_CATALOG[i];
+      }
+      return null;
+    }
+    function pinIconSvgMarkup(iconId, glyphColor, size) {
+      var ic = getPinIconById(iconId);
+      if (!ic) return '';
+      var s = size || 14;
+      return '<svg viewBox="0 0 24 24" width="' + s + '" height="' + s + '" aria-hidden="true"><path fill="none" stroke="' + (glyphColor || '#000') + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="' + ic.d + '"/></svg>';
+    }
+    function buildCustomPinMarkerHtml(loc) {
+      var outer = loc.color || '#e59a18';
+      var inner = loc.innerColor || '#111111';
+      var glyph = loc.iconColor || '#ffffff';
+      var iconId = loc.iconId || null;
+      var letter = getFirstLetter(loc.name);
+      if (loc.isStand && !iconId) letter = 'S';
+      var innerContent = iconId
+        ? pinIconSvgMarkup(iconId, glyph, 12)
+        : '<span style="font-size:10px;font-weight:800;color:' + glyph + ';line-height:1;">' + letter + '</span>';
+      return (
+        '<div style="width:28px;height:36px;position:relative;">' +
+          '<div style="width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:' + outer + ';border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,0.45);position:absolute;left:1px;top:0;"></div>' +
+          '<div style="position:absolute;left:5px;top:4px;width:18px;height:18px;border-radius:50%;background:' + inner + ';display:flex;align-items:center;justify-content:center;">' +
+            innerContent +
+          '</div>' +
+        '</div>'
+      );
+    }
+    function togglePinIconPicker() {
+      var el = document.getElementById('pin-icon-picker');
+      if (!el) return;
+      var show = el.style.display === 'none' || !el.style.display;
+      el.style.display = show ? 'block' : 'none';
+      if (show) renderPinIconGrid();
+    }
+    function clearSelectedPinIcon() {
+      selectedPinIconId = null;
+      renderPinIconGrid();
+    }
+    function selectPinIcon(id) {
+      selectedPinIconId = id || null;
+      if (id) {
+        var schemes = loadPinIconSchemes();
+        var sch = schemes[id];
+        if (sch) {
+          if (sch.outer) { selectedPinColor = sch.outer; selectPinColor(sch.outer); }
+          if (sch.inner) {
+            selectedPinInnerColor = sch.inner;
+            var inn = document.getElementById('pin-inner-color');
+            if (inn) inn.value = sch.inner;
+          }
+          if (sch.icon) {
+            selectedPinGlyphColor = sch.icon;
+            var g = document.getElementById('pin-glyph-color');
+            if (g) g.value = sch.icon;
+          }
+        }
+      }
+      renderPinIconGrid();
+    }
+    function onPinColorInputsChange() {
+      var o = document.getElementById('pin-outer-color');
+      var i = document.getElementById('pin-inner-color');
+      var g = document.getElementById('pin-glyph-color');
+      if (o && o.value) {
+        selectedPinColor = o.value;
+        var root = document.getElementById('cp-pin');
+        if (root) setColorPickerValue(root, o.value);
+        var hv = document.getElementById('pin-color-value');
+        if (hv) hv.value = o.value;
+      }
+      if (i && i.value) selectedPinInnerColor = i.value;
+      if (g && g.value) selectedPinGlyphColor = g.value;
+    }
+    function renderPinIconGrid() {
+      var grid = document.getElementById('pin-icon-grid');
+      var recentEl = document.getElementById('pin-icon-recent');
+      var q = ((document.getElementById('pin-icon-search') && document.getElementById('pin-icon-search').value) || '').trim().toLowerCase();
+      if (!grid) return;
+      var list = PIN_ICON_CATALOG.filter(function(ic) {
+        if (!q) return true;
+        return ic.name.toLowerCase().indexOf(q) >= 0 || ic.id.indexOf(q) >= 0;
+      });
+      if (q) {
+        list.sort(function(a, b) {
+          var as = a.name.toLowerCase().indexOf(q) === 0 ? 0 : 1;
+          var bs = b.name.toLowerCase().indexOf(q) === 0 ? 0 : 1;
+          if (as !== bs) return as - bs;
+          return a.name.localeCompare(b.name);
+        });
+      }
+      grid.innerHTML = list.map(function(ic) {
+        var sel = selectedPinIconId === ic.id ? ' selected' : '';
+        return '<button type="button" class="' + sel + '" title="' + ic.name + '" onclick="selectPinIcon(\'' + ic.id + '\')">' +
+          pinIconSvgMarkup(ic.id, '#e2e8f0', 16) +
+          '<span>' + ic.name.split(' ')[0] + '</span></button>';
+      }).join('');
+      if (recentEl) {
+        var recent = loadPinIconRecent().map(getPinIconById).filter(Boolean);
+        if (recent.length) {
+          recentEl.style.display = 'block';
+          recentEl.innerHTML = '<div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Recent</div><div class="pin-icon-grid">' +
+            recent.map(function(ic) {
+              var sel = selectedPinIconId === ic.id ? ' selected' : '';
+              return '<button type="button" class="' + sel + '" title="' + ic.name + '" onclick="selectPinIcon(\'' + ic.id + '\')">' +
+                pinIconSvgMarkup(ic.id, '#e2e8f0', 16) +
+                '<span>' + ic.name.split(' ')[0] + '</span></button>';
+            }).join('') + '</div>';
+        } else {
+          recentEl.style.display = 'none';
+          recentEl.innerHTML = '';
+        }
+      }
+    }
+    function setHuntStandType(type) {
+      selectedHuntStandType = type === 'bow_stand' ? 'bow_stand' : 'rifle_stand';
+      var r = document.getElementById('hunt-stand-rifle');
+      var b = document.getElementById('hunt-stand-bow');
+      if (r) r.classList.toggle('active', selectedHuntStandType === 'rifle_stand');
+      if (b) b.classList.toggle('active', selectedHuntStandType === 'bow_stand');
+    }
+    window.togglePinIconPicker = togglePinIconPicker;
+    window.clearSelectedPinIcon = clearSelectedPinIcon;
+    window.selectPinIcon = selectPinIcon;
+    window.renderPinIconGrid = renderPinIconGrid;
+    window.onPinColorInputsChange = onPinColorInputsChange;
+    window.setHuntStandType = setHuntStandType;
 
     function savePinFromMap() {
       const name = document.getElementById('pin-name-input').value.trim();
@@ -14822,6 +15056,7 @@
         var tvaLine = 'TVA Land: ' + tva.reservoir + ' (' + tva.recType + ')' + (tva.restricted ? ' - ' + tva.restricted : '');
         notes = notes ? (notes + '\n' + tvaLine) : tvaLine;
       }
+      onPinColorInputsChange();
       const newId = 'pin_' + Date.now();
       const newLoc = {
         id: newId,
@@ -14831,6 +15066,9 @@
         lat: clickLat,
         lng: clickLng,
         color: selectedPinColor,
+        innerColor: selectedPinInnerColor,
+        iconColor: selectedPinGlyphColor,
+        iconId: selectedPinIconId || null,
         notes: notes,
         isPin: true,
         parentId: detected.id,
@@ -14838,12 +15076,21 @@
         tva: tva ? { reservoir: tva.reservoir, recType: tva.recType, restricted: tva.restricted, url: tva.url } : null,
         tvaChecked: true
       };
+      if (selectedPinIconId) {
+        pushPinIconRecent(selectedPinIconId);
+        savePinIconScheme(selectedPinIconId, {
+          outer: selectedPinColor,
+          inner: selectedPinInnerColor,
+          icon: selectedPinGlyphColor
+        });
+      }
       locations.push(newLoc);
       const pins = JSON.parse(localStorage.getItem('alabama_hunt_custom_pins') || '[]');
       pins.push(newLoc);
       localStorage.setItem('alabama_hunt_custom_pins', JSON.stringify(pins));
       document.getElementById('pin-name-input').value = '';
       document.getElementById('pin-notes-input').value = '';
+      selectedPinIconId = null;
       closeDetectionToast();
       clearMapDot();
       lastVisibleMarkerKey = '';
@@ -14872,6 +15119,7 @@
       const newHunt = {
         id: 'hunt_' + Date.now(), name: name + (tva ? ' [TVA]' : ''), date: dateStr,
         lat: clickLat, lng: clickLng, color: selectedHuntColor, notes: notes,
+        iconId: selectedHuntStandType || 'rifle_stand',
         temp: w.hourly.temperature_2m[7], windSpeed: w.hourly.wind_speed_10m[7], windDir: w.hourly.wind_direction_10m[7],
         tva: tva ? { reservoir: tva.reservoir, recType: tva.recType, restricted: tva.restricted } : null
       };
@@ -14902,16 +15150,15 @@
       pinMarkerGroup.clearLayers();
       // Always show saved user pins so they can be reopened / deleted
       locations.filter(function(l) { return l.isPin; }).forEach(function(loc) {
-        var letter = getFirstLetter(loc.name);
         var isStandPin = !!loc.isStand;
-        var pinColor = loc.color || (isStandPin ? '#1f6f9f' : '#e59a18');
-        var pinLabel = isStandPin ? 'S' : letter;
         var m = L.marker([loc.lat, loc.lng], {
           icon: L.divIcon({
             className: '',
-            html: '<div style="background:' + pinColor + ';width:20px;height:20px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:bold;box-shadow:0 1px 5px rgba(0,0,0,0.45);">' + pinLabel + '</div>',
-            iconSize: [20, 20],
-            iconAnchor: [10, 10]
+            html: (typeof buildCustomPinMarkerHtml === 'function')
+              ? buildCustomPinMarkerHtml(loc)
+              : '<div style="background:' + (loc.color || (isStandPin ? '#1f6f9f' : '#e59a18')) + ';width:20px;height:20px;border-radius:50%;border:2px solid white;"></div>',
+            iconSize: [28, 36],
+            iconAnchor: [14, 34]
           })
         });
         var safeId = escJsStr(loc.id);
