@@ -2,8 +2,8 @@
  * Caches app shell for return visits with no signal.
  * Map tiles: cache-first when already stored; network otherwise (then cache).
  */
-const SHELL_CACHE = 'reg-slayer-shell-v1';
-const TILE_CACHE = 'reg-slayer-tiles-v1';
+const SHELL_CACHE = 'reg-slayer-shell-v2';
+const TILE_CACHE = 'reg-slayer-tiles-v2';
 const DATA_CACHE = 'reg-slayer-data-v1';
 
 const SHELL_ASSETS = [
@@ -29,6 +29,7 @@ function isTileUrl(url) {
     if (h.includes('basemap.nationalmap.gov')) return true;
     if (h.includes('basemaps.cartocdn.com')) return true;
     if (h.includes('arcgisonline.com') && u.pathname.includes('/tile/')) return true;
+    if (h.includes('wayback.maptiles.arcgis.com') && u.pathname.includes('/tile/')) return true;
     if (h.includes('tiles.regrid.com')) return true;
     if (h.includes('tilecache.rainviewer.com')) return true;
     if (h.includes('tile.openstreetmap.org')) return true;
