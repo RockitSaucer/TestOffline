@@ -2961,8 +2961,14 @@
       pointer-events: none;
       cursor: crosshair;
     }
+    /* Measure vertices: dark fill + thin light ring (reads on any basemap) */
     .draw-vertex-dot.is-measure {
-      background: #38bdf8;
+      width: 10px;
+      height: 10px;
+      margin: 7px;
+      background: #0c1929;
+      border: 1.5px solid #f1f5f9;
+      box-shadow: 0 0 0 1px rgba(12, 25, 41, 0.55), 0 1px 3px rgba(0,0,0,0.5);
       pointer-events: none;
     }
 
@@ -5794,8 +5800,8 @@
                 </div>
                 <div>
                   <span style="font-size:10px;color:var(--muted);font-weight:700;">Icon</span>
-                  <div class="color-picker" id="cp-pin-glyph" data-input-id="pin-glyph-color" data-initial="#ffffff" data-bind-var="selectedPinGlyphColor"></div>
-                  <input type="hidden" id="pin-glyph-color" value="#ffffff" />
+                  <div class="color-picker" id="cp-pin-glyph" data-input-id="pin-glyph-color" data-initial="#111111" data-bind-var="selectedPinGlyphColor"></div>
+                  <input type="hidden" id="pin-glyph-color" value="#111111" />
                 </div>
               </div>
               <textarea id="pin-notes-input" class="toast-form-control" placeholder="Notes..." style="height:50px; resize:none;"></textarea>
@@ -6168,8 +6174,12 @@
 
     let mapDrawPreviewLayer = null; // L.layerGroup for draft line/poly + vertices
     let mapDrawLineLayer = null; // rubber-band polyline (updated on mousemove without rebuild)
+    let mapDrawLineHaloLayer = null; // light under-stroke so measure dashes stay visible
     let mapDrawFillLayer = null;
     let mapDrawVertexGroup = null; // DOM markers for vertices (stable; not rebuilt every mousemove)
+    // Measure line: dark dashes with light halo/border on vertices
+    var MEASURE_LINE_COLOR = '#0c1929';
+    var MEASURE_LINE_HALO = '#eef2f7';
     let mapDrawMouseLatLng = null;
     let customAreaGroup = null; // saved user shapes on map
     let pendingShapeRing = null; // ring awaiting save modal
@@ -13154,6 +13164,7 @@
 
     function clearMapDrawPreview() {
       mapDrawLineLayer = null;
+      mapDrawLineHaloLayer = null;
       mapDrawFillLayer = null;
       mapDrawVertexGroup = null;
       if (mapDrawPreviewLayer) mapDrawPreviewLayer.clearLayers();
@@ -13186,19 +13197,54 @@
     /** Update only the draft line to the cursor — keeps vertex markers stable for click-to-close. */
     function updateMapDrawRubberBand() {
       if (!map || !mapDrawPreviewLayer || !mapDrawMode || !mapDrawPoints.length) return;
-      var color = mapDrawMode === 'measure' ? '#38bdf8' : '#e59a18';
+      var isMeasure = mapDrawMode === 'measure';
+      var color = isMeasure ? MEASURE_LINE_COLOR : '#e59a18';
       var latlngs = mapDrawPoints.map(function(p) { return [p.lat, p.lng]; });
       if (mapDrawMouseLatLng) {
         latlngs = latlngs.concat([[mapDrawMouseLatLng.lat, mapDrawMouseLatLng.lng]]);
+      }
+      // Light halo under dark dashed measure line (reads as a thin light border on each dash)
+      if (isMeasure) {
+        if (mapDrawLineHaloLayer && mapDrawPreviewLayer.hasLayer(mapDrawLineHaloLayer)) {
+          try {
+            mapDrawLineHaloLayer.setLatLngs(latlngs);
+            mapDrawLineHaloLayer.setStyle({
+              color: MEASURE_LINE_HALO,
+              weight: 7,
+              opacity: 0.95,
+              dashArray: '7 7',
+              lineCap: 'round',
+              lineJoin: 'round'
+            });
+          } catch (eHalo) {
+            mapDrawLineHaloLayer = null;
+          }
+        }
+        if (!mapDrawLineHaloLayer) {
+          mapDrawLineHaloLayer = L.polyline(latlngs, {
+            color: MEASURE_LINE_HALO,
+            weight: 7,
+            opacity: 0.95,
+            dashArray: '7 7',
+            lineCap: 'round',
+            lineJoin: 'round',
+            interactive: false
+          }).addTo(mapDrawPreviewLayer);
+        }
+      } else if (mapDrawLineHaloLayer) {
+        try { mapDrawPreviewLayer.removeLayer(mapDrawLineHaloLayer); } catch (eRmH) {}
+        mapDrawLineHaloLayer = null;
       }
       if (mapDrawLineLayer && mapDrawPreviewLayer.hasLayer(mapDrawLineLayer)) {
         try {
           mapDrawLineLayer.setLatLngs(latlngs);
           mapDrawLineLayer.setStyle({
             color: color,
-            weight: 3,
-            opacity: 0.95,
-            dashArray: mapDrawMode === 'measure' ? '6 6' : null
+            weight: isMeasure ? 3.5 : 3,
+            opacity: 1,
+            dashArray: isMeasure ? '7 7' : null,
+            lineCap: 'round',
+            lineJoin: 'round'
           });
         } catch (eLine) {
           mapDrawLineLayer = null;
@@ -13207,9 +13253,11 @@
       if (!mapDrawLineLayer) {
         mapDrawLineLayer = L.polyline(latlngs, {
           color: color,
-          weight: 3,
-          opacity: 0.95,
-          dashArray: mapDrawMode === 'measure' ? '6 6' : null,
+          weight: isMeasure ? 3.5 : 3,
+          opacity: 1,
+          dashArray: isMeasure ? '7 7' : null,
+          lineCap: 'round',
+          lineJoin: 'round',
           interactive: false
         }).addTo(mapDrawPreviewLayer);
       }
@@ -13239,7 +13287,7 @@
         setMapDrawUi();
         return;
       }
-      var color = mapDrawMode === 'measure' ? '#38bdf8' : '#e59a18';
+      var color = mapDrawMode === 'measure' ? MEASURE_LINE_COLOR : '#e59a18';
       // Soft fill preview for shape (3+ corners)
       if (mapDrawMode === 'draw' && mapDrawPoints.length >= 3) {
         var fillPts = mapDrawPoints.map(function(p) { return [p.lat, p.lng]; });
@@ -13267,19 +13315,24 @@
         else if (isLatest) cls += ' is-latest';
         else cls += ' is-latest';
 
-        var size = canClose ? (idx === 0 ? 24 : 22) : 18;
+        var isMeasurePt = mapDrawMode === 'measure';
+        var size = canClose ? (idx === 0 ? 24 : 22) : (isMeasurePt ? 20 : 18);
+        // Measure: allow re-clicking any existing vertex (esp. last) to finish
+        var measureCanFinish = isMeasurePt && mapDrawPoints.length >= 2;
         var m = L.marker([p.lat, p.lng], {
           icon: L.divIcon({
             className: 'draw-vertex-icon',
             html: '<div class="' + cls + '" title="' +
-              (canClose ? (idx === 0 ? 'Tap to close shape' : 'Tap previous corner to finish') : '') +
+              (canClose
+                ? (idx === 0 ? 'Tap to close shape' : 'Tap previous corner to finish')
+                : (measureCanFinish ? 'Tap again to finish measure' : '')) +
               '"></div>',
             iconSize: [size, size],
             iconAnchor: [size / 2, size / 2]
           }),
-          interactive: !!canClose,
+          interactive: !!(canClose || measureCanFinish),
           keyboard: false,
-          zIndexOffset: canClose ? 2500 : 2000,
+          zIndexOffset: canClose ? 2500 : (measureCanFinish ? 2400 : 2000),
           bubblingMouseEvents: false
         });
         if (canClose) {
@@ -13300,6 +13353,34 @@
               className: 'measured-path-tooltip'
             });
           } catch (eTip) {}
+        } else if (measureCanFinish) {
+          m.on('mousedown', function(ev) {
+            try {
+              if (ev && ev.originalEvent) {
+                L.DomEvent.stopPropagation(ev.originalEvent);
+                L.DomEvent.preventDefault(ev.originalEvent);
+              }
+            } catch (eMm) {}
+          });
+          m.on('click', function(ev) {
+            try {
+              if (ev) L.DomEvent.stop(ev);
+              if (ev && ev.originalEvent) {
+                L.DomEvent.stopPropagation(ev.originalEvent);
+                L.DomEvent.preventDefault(ev.originalEvent);
+              }
+            } catch (eMc) {}
+            mapDrawLastClickAt = 0;
+            mapDrawLastClickLatLng = null;
+            finishMapDraw();
+          });
+          try {
+            m.bindTooltip('Tap point again to finish', {
+              direction: 'top',
+              opacity: 0.95,
+              className: 'measured-path-tooltip'
+            });
+          } catch (eTipM) {}
         }
         m.addTo(mapDrawVertexGroup);
       });
@@ -13315,7 +13396,7 @@
             keyboard: false,
             icon: L.divIcon({
               className: '',
-              html: '<div style="background:rgba(15,18,14,0.88);border:1px solid #38bdf8;color:#fff;font-size:10px;font-weight:700;padding:2px 5px;border-radius:4px;white-space:nowrap;pointer-events:none;">' + formatMiles(seg) + '</div>',
+              html: '<div style="background:rgba(12,25,41,0.94);border:1px solid #eef2f7;color:#fff;font-size:10px;font-weight:700;padding:2px 5px;border-radius:4px;white-space:nowrap;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,0.45);">' + formatMiles(seg) + '</div>',
               iconSize: [70, 18],
               iconAnchor: [35, 9]
             })
@@ -13377,20 +13458,38 @@
     }
 
     /**
-     * Single click = add vertex; quick second click near the first = finish (same as Finish button).
-     * While drawing a shape, clicking near any existing vertex closes the shape.
+     * Single click = add vertex.
+     * Measure: double-click OR click the same/existing point again → finish.
+     * Draw: click near a previous vertex closes the shape; double-click also finishes.
      */
     function handleMapDrawToolClick(latlng, e) {
       if (!mapDrawMode || !latlng) return;
       var now = Date.now();
       var isDouble = false;
-      if (mapDrawLastClickAt && (now - mapDrawLastClickAt) < 400 && mapDrawLastClickLatLng) {
+      if (mapDrawLastClickAt && (now - mapDrawLastClickAt) < 450 && mapDrawLastClickLatLng) {
         var dMi = haversineMiles(
           mapDrawLastClickLatLng.lat, mapDrawLastClickLatLng.lng,
           latlng.lat, latlng.lng
         );
         // Same-ish spot within ~80 ft counts as double-click finish
         if (dMi < 0.015) isDouble = true;
+      }
+
+      // Measure: re-click any existing vertex (same point a second time) → finish
+      if (!isDouble && mapDrawMode === 'measure' && mapDrawPoints.length >= 2) {
+        var nearMeas = findNearbyDrawVertexIndex(latlng, 36);
+        if (nearMeas >= 0) {
+          mapDrawLastClickAt = 0;
+          mapDrawLastClickLatLng = null;
+          if (e && e.originalEvent) {
+            try {
+              L.DomEvent.stopPropagation(e.originalEvent);
+              L.DomEvent.preventDefault(e.originalEvent);
+            } catch (errMeas) {}
+          }
+          finishMapDraw();
+          return;
+        }
       }
 
       // Draw: click near a previous corner (not the latest) → complete the shape
@@ -13917,25 +14016,49 @@
       if (!map || !points || points.length < 2) return;
       try {
         var latlngs = points.map(function(p) { return [p.lat, p.lng]; });
-        var line = L.polyline(latlngs, {
-          color: '#38bdf8',
-          weight: 3,
+        var halo = L.polyline(latlngs, {
+          color: MEASURE_LINE_HALO,
+          weight: 7,
           opacity: 0.95,
-          dashArray: '6 4',
+          dashArray: '7 7',
+          lineCap: 'round',
+          lineJoin: 'round',
           interactive: false
+        });
+        var line = L.polyline(latlngs, {
+          color: MEASURE_LINE_COLOR,
+          weight: 3.5,
+          opacity: 1,
+          dashArray: '7 7',
+          lineCap: 'round',
+          lineJoin: 'round',
+          interactive: false
+        });
+        var layers = [halo, line];
+        // Endpoint + intermediate dots: dark fill, thin light border
+        points.forEach(function(p) {
+          layers.push(L.circleMarker([p.lat, p.lng], {
+            radius: 5,
+            color: MEASURE_LINE_HALO,
+            weight: 2,
+            fillColor: MEASURE_LINE_COLOR,
+            fillOpacity: 1,
+            interactive: false
+          }));
         });
         var mid = points[Math.floor(points.length / 2)];
         var label = L.marker([mid.lat, mid.lng], {
           interactive: false,
           icon: L.divIcon({
             className: 'temp-measure-label',
-            html: '<div style="background:rgba(8,24,40,0.92);border:1px solid #38bdf8;color:#7dd3fc;font-size:11px;font-weight:800;padding:3px 7px;border-radius:6px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.45);">' +
+            html: '<div style="background:rgba(12,25,41,0.96);border:1px solid #eef2f7;color:#fff;font-size:11px;font-weight:800;padding:3px 7px;border-radius:6px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.5);">' +
               formatMiles(distanceMi) + '</div>',
             iconSize: [0, 0],
             iconAnchor: [0, 12]
           })
         });
-        tempMeasureLayer = L.layerGroup([line, label]).addTo(map);
+        layers.push(label);
+        tempMeasureLayer = L.layerGroup(layers).addTo(map);
       } catch (eShow) {
         tempMeasureLayer = null;
       }
@@ -14002,7 +14125,7 @@
 
       if (mapDrawMode === 'measure') {
         if (mapDrawPoints.length < 2) {
-          alert('Add at least two points to measure a distance, then double-click or press Finish.');
+          alert('Add at least two points to measure a distance, then double-click, tap a point again, or press Finish.');
           return;
         }
         var total = pathDistanceMiles(mapDrawPoints);
@@ -15542,6 +15665,77 @@
       return list;
     }
 
+    /** Relative luminance 0–1 for a normalized #rrggbb hex. */
+    function hexLuminance(hex) {
+      var h = normalizeHexColor(hex);
+      if (!h || h.length < 7) return 0.5;
+      var r = parseInt(h.slice(1, 3), 16) / 255;
+      var g = parseInt(h.slice(3, 5), 16) / 255;
+      var b = parseInt(h.slice(5, 7), 16) / 255;
+      function lin(c) { return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
+      return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+    }
+    /** Effective solid color of pin glyph for conflict checks ('natural' → dark). */
+    function effectivePinIconHex(iconColor, iconId) {
+      if (!iconColor || iconColor === 'natural' || iconColor === 'none' || iconColor === 'original') {
+        if (iconId === 'blood') return '#e43844';
+        return '#1a1a1a';
+      }
+      return normalizeHexColor(iconColor) || '#1a1a1a';
+    }
+    /**
+     * Pin disc (inner) and icon must never match.
+     * Returns { inner, icon } with icon possibly adjusted (or inner if forceInner).
+     */
+    function resolveDistinctPinInnerIcon(innerHex, iconColor, iconId, preferChange) {
+      var inner = normalizeHexColor(innerHex) || '#ffffff';
+      var iconEff = effectivePinIconHex(iconColor, iconId);
+      var iconOut = (!iconColor || iconColor === 'natural') ? 'natural' : iconEff;
+      if (inner !== iconEff) {
+        return { inner: inner, icon: iconOut, iconHex: iconEff };
+      }
+      // Same color — force contrast. Prefer changing the side the user just edited.
+      var alt;
+      if (hexLuminance(inner) > 0.55) alt = '#111111';
+      else alt = '#ffffff';
+      if (preferChange === 'inner') {
+        return { inner: alt, icon: iconOut, iconHex: iconEff };
+      }
+      // Default: change icon tint (leave white disc)
+      return { inner: inner, icon: alt, iconHex: alt };
+    }
+    function applyPinInnerIconDistinct(preferChange) {
+      var pair = resolveDistinctPinInnerIcon(
+        selectedPinInnerColor,
+        selectedPinGlyphColor,
+        selectedPinIconId,
+        preferChange
+      );
+      selectedPinInnerColor = pair.inner;
+      selectedPinGlyphColor = pair.icon;
+      var inn = document.getElementById('pin-inner-color');
+      var gly = document.getElementById('pin-glyph-color');
+      if (inn) inn.value = pair.inner;
+      if (gly) gly.value = pair.icon === 'natural' ? pair.iconHex : pair.icon;
+      var cpI = document.getElementById('cp-pin-inner');
+      var cpG = document.getElementById('cp-pin-glyph');
+      // Avoid recursive setColorPickerValue loops: update UI without re-bind when already synced
+      if (cpI && normalizeHexColor(cpI.getAttribute('data-value')) !== pair.inner) {
+        if (typeof setColorPickerValue === 'function') {
+          setColorPickerValue(cpI, pair.inner, { skipPinDistinct: true });
+        }
+      }
+      if (cpG && pair.icon !== 'natural') {
+        var gHex = pair.iconHex || pair.icon;
+        if (normalizeHexColor(cpG.getAttribute('data-value')) !== gHex) {
+          if (typeof setColorPickerValue === 'function') {
+            setColorPickerValue(cpG, gHex, { skipPinDistinct: true });
+          }
+        }
+      }
+      return pair;
+    }
+
     function setColorPickerValue(rootOrId, hex, opts) {
       opts = opts || {};
       var root = typeof rootOrId === 'string' ? document.getElementById(rootOrId) : rootOrId;
@@ -15568,6 +15762,10 @@
       if (bind === 'selectedPinInnerColor') selectedPinInnerColor = hex;
       if (bind === 'selectedPinGlyphColor') selectedPinGlyphColor = hex;
       if (bind === 'selectedHuntColor') selectedHuntColor = hex;
+      // Never allow pin disc and icon to be the same color
+      if (!opts.skipPinDistinct && (bind === 'selectedPinInnerColor' || bind === 'selectedPinGlyphColor')) {
+        applyPinInnerIconDistinct(bind === 'selectedPinInnerColor' ? 'icon' : 'inner');
+      }
       if (typeof opts.onChange === 'function') opts.onChange(hex);
     }
 
@@ -15890,6 +16088,7 @@
       }
       if (i && i.value) selectedPinInnerColor = i.value;
       if (g && g.value) selectedPinGlyphColor = g.value;
+      applyPinInnerIconDistinct('icon');
     }
     function renderPinIconGrid() {
       var grid = document.getElementById('pin-icon-grid');
