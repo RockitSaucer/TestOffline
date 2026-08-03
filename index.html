@@ -141,6 +141,29 @@
       user-select: none;
       text-shadow: 0 1px 3px rgba(0,0,0,0.85);
     }
+    /* Active map name (private / shared) — top-left of brand bar */
+    .brand-map-name {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 2;
+      max-width: min(36vw, 220px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: var(--accent, #e59a18);
+      text-shadow: 0 1px 4px rgba(0,0,0,0.85);
+      pointer-events: none;
+    }
+    html.layout-phone .brand-map-name {
+      font-size: 10px;
+      left: 8px;
+      max-width: 38vw;
+    }
 
     /* Site links / tagline live in page footer (v3.9) */
     .site-footer {
@@ -372,6 +395,7 @@
     html.layout-phone .card-planner {
       display: contents;
     }
+    /* With display:contents, assign order so tracts sit under steps, then map */
     html.layout-phone .card-planner > .planner-row {
       order: 1;
       margin: 0 10px;
@@ -386,11 +410,20 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.4);
       align-self: stretch;
     }
+    html.layout-phone .card-planner > .available-tracts-panel,
+    html.layout-phone .card-planner > #locations-under-steps {
+      order: 2;
+      margin: 0 10px;
+      width: auto;
+      max-width: calc(100% - 20px);
+      box-sizing: border-box;
+      align-self: stretch;
+    }
     html.layout-phone .card-map {
       position: static;
       min-height: 0;
       max-height: none;
-      order: 2;
+      order: 3;
       width: 100%;
       max-width: 100%;
       margin: 0;
@@ -403,7 +436,7 @@
     }
     html.layout-phone .card-planner > #dashboard-container,
     html.layout-phone .card-planner > .dashboard-under-steps {
-      order: 3;
+      order: 4;
       margin: 0 10px 4px;
       width: auto;
       max-width: calc(100% - 20px);
@@ -414,6 +447,12 @@
       padding: 14px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.4);
       align-self: stretch;
+    }
+    /* Site footer: normal document flow on mobile — only after scrolling to page end */
+    html.layout-phone .site-footer {
+      position: static !important;
+      bottom: auto !important;
+      z-index: auto;
     }
     html.layout-phone .card-map .map-section-block {
       width: 100%;
@@ -1006,14 +1045,25 @@
     }
     .pin-icon-grid button svg { width: 16px; height: 16px; }
     /* Desktop: scale planner chrome with viewport width */
+    /* Desktop: keep planner readable — scroll horizontally instead of squashing */
+    html.layout-desktop .app-shell,
+    html.layout-desktop .container {
+      overflow-x: auto;
+    }
     html.layout-desktop .card-planner {
-      font-size: clamp(12px, 0.95vw, 15px);
+      font-size: 14px;
+      min-width: 720px;
     }
     html.layout-desktop .planner-row {
-      gap: clamp(8px, 1vw, 14px);
+      gap: 14px;
+      min-width: 680px;
+      grid-template-columns: minmax(280px, 1.55fr) minmax(140px, 0.48fr) minmax(220px, 1.05fr);
     }
     html.layout-desktop .step-section {
       min-width: 0;
+    }
+    html.layout-desktop #calendar-month-year {
+      font-size: 14px !important;
     }
 
     .calendar-container {
@@ -1898,6 +1948,15 @@
       height: 22px;
       display: block;
       pointer-events: none;
+    }
+    .map-draw-tools .mdt-icon-img,
+    .map-layers-toggle-btn .mdt-icon-img {
+      width: 22px;
+      height: 22px;
+      object-fit: contain;
+      display: block;
+      pointer-events: none;
+      border-radius: 3px;
     }
     .map-draw-tools .mdt-btn:hover { border-color: var(--accent); color: #fff; }
     .map-draw-tools .mdt-btn.active {
@@ -4170,32 +4229,36 @@
     }
     .location-filters-box #dist-zip-row {
       display: none;
-      gap: 6px;
+      gap: 8px;
       margin-top: 8px;
       align-items: center;
       flex-wrap: nowrap;
       position: relative;
       z-index: 6;
+      min-width: 0;
     }
     .location-filters-box #dist-zip-row.active { display: flex; }
     .location-filters-box #dist-zip-input {
       flex: 0 0 auto;
-      width: 6.5ch;
-      min-width: 6.5ch;
-      max-width: 7.5ch;
-      padding: 7px 6px;
+      /* Room for 6 digits + padding so text is not clipped */
+      width: 8.5ch;
+      min-width: 8.5ch;
+      max-width: 10ch;
+      box-sizing: content-box;
+      padding: 7px 10px;
       border-radius: 6px;
       border: 1px solid var(--border);
       background: var(--panel);
       color: var(--ink);
-      font-size: 12px;
-      letter-spacing: 0.04em;
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.06em;
     }
     .location-filters-box #dist-zip-row .dist-zip-apply,
     .location-filters-box #dist-zip-row button {
       flex: 0 0 auto;
       white-space: nowrap;
-      padding: 7px 10px;
+      padding: 7px 12px;
       font-size: 12px;
       font-weight: 700;
       border-radius: 6px;
@@ -4580,8 +4643,9 @@
   </style>
 </head>
 <body>
-  <!-- Brand header: centered logo + small V4.5 badge -->
+  <!-- Brand header: map name + logo + V4.5 badge -->
   <header class="brand-header" role="banner">
+    <div class="brand-map-name" id="brand-map-name" title="Active map">My Map</div>
     <div class="brand-logo-wrap">
       <img class="brand-logo" src="reg-slayer-logo.png" alt="REG SLAYER - Know Before You Go" width="1100" height="240" />
       <span class="brand-version" aria-label="Version 4.5 Offline Test">V4.5-OT</span>
@@ -4945,28 +5009,13 @@
               </div>
               <div class="map-draw-tools" id="map-draw-tools">
                 <button type="button" class="mdt-btn mdt-icon-btn" id="mdt-measure" onclick="startMapMeasure()" title="Measure" aria-label="Measure">
-                  <svg class="mdt-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <circle cx="12" cy="12" r="9" fill="#f5c518" stroke="#1a1a1a" stroke-width="1.4"/>
-                    <path d="M7.2 16.8 L16.8 7.2" stroke="#1a1a1a" stroke-width="1.6" stroke-linecap="round"/>
-                    <path d="M9.1 9.1h1.4M11 11h1.4M12.9 12.9h1.4M14.8 14.8h1.4" stroke="#1a1a1a" stroke-width="1.2" stroke-linecap="round"/>
-                    <circle cx="7.2" cy="16.8" r="1.5" fill="#1a1a1a"/>
-                    <circle cx="16.8" cy="7.2" r="1.5" fill="#1a1a1a"/>
-                  </svg>
+                  <img class="mdt-icon-img" src="icons/tools/measure.jpg" alt="" width="22" height="22" draggable="false">
                 </button>
                 <button type="button" class="mdt-btn mdt-icon-btn" id="mdt-draw" onclick="startMapDrawShape()" title="Draw" aria-label="Draw">
-                  <svg class="mdt-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <rect x="2" y="2" width="20" height="20" rx="4" fill="#f5c518"/>
-                    <path d="M7 16.5c1.2-3.2 2.6-5.4 5.8-7.2 1.6-.9 3.2-1.2 4.2-1.3" fill="none" stroke="#111" stroke-width="1.7" stroke-linecap="round"/>
-                    <path d="M15.6 6.2l2.2 2.2-1.1 3.1-3.1-3.1 2-2.2z" fill="#111"/>
-                    <path d="M6.5 17.2l3.2-1.1" stroke="#111" stroke-width="1.4" stroke-linecap="round"/>
-                  </svg>
+                  <img class="mdt-icon-img" src="icons/tools/draw.png" alt="" width="22" height="22" draggable="false">
                 </button>
                 <button type="button" class="mdt-btn mdt-icon-btn mdt-track-idle" id="mdt-track" onclick="toggleGpsTrack()" title="Track" aria-label="Track">
-                  <svg class="mdt-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <circle cx="12" cy="12" r="9" fill="#dc2626" stroke="#7f1d1d" stroke-width="1.2"/>
-                    <path d="M12 6.2v5.2l3.4 2" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                    <circle cx="12" cy="12" r="1.4" fill="#fff"/>
-                  </svg>
+                  <img class="mdt-icon-img" src="icons/tools/track.jpg" alt="" width="22" height="22" draggable="false">
                 </button>
                 <button type="button" class="mdt-btn mdt-track-stop" id="mdt-track-stop" onclick="toggleGpsTrack()" title="Stop" aria-label="Stop GPS tracking">Stop</button>
                 <div class="mdt-tools-panel" id="mdt-tools-panel" role="group" aria-label="Active tool controls">
@@ -5038,14 +5087,7 @@
 
             <div class="map-layers-menu map-layers-bottom" id="map-layers-menu">
               <button type="button" class="map-layers-toggle-btn mdt-icon-btn" id="map-layers-toggle-btn" aria-expanded="false" aria-controls="map-layers-panel" title="Layers" aria-label="Layers">
-                <svg class="mdt-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <!-- bottom layer: white + black lines -->
-                  <path d="M12 18.6 L3.5 14.2 L12 9.8 L20.5 14.2 Z" fill="#f8fafc" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/>
-                  <!-- middle layer: blue + black border -->
-                  <path d="M12 15.4 L3.5 11 L12 6.6 L20.5 11 Z" fill="#3b82f6" stroke="#111" stroke-width="1.2" stroke-linejoin="round"/>
-                  <!-- top layer: white + red border -->
-                  <path d="M12 12.2 L3.5 7.8 L12 3.4 L20.5 7.8 Z" fill="#f8fafc" stroke="#dc2626" stroke-width="1.35" stroke-linejoin="round"/>
-                </svg>
+                <img class="mdt-icon-img" src="icons/tools/layers.webp" alt="" width="22" height="22" draggable="false">
               </button>
 <div class="map-layers-panel" id="map-layers-panel" role="group" aria-label="Map layers">
                           <div class="ml-section">Base map</div>
@@ -5186,15 +5228,23 @@
                   <button type="button" class="filter-btn" style="width:100%;margin-top:6px;font-size:10px;" onclick="clearSelectedPinIcon()">No icon (plain pin)</button>
                 </div>
               </div>
-              <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
-                <label style="font-size:10px;color:var(--muted);">Pin <input type="color" id="pin-outer-color" value="#e59a18" onchange="onPinColorInputsChange()" style="width:28px;height:22px;border:none;background:transparent;vertical-align:middle;"></label>
-                <label style="font-size:10px;color:var(--muted);">Inside <input type="color" id="pin-inner-color" value="#111111" onchange="onPinColorInputsChange()" style="width:28px;height:22px;border:none;background:transparent;vertical-align:middle;"></label>
-                <label style="font-size:10px;color:var(--muted);">Icon <input type="color" id="pin-glyph-color" value="#ffffff" onchange="onPinColorInputsChange()" style="width:28px;height:22px;border:none;background:transparent;vertical-align:middle;"></label>
-              </div>
-              <div style="margin-top:6px;">
-                <span style="font-size:11px; color:var(--muted);">Quick color:</span>
-                <div class="color-picker" id="cp-pin" data-input-id="pin-color-value" data-initial="#e59a18" data-bind-var="selectedPinColor"></div>
-                <input type="hidden" id="pin-color-value" value="#e59a18" />
+              <div class="pin-color-slots" style="margin-top:8px;display:flex;flex-direction:column;gap:8px;">
+                <div>
+                  <span style="font-size:10px;color:var(--muted);font-weight:700;">Pin (outer)</span>
+                  <div class="color-picker" id="cp-pin" data-input-id="pin-color-value" data-initial="#e59a18" data-bind-var="selectedPinColor"></div>
+                  <input type="hidden" id="pin-color-value" value="#e59a18" />
+                  <input type="hidden" id="pin-outer-color" value="#e59a18" />
+                </div>
+                <div>
+                  <span style="font-size:10px;color:var(--muted);font-weight:700;">Inside</span>
+                  <div class="color-picker" id="cp-pin-inner" data-input-id="pin-inner-color" data-initial="#111111" data-bind-var="selectedPinInnerColor"></div>
+                  <input type="hidden" id="pin-inner-color" value="#111111" />
+                </div>
+                <div>
+                  <span style="font-size:10px;color:var(--muted);font-weight:700;">Icon</span>
+                  <div class="color-picker" id="cp-pin-glyph" data-input-id="pin-glyph-color" data-initial="#ffffff" data-bind-var="selectedPinGlyphColor"></div>
+                  <input type="hidden" id="pin-glyph-color" value="#ffffff" />
+                </div>
               </div>
               <textarea id="pin-notes-input" class="toast-form-control" placeholder="Notes..." style="height:50px; resize:none;"></textarea>
               <div style="display:flex; gap:4px; margin-top:6px;">
@@ -12171,7 +12221,18 @@
           var shareName = mapDotMenuSource === 'gps'
             ? 'My location'
             : (detected.name || 'Map spot');
-          shareLocationLink(clickLat, clickLng, shareName);
+          // Popup: share to another map OR copy location (Google Maps link)
+          if (window.RegSlayerParty && typeof window.RegSlayerParty.openShareLocationChooser === 'function') {
+            window.RegSlayerParty.openShareLocationChooser(
+              clickLat, clickLng, shareName,
+              { lat: clickLat, lng: clickLng, name: shareName }
+            );
+          } else if (mapDotMenuSource === 'gps' && window.RegSlayerParty &&
+                     typeof window.RegSlayerParty.openShareMyLocationChooser === 'function') {
+            window.RegSlayerParty.openShareMyLocationChooser();
+          } else {
+            shareLocationLink(clickLat, clickLng, shareName);
+          }
           return false;
         }
 
@@ -14832,17 +14893,32 @@
       lastClickTva = null;
       lastClickPublicLand = null;
     }
-    // ========== SHARED COLOR PICKER (8 presets + recent customs + wheel tab) ==========
-    var COLOR_PRESETS = [
-      '#e59a18', // amber
-      '#dc2626', // red
+    // ========== SHARED COLOR PICKER (fixed slots + custom/wheel) ==========
+    // Fixed first 5 always: Black, White, Blue, Red, Yellow. Last 3 start random; custom wheel colors replace them.
+    var COLOR_PRESETS_FIXED = [
+      '#000000', // black
+      '#ffffff', // white
       '#2563eb', // blue
-      '#16a34a', // green
-      '#9333ea', // purple
-      '#facc15', // yellow
-      '#0d9488', // teal
-      '#ec4899'  // pink
+      '#dc2626', // red
+      '#facc15'  // yellow
     ];
+    var COLOR_PRESETS_RANDOM_SEED = [
+      '#e59a18', // amber
+      '#16a34a', // green
+      '#9333ea'  // purple
+    ];
+    function getColorPresetRow() {
+      var custom = loadRecentCustomColors();
+      var row = COLOR_PRESETS_FIXED.slice();
+      // Up to 3 trailing slots: prefer user customs, else seed randoms
+      for (var i = 0; i < 3; i++) {
+        if (custom[i]) row.push(custom[i]);
+        else row.push(COLOR_PRESETS_RANDOM_SEED[i] || '#888888');
+      }
+      return row;
+    }
+    // Back-compat alias (fixed + seeds; customs applied via getColorPresetRow)
+    var COLOR_PRESETS = COLOR_PRESETS_FIXED.concat(COLOR_PRESETS_RANDOM_SEED);
     var CUSTOM_COLORS_KEY = 'reg_slayer_custom_colors_v1';
 
     function normalizeHexColor(c) {
@@ -14901,7 +14977,13 @@
       var wheel = root.querySelector('input[type="color"]');
       if (wheel) wheel.value = hex;
       var bind = root.getAttribute('data-bind-var');
-      if (bind === 'selectedPinColor') selectedPinColor = hex;
+      if (bind === 'selectedPinColor') {
+        selectedPinColor = hex;
+        var outerH = document.getElementById('pin-outer-color');
+        if (outerH) outerH.value = hex;
+      }
+      if (bind === 'selectedPinInnerColor') selectedPinInnerColor = hex;
+      if (bind === 'selectedPinGlyphColor') selectedPinGlyphColor = hex;
       if (bind === 'selectedHuntColor') selectedHuntColor = hex;
       if (typeof opts.onChange === 'function') opts.onChange(hex);
     }
@@ -14914,7 +14996,6 @@
       var input = inputId ? document.getElementById(inputId) : null;
       if (input && input.value) initial = normalizeHexColor(input.value) || initial;
 
-      var recent = loadRecentCustomColors();
       var html = '' +
         '<div class="cp-tabs" role="tablist">' +
           '<button type="button" class="cp-tab active" data-cp-tab="presets">Presets</button>' +
@@ -14923,56 +15004,41 @@
         '</div>' +
         '<div class="cp-panel active" data-cp-panel="presets">' +
           '<div class="cp-swatches" data-role="presets"></div>' +
-          '<div class="cp-recent-label" data-role="recent-label"' + (recent.length ? '' : ' hidden') + '>Recent custom</div>' +
-          '<div class="cp-swatches cp-recent" data-role="recent"' + (recent.length ? '' : ' hidden') + '></div>' +
+          '<div class="cp-recent-label" hidden data-role="recent-label"></div>' +
+          '<div class="cp-swatches cp-recent" hidden data-role="recent"></div>' +
         '</div>' +
         '<div class="cp-panel" data-cp-panel="wheel">' +
           '<div class="cp-wheel-row">' +
             '<input type="color" value="' + initial + '" aria-label="Custom color" />' +
-            '<span class="cp-wheel-hint">Pick any color. The last 3 custom colors are saved under Presets.</span>' +
+            '<span class="cp-wheel-hint">Color wheel only appears here. Last 3 custom colors fill the extra preset slots.</span>' +
           '</div>' +
         '</div>';
       root.innerHTML = html;
 
-      var presetRow = root.querySelector('[data-role="presets"]');
-      COLOR_PRESETS.forEach(function(c) {
-        var b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'cp-swatch' + (c === initial ? ' selected' : '');
-        b.setAttribute('data-color', c);
-        b.style.background = c;
-        b.title = c;
-        b.addEventListener('click', function() {
-          setColorPickerValue(root, c);
-        });
-        presetRow.appendChild(b);
-      });
-
-      function refreshRecentRow(selectHex) {
-        var recentRow = root.querySelector('[data-role="recent"]');
-        var recentLab = root.querySelector('[data-role="recent-label"]');
-        var list = loadRecentCustomColors();
-        if (!recentRow || !recentLab) return;
-        recentRow.innerHTML = '';
-        if (!list.length) {
-          recentRow.hidden = true;
-          recentLab.hidden = true;
-          return;
-        }
-        recentRow.hidden = false;
-        recentLab.hidden = false;
-        list.forEach(function(c) {
+      function fillPresetSwatches(selectHex) {
+        var presetRow = root.querySelector('[data-role="presets"]');
+        if (!presetRow) return;
+        presetRow.innerHTML = '';
+        getColorPresetRow().forEach(function(c, idx) {
           var b = document.createElement('button');
           b.type = 'button';
-          b.className = 'cp-swatch' + (selectHex && c === selectHex ? ' selected' : '');
+          b.className = 'cp-swatch' + (c === selectHex ? ' selected' : '');
           b.setAttribute('data-color', c);
           b.style.background = c;
-          b.title = 'Custom ' + c;
+          // white swatch needs a border to stay visible
+          if (c === '#ffffff') b.style.boxShadow = 'inset 0 0 0 1px #666';
+          b.title = (idx < 5 ? 'Preset ' : 'Custom slot ') + c;
           b.addEventListener('click', function() {
             setColorPickerValue(root, c);
           });
-          recentRow.appendChild(b);
+          presetRow.appendChild(b);
         });
+      }
+      fillPresetSwatches(initial);
+
+      function refreshRecentRow(selectHex) {
+        // Customs already merged into trailing preset slots — just rebuild swatches
+        fillPresetSwatches(selectHex || normalizeHexColor(root.getAttribute('data-value')) || initial);
       }
       refreshRecentRow(initial);
 
@@ -15031,6 +15097,8 @@
       if (root) setColorPickerValue(root, c);
       var outer = document.getElementById('pin-outer-color');
       if (outer) outer.value = c;
+      var hv = document.getElementById('pin-color-value');
+      if (hv) hv.value = c;
     }
     function selectHuntColor(c) {
       selectedHuntColor = c;
@@ -15101,16 +15169,34 @@
       }
       return null;
     }
+    /** Image paths for hunt stand types (and future issue #8 asset pack). */
+    var PIN_ICON_IMAGE = {
+      rifle_stand: 'icons/pins/rifle_stand.svg',
+      bow_stand: 'icons/pins/bow_stand.svg'
+    };
+    function pinIconImageSrc(iconId) {
+      if (!iconId) return null;
+      if (PIN_ICON_IMAGE[iconId]) return PIN_ICON_IMAGE[iconId];
+      return null;
+    }
     function pinIconSvgMarkup(iconId, glyphColor, size) {
+      var img = pinIconImageSrc(iconId);
+      var s = size || 14;
+      if (img) {
+        // CSS filter forces black detail; color can still tint via opacity layer if needed
+        var tint = (glyphColor && glyphColor !== '#000000' && glyphColor !== '#000')
+          ? ' style="filter:brightness(0) saturate(100%);opacity:0.95;"'
+          : ' style="filter:brightness(0) saturate(100%);"';
+        return '<img src="' + img + '" width="' + s + '" height="' + s + '" alt="" draggable="false"' + tint + '>';
+      }
       var ic = getPinIconById(iconId);
       if (!ic) return '';
-      var s = size || 14;
       return '<svg viewBox="0 0 24 24" width="' + s + '" height="' + s + '" aria-hidden="true"><path fill="none" stroke="' + (glyphColor || '#000') + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="' + ic.d + '"/></svg>';
     }
     function buildCustomPinMarkerHtml(loc) {
       var outer = loc.color || '#e59a18';
       var inner = loc.innerColor || '#111111';
-      var glyph = loc.iconColor || '#ffffff';
+      var glyph = loc.iconColor || '#000000';
       var iconId = loc.iconId || null;
       var letter = getFirstLetter(loc.name);
       if (loc.isStand && !iconId) letter = 'S';
@@ -15313,6 +15399,10 @@
       var huntToggle = document.getElementById('toggle-prev-hunts-chk');
       if (huntToggle) huntToggle.checked = true;
       drawHuntsOnMap();
+      try {
+        if (typeof window.regSlayerMapDataChanged === 'function') window.regSlayerMapDataChanged();
+        else if (window.RegSlayerCloud && typeof window.RegSlayerCloud.markDirty === 'function') window.RegSlayerCloud.markDirty();
+      } catch (eHuntCloud) {}
       alert('Hunt "' + name + '" logged!' + (tva ? '\n\nOn TVA land: ' + tva.reservoir + '.' : ''));
     }
 
@@ -15366,12 +15456,22 @@
       huntMarkerGroup.clearLayers();
       if (!document.getElementById('toggle-prev-hunts-chk').checked) return;
       historicalHunts.forEach(function(hunt) {
+        // Rifle / bow hunt uses stand pin art; color from hunt form
+        var huntLoc = {
+          color: hunt.color || '#3498db',
+          innerColor: hunt.innerColor || '#111111',
+          iconColor: hunt.iconColor || '#000000',
+          iconId: hunt.iconId || 'rifle_stand',
+          name: hunt.name || 'Hunt'
+        };
         var m = L.marker([hunt.lat, hunt.lng], {
           icon: L.divIcon({
             className: '',
-            html: '<div style="background:' + (hunt.color||'#3498db') + ';width:20px;height:20px;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:bold;box-shadow:0 1px 5px rgba(0,0,0,0.45);">H</div>',
-            iconSize: [20, 20],
-            iconAnchor: [10, 10]
+            html: (typeof buildCustomPinMarkerHtml === 'function')
+              ? buildCustomPinMarkerHtml(huntLoc)
+              : '<div style="background:' + (hunt.color||'#3498db') + ';width:20px;height:20px;border-radius:50%;border:2px solid white;"></div>',
+            iconSize: [28, 36],
+            iconAnchor: [14, 34]
           })
         });
         var safeId = escJsStr(hunt.id);
@@ -15395,9 +15495,14 @@
     function deleteHunt(id) {
       if (!confirm('Delete this past hunt?')) return;
       historicalHunts = historicalHunts.filter(function(h) { return String(h.id) !== String(id); });
-      localStorage.setItem('alabama_hunt_historical_hunts', JSON.stringify(historicalHunts));
+      try { localStorage.setItem('alabama_hunt_historical_hunts', JSON.stringify(historicalHunts)); } catch (eH) {}
       if (map) map.closePopup();
       drawHuntsOnMap();
+      try {
+        if (typeof window.regSlayerMapDataChanged === 'function') window.regSlayerMapDataChanged();
+        else if (window.RegSlayerCloud && typeof window.RegSlayerCloud.markDirty === 'function') window.RegSlayerCloud.markDirty();
+        if (window.RegSlayerCloud && typeof window.RegSlayerCloud.forcePush === 'function') window.RegSlayerCloud.forcePush();
+      } catch (eCloud) { console.warn('deleteHunt cloud sync', eCloud); }
     }
     window.deleteHunt = deleteHunt;
 
@@ -15405,14 +15510,22 @@
       if (!confirm('Delete this pin?')) return;
       var idx = locations.findIndex(function(l) { return String(l.id) === String(id); });
       if (idx !== -1) locations.splice(idx, 1);
-      var pins = JSON.parse(localStorage.getItem('alabama_hunt_custom_pins') || '[]');
+      var pins = [];
+      try { pins = JSON.parse(localStorage.getItem('alabama_hunt_custom_pins') || '[]'); } catch (eP) { pins = []; }
+      if (!Array.isArray(pins)) pins = [];
       pins = pins.filter(function(p) { return String(p.id) !== String(id); });
-      localStorage.setItem('alabama_hunt_custom_pins', JSON.stringify(pins));
+      try { localStorage.setItem('alabama_hunt_custom_pins', JSON.stringify(pins)); } catch (eS) {}
       if (String(selectedLocationId) === String(id)) { resetDashboard(); selectedLocationId = null; }
       lastVisibleMarkerKey = '';
       if (map) map.closePopup();
       updateAvailableList();
       drawPinsOnMap();
+      // Push deletion to cloud so refresh / pull does not resurrect the pin
+      try {
+        if (typeof window.regSlayerMapDataChanged === 'function') window.regSlayerMapDataChanged();
+        else if (window.RegSlayerCloud && typeof window.RegSlayerCloud.markDirty === 'function') window.RegSlayerCloud.markDirty();
+        if (window.RegSlayerCloud && typeof window.RegSlayerCloud.forcePush === 'function') window.RegSlayerCloud.forcePush();
+      } catch (eCloud) { console.warn('deletePin cloud sync', eCloud); }
     }
     window.deletePin = deletePin;
 

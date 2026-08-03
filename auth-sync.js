@@ -352,7 +352,7 @@
         return;
       }
 
-      // Full replace from cloud (includes deletions)
+      // Full replace from cloud (includes deletions). Dirty local already bailed out above.
       applyMapState(state);
       localRevision = rev;
       writeLocalCache(state);

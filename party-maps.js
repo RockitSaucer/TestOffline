@@ -873,7 +873,7 @@
           }
         },
         {
-          label: 'Copy to clipboard',
+          label: 'Copy location',
           onClick: function () {
             if (typeof shareLocationLink === 'function') shareLocationLink(lat, lng, label);
             else if (typeof googleMapsShareUrl === 'function') {
@@ -896,17 +896,28 @@
         '<p class="settings-hint">Choose how to share your GPS position.</p>',
         [
           {
-            label: 'Share with party',
+            label: 'Share to another map',
             primary: true,
             onClick: function () {
-              if (!sharing) startSharing();
-              else alert('Already sharing with party. Tap the red Share Location button to stop.');
+              openShareToMapFlow({ lat: la, lng: lo, name: 'My location' }, 'pin');
             }
           },
           {
-            label: 'Copy to clipboard',
+            label: 'Copy location',
             onClick: function () {
               if (typeof shareLocationLink === 'function') shareLocationLink(la, lo, 'My location');
+              else if (typeof googleMapsShareUrl === 'function') {
+                var u = googleMapsShareUrl(la, lo);
+                if (navigator.clipboard) navigator.clipboard.writeText(u);
+                else window.prompt('Copy:', u);
+              }
+            }
+          },
+          {
+            label: sharing ? 'Stop sharing with party' : 'Share with party (live)',
+            onClick: function () {
+              if (!sharing) startSharing();
+              else stopSharing();
             }
           },
           { label: 'Cancel' }
@@ -1096,7 +1107,12 @@
     }
     var shareBtn = $('share-loc-btn');
     if (shareBtn) {
-      shareBtn.onclick = function () { toggleSharing(); };
+      // Popup: share to map / copy location / party live share
+      shareBtn.onclick = function (ev) {
+        if (ev) { try { ev.preventDefault(); ev.stopPropagation(); } catch (e0) {} }
+        openShareMyLocationChooser();
+        return false;
+      };
     }
     // gps long-press / secondary: after snap offer share? User asked: when clicking current location arrow icon on map
     // Own GPS marker is non-interactive. Make share via toolbar. Also hook snapToGPS secondary menu:
