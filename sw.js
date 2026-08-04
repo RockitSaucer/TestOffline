@@ -2,7 +2,7 @@
  * Caches app shell for return visits with no signal.
  * Map tiles: cache-first when already stored; network otherwise (then cache).
  */
-const SHELL_CACHE = 'reg-slayer-shell-v15';
+const SHELL_CACHE = 'reg-slayer-shell-v16';
 const TILE_CACHE = 'reg-slayer-tiles-v2';
 const DATA_CACHE = 'reg-slayer-data-v1';
 
@@ -19,6 +19,33 @@ const SHELL_ASSETS = [
   './icons/tools/draw.png',
   './icons/tools/track.png',
   './icons/tools/layers.png',
+  // Pin glyphs — needed offline when opening a map with saved pins
+  './icons/pins/alligator.png',
+  './icons/pins/arrow.png',
+  './icons/pins/beaver_dam.png',
+  './icons/pins/blood.png',
+  './icons/pins/boat.png',
+  './icons/pins/bow.png',
+  './icons/pins/bow_stand.png',
+  './icons/pins/bridge.png',
+  './icons/pins/buck.png',
+  './icons/pins/camera.png',
+  './icons/pins/crossing.png',
+  './icons/pins/deadhead.png',
+  './icons/pins/doe.png',
+  './icons/pins/feeder.png',
+  './icons/pins/food.png',
+  './icons/pins/muzzleloader.png',
+  './icons/pins/prints.png',
+  './icons/pins/rifle.png',
+  './icons/pins/rifle_stand.png',
+  './icons/pins/rub.png',
+  './icons/pins/salt.png',
+  './icons/pins/scrape.png',
+  './icons/pins/shed.png',
+  './icons/pins/tent.png',
+  './icons/pins/tree.png',
+  './icons/pins/truck.png',
   './vendor/leaflet/leaflet.js',
   './vendor/leaflet/leaflet.css',
   './vendor/leaflet/marker-icon.png',

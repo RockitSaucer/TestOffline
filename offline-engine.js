@@ -249,7 +249,8 @@
         reject(new Error('This browser cannot store offline map tiles.'));
         return;
       }
-      caches.open('reg-slayer-tiles-v1').then(async function (cache) {
+      // Must match TILE_CACHE in sw.js (reg-slayer-tiles-v2)
+      caches.open('reg-slayer-tiles-v2').then(async function (cache) {
         var ok = 0;
         var fail = 0;
         // Small concurrency for flaky rural LTE without flooding the radio
@@ -308,7 +309,7 @@
     setPacks([]);
     var p = Promise.resolve();
     if ('caches' in global) {
-      p = caches.delete('reg-slayer-tiles-v1');
+      p = caches.delete('reg-slayer-tiles-v2');
     }
     updateOfflineBanner();
     return p;

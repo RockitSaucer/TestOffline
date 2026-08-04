@@ -1,4 +1,4 @@
-﻿/* REG SLAYER 5.1 Beta â€” Auth + personal/shared map cloud sync (local-first).
+﻿/* REG SLAYER 5.2 Beta — Auth + personal/shared map cloud sync (local-first).
    Loaded inline into index.html. Performance rules:
    - Always write localStorage first
    - Debounced cloud push (idle when possible)
@@ -208,7 +208,7 @@
     cloudBusy = true;
     updateSyncBadge('syncing');
     try {
-      // Local is authority when dirty â€” full replace (no merge).
+      // Local is authority when dirty — full replace (no merge).
       // Merge-by-id was resurrecting deleted pins/areas on push/refresh.
       var state = collectMapState();
       writeLocalCache(state);
@@ -344,7 +344,7 @@
       );
       var localHas = (local.pins && local.pins.length) || (local.hunts && local.hunts.length) ||
         (local.customAreas && local.customAreas.length) || (local.measuredPaths && local.measuredPaths.length);
-      // Only seed when we have never synced (rev 0) â€” not after intentional full delete
+      // Only seed when we have never synced (rev 0) — not after intentional full delete
       if (remoteEmpty && localHas && !rev) {
         dirty = true;
         try { localStorage.setItem(DIRTY_KEY, '1'); } catch (eD) {}
@@ -505,7 +505,7 @@
     await ensureClient();
     var uname = normalizeUsername(username);
     if (uname.length < 3 || uname.length > 32 || !/^[a-z0-9_]+$/.test(uname)) {
-      throw new Error('Username: 3â€“32 chars, letters/numbers/underscore only');
+      throw new Error('Username: 3–32 chars, letters/numbers/underscore only');
     }
     if (!password || password.length < 6) throw new Error('Password must be at least 6 characters');
     var email = syntheticEmail(uname);
@@ -776,8 +776,8 @@
     if (off) off.checked = !!offlineMode;
     var sync = $('set-sync-status');
     if (sync) {
-      if (offlineMode) sync.textContent = 'Offline mode â€” cloud sync paused';
-      else if (!isOnline()) sync.textContent = 'No connection â€” saving locally';
+      if (offlineMode) sync.textContent = 'Offline mode — cloud sync paused';
+      else if (!isOnline()) sync.textContent = 'No connection — saving locally';
       else if (dirty) sync.textContent = 'Local save pending cloud uploadâ€¦';
       else sync.textContent = 'Cloud sync ready';
     }
@@ -787,7 +787,7 @@
   function updateSyncBadge(state) {
     var sync = $('set-sync-status');
     if (!sync) return;
-    if (offlineMode) { sync.textContent = 'Offline mode â€” cloud sync paused'; return; }
+    if (offlineMode) { sync.textContent = 'Offline mode — cloud sync paused'; return; }
     if (state === 'syncing') sync.textContent = 'Uploading to cloudâ€¦';
     else if (state === 'pending') sync.textContent = 'Waiting to upload (will retry when online)â€¦';
     else if (state === 'ok') sync.textContent = 'Synced with cloud';
