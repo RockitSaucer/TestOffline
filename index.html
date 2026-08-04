@@ -343,6 +343,11 @@
       padding: 10px 14px 8px;
       box-sizing: border-box;
     }
+    /* Phase 2 shell is horizontal (rail | workspace), not the old stacked column */
+    html.layout-desktop .app-shell.shell-v2 {
+      flex-direction: row;
+      padding: 0;
+    }
     html.layout-desktop .container {
       flex: 1 1 auto;
       min-height: 0;
@@ -427,6 +432,13 @@
       margin: 0;
       box-sizing: border-box;
       overflow-x: hidden;
+    }
+    html.layout-phone .app-shell.shell-v2 {
+      flex-direction: column-reverse;
+      padding: 0;
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
     }
     html.layout-phone .container {
       display: flex;
@@ -5382,6 +5394,389 @@
       accent-color: var(--accent);
       cursor: pointer;
     }
+
+    /* ========== Phase 2: context + canvas shell ========== */
+    .shell-v2 {
+      display: flex;
+      flex-direction: row;
+      flex: 1 1 auto;
+      min-height: 0;
+      height: 100%;
+      gap: 0;
+      padding: 0 !important;
+    }
+    .app-rail {
+      flex: 0 0 60px;
+      width: 60px;
+      background: #0c0f0b;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 8px 6px;
+      z-index: 40;
+      box-sizing: border-box;
+    }
+    .rail-top, .rail-bottom {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .rail-bottom {
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+      margin-top: 8px;
+    }
+    .rail-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(145deg, #2a3a1f, #1a2414);
+      border: 1px solid rgba(229,154,24,0.45);
+      color: var(--accent);
+      font-weight: 800;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: -0.03em;
+      margin-bottom: 6px;
+      user-select: none;
+    }
+    .rail-btn {
+      width: 44px;
+      min-height: 44px;
+      border: none;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 6px 2px;
+      font-size: 9px;
+      font-weight: 600;
+      line-height: 1.1;
+      transition: background 0.15s, color 0.15s;
+    }
+    .rail-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .rail-btn:hover { background: rgba(255,255,255,0.06); color: var(--ink); }
+    .rail-btn.is-active {
+      background: rgba(229,154,24,0.18);
+      color: var(--accent);
+    }
+    .rail-btn .rail-lbl { max-width: 52px; text-align: center; }
+    .shell-workspace {
+      flex: 1 1 auto;
+      min-width: 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .context-bar {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: #0e120c;
+      border-bottom: 1px solid var(--border);
+      z-index: 30;
+      flex-wrap: wrap;
+    }
+    .ctx-chip {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      max-width: min(280px, 40vw);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .ctx-chip:hover { border-color: var(--accent); color: var(--accent); }
+    .ctx-chip.is-empty { color: var(--muted); font-weight: 500; }
+    .ctx-status {
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 8px;
+      background: rgba(72,106,47,0.25);
+      color: #b8d49a;
+      border: 1px solid rgba(72,106,47,0.45);
+      max-width: min(360px, 45vw);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .ctx-status.is-closed {
+      background: rgba(217,65,54,0.18);
+      color: #f0a8a2;
+      border-color: rgba(217,65,54,0.45);
+    }
+    .ctx-status.is-unknown {
+      background: rgba(255,255,255,0.05);
+      color: var(--muted);
+      border-color: var(--border);
+    }
+    .shell-stage {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: row;
+      position: relative;
+      overflow: hidden;
+    }
+    .shell-panel {
+      flex: 0 0 340px;
+      width: 340px;
+      max-width: 42vw;
+      min-width: 260px;
+      background: var(--panel-light, #12160f);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      z-index: 20;
+      transition: width 0.18s ease, flex-basis 0.18s ease, opacity 0.15s ease, transform 0.18s ease;
+      box-shadow: 4px 0 18px rgba(0,0,0,0.25);
+    }
+    .shell-panel.is-collapsed {
+      flex-basis: 0 !important;
+      width: 0 !important;
+      min-width: 0 !important;
+      max-width: 0 !important;
+      opacity: 0;
+      pointer-events: none;
+      border-right: none;
+      overflow: hidden;
+    }
+    .shell-panel-head {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      background: #0c0f0b;
+    }
+    .shell-panel-head h2 {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .shell-panel-close {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--muted);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .shell-panel-close:hover { color: var(--ink); border-color: var(--accent); }
+    .shell-panel-body {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+    .shell-view { display: none; padding: 8px; }
+    .shell-view.is-active { display: block; }
+    .shell-map-host {
+      flex: 1 1 auto;
+      min-width: 0;
+      min-height: 0;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+    /* Planner / map cards fill shell cells */
+    .shell-v2 .container {
+      display: contents;
+    }
+    .shell-v2 .card-planner {
+      border: none;
+      box-shadow: none;
+      background: transparent;
+      padding: 0;
+      max-height: none;
+      height: auto;
+      overflow: visible;
+    }
+    .shell-v2 .card-map {
+      flex: 1 1 auto;
+      height: 100% !important;
+      max-height: 100% !important;
+      min-height: 0 !important;
+      border: none;
+      border-radius: 0;
+      padding: 0 !important;
+      margin: 0;
+    }
+    html.layout-desktop .shell-v2 .card-map .map-wrapper {
+      min-height: 0 !important;
+      height: 100% !important;
+    }
+    html.layout-desktop .shell-v2 #leaflet-map {
+      height: 100% !important;
+      min-height: 0 !important;
+    }
+    /* Desktop: hide tall brand banner — mark lives on rail */
+    html.layout-desktop .brand-header.shell-brand-compact {
+      height: 0 !important;
+      min-height: 0 !important;
+      max-height: 0 !important;
+      overflow: hidden !important;
+      opacity: 0;
+      pointer-events: none;
+      border: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    html.layout-desktop .site-footer {
+      display: none;
+    }
+    .shell-stub {
+      padding: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .shell-stub h3 {
+      margin: 0 0 8px;
+      color: var(--ink);
+      font-size: 14px;
+    }
+    .shell-stub .shell-action {
+      display: inline-block;
+      margin-top: 10px;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .shell-stub .shell-action.secondary {
+      background: var(--panel);
+      color: var(--ink);
+      border: 1px solid var(--border);
+      margin-left: 6px;
+    }
+    #regs-panel-host .regs-modal-card {
+      position: static;
+      max-width: none;
+      max-height: none;
+      box-shadow: none;
+      border: none;
+      padding: 4px 2px 16px;
+      background: transparent;
+    }
+    #view-log .log-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    #view-log .log-item {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+    }
+    /* Phone: bottom tab rail + panel sheet over map */
+    html.layout-phone .shell-v2 {
+      flex-direction: column-reverse;
+    }
+    html.layout-phone .app-rail {
+      flex: 0 0 auto;
+      width: 100%;
+      flex-direction: row;
+      justify-content: space-between;
+      border-right: none;
+      border-top: 1px solid var(--border);
+      padding: 4px 4px calc(4px + env(safe-area-inset-bottom, 0px));
+      gap: 0;
+    }
+    html.layout-phone .rail-top {
+      flex-direction: row;
+      flex: 1 1 auto;
+      justify-content: space-around;
+      gap: 2px;
+    }
+    html.layout-phone .rail-bottom {
+      flex-direction: row;
+      border-top: none;
+      border-left: 1px solid var(--border);
+      margin-top: 0;
+      padding-top: 0;
+      padding-left: 4px;
+      gap: 2px;
+    }
+    html.layout-phone .rail-mark { display: none; }
+    html.layout-phone .rail-btn {
+      width: auto;
+      min-width: 48px;
+      flex: 1 1 0;
+      min-height: 48px;
+      font-size: 8px;
+    }
+    html.layout-phone .shell-stage {
+      flex-direction: column;
+    }
+    html.layout-phone .shell-panel {
+      flex: 0 0 48%;
+      width: 100%;
+      max-width: none;
+      min-width: 0;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+      box-shadow: none;
+    }
+    html.layout-phone .shell-panel.is-collapsed {
+      flex: 0 0 0 !important;
+      height: 0 !important;
+    }
+    html.layout-phone .shell-map-host {
+      flex: 1 1 52%;
+    }
+    html.layout-phone .context-bar {
+      padding: 6px 8px;
+      gap: 6px;
+    }
+    html.layout-phone .ctx-chip {
+      font-size: 11px;
+      padding: 5px 9px;
+      max-width: 28vw;
+    }
+    html.layout-phone .ctx-status {
+      font-size: 10px;
+      max-width: 34vw;
+    }
+    /* Hide secondary rail items on very narrow: use More later; keep all for now with smaller labels */
+    @media (max-width: 380px) {
+      html.layout-phone .rail-btn .rail-lbl { display: none; }
+    }
+
   </style>
 </head>
 <body>
@@ -5390,7 +5785,7 @@
     <div class="brand-map-name" id="brand-map-name" title="Active map">My Map</div>
     <div class="brand-logo-wrap">
       <img class="brand-logo" src="reg-slayer-logo.png" alt="REG SLAYER - Know Before You Go" width="1100" height="240" />
-      <span class="brand-version" aria-label="Version 1.02 Beta">V1.02 Beta</span>
+      <span class="brand-version" aria-label="Version 1.03 Beta">V1.03 Beta</span>
     </div>
   </header>
 
@@ -5473,8 +5868,61 @@
     </div>
   </div>
 
-  <div class="app-shell">
-  <div class="container">
+  <div class="app-shell shell-v2" id="app-shell">
+    <nav class="app-rail" id="app-rail" aria-label="Main navigation">
+      <div class="rail-top">
+        <div class="rail-mark" title="REG SLAYER V1.03 Beta" aria-hidden="true">RS</div>
+      <button type="button" class="rail-btn is-active" data-shell-view="plan" aria-label="Plan" aria-current="page" title="Plan">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 3h10a2 2 0 0 1 2 2v14l-7-3-7 3V5a2 2 0 0 1 2-2zm0 2v11.2l5-2.1 5 2.1V5H7z"/></svg>
+        <span class="rail-lbl">Plan</span>
+      </button>
+      <button type="button" class="rail-btn" data-shell-view="map" aria-label="Map" title="Map">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M15 4.5 9 6.3 3 4.5v15l6 1.8 6-1.8 6 1.8v-15l-6-1.8zm0 1.9 4 1.2v11.3l-4-1.2V6.4zm-6 1.1 4-1.2v11.3l-4 1.2V7.5zm-2 .5v11.3l-4-1.2V6.8l4 1.2z"/></svg>
+        <span class="rail-lbl">Map</span>
+      </button>
+      <button type="button" class="rail-btn" data-shell-view="conditions" aria-label="Conditions" title="Conditions">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 4a1 1 0 0 1 1 1v1.1a6 6 0 0 1 4.5 4.4H19a3 3 0 1 1 0 6h-1.1A6 6 0 0 1 7 14H6a3 3 0 1 1 0-6h.6A6 6 0 0 1 11 6.1V5a1 1 0 0 1 1-1z"/></svg>
+        <span class="rail-lbl">Conditions</span>
+      </button>
+      <button type="button" class="rail-btn" data-shell-view="regs" aria-label="Regs" title="Regs">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 3h9l3 3v15H6V3zm2 2v14h10V7h-3V5H8zm2 4h6v2h-6V9zm0 4h6v2h-6v-2z"/></svg>
+        <span class="rail-lbl">Regs</span>
+      </button>
+      <button type="button" class="rail-btn" data-shell-view="log" aria-label="Hunt log" title="Hunt log">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 4h14v2H5V4zm0 4h14v12H5V8zm2 2v2h10v-2H7zm0 4v2h7v-2H7z"/></svg>
+        <span class="rail-lbl">Hunt log</span>
+      </button>
+      <button type="button" class="rail-btn" data-shell-view="party" aria-label="Party" title="Party">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm6 0a3 3 0 1 1 0-6 3 3 0 0 1 0 6zM9 13c-2.7 0-5 1.6-5 3.5V19h10v-2.5C14 14.6 11.7 13 9 13zm6 0c-.4 0-.8 0-1.2.1 1.2.8 2.2 2 2.2 3.4V19h5v-2.5c0-1.9-2.3-3.5-6-3.5z"/></svg>
+        <span class="rail-lbl">Party</span>
+      </button>
+      </div>
+      <div class="rail-bottom">
+        <button type="button" class="rail-btn" id="rail-offline-btn" aria-label="Offline and sync status" title="Offline / sync">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M2.1 3.5 3.5 2.1 21.9 20.5 20.5 21.9l-3.2-3.2A8 8 0 0 1 4 14h2a6 6 0 0 0 9.3 4.9l-1.5-1.5A4 4 0 0 1 8 14H6l.3-.7 1.5 1.5L2.1 3.5zM12 4a8 8 0 0 1 8 8h-2a6 6 0 0 0-6-6V4z"/></svg>
+          <span class="rail-lbl">Offline</span>
+        </button>
+        <button type="button" class="rail-btn" id="rail-settings-btn" aria-label="Settings" title="Settings" onclick="if(typeof openSettingsModal==='function')openSettingsModal();">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19.1 12.9c0-.3 0-.6-.1-.9l2-1.6-1.9-3.3-2.4 1a7.2 7.2 0 0 0-1.6-.9l-.4-2.5h-3.8l-.4 2.5c-.6.2-1.1.5-1.6.9l-2.4-1-1.9 3.3 2 1.6c0 .3-.1.6-.1.9s0 .6.1.9l-2 1.6 1.9 3.3 2.4-1c.5.4 1 .7 1.6.9l.4 2.5h3.8l.4-2.5c.6-.2 1.1-.5 1.6-.9l2.4 1 1.9-3.3-2-1.6c.1-.3.1-.6.1-.9zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z"/></svg>
+          <span class="rail-lbl">Settings</span>
+        </button>
+      </div>
+    </nav>
+    <div class="shell-workspace">
+      <div class="context-bar" id="context-bar" role="region" aria-label="Hunt context">
+        <button type="button" class="ctx-chip is-empty" id="ctx-chip-date" data-ctx="date" title="Hunt date">Pick date</button>
+        <button type="button" class="ctx-chip is-empty" id="ctx-chip-weapon" data-ctx="weapon" title="Weapon">Weapon</button>
+        <button type="button" class="ctx-chip is-empty" id="ctx-chip-area" data-ctx="area" title="Area">Area</button>
+        <div class="ctx-status is-unknown" id="ctx-status" title="Hunt status for current context">Set date &amp; weapon</div>
+      </div>
+      <div class="shell-stage" id="shell-stage">
+        <aside class="shell-panel" id="shell-panel" aria-label="Side panel">
+          <div class="shell-panel-head">
+            <h2 id="shell-panel-title">Plan</h2>
+            <button type="button" class="shell-panel-close" id="shell-panel-close" title="Show map only">Map</button>
+          </div>
+          <div class="shell-panel-body" id="shell-panel-body">
+            <div class="shell-view is-active" id="view-plan" data-view="plan">
     <div class="card card-planner">
       <!-- Square calendar (left fixed) + weapons stacked in freed space on the right -->
       <div class="planner-row" id="planner-row">
@@ -5604,7 +6052,9 @@
           <div class="location-list" id="location-list"></div>
         </div>
       </div>
-
+    </div><!-- /.card-planner -->
+            </div>
+            <div class="shell-view" id="view-conditions" data-view="conditions">
       <div id="dashboard-container" class="dashboard-under-steps">
       <div id="db-blank" style="text-align:center;padding:120px 0;color:var(--muted);">
         <h3>Step 4: Weather & Water Dashboard</h3>
@@ -5688,8 +6138,36 @@
         </div>
       </div>
     </div>
-    </div>
-
+            </div>
+            <div class="shell-view" id="view-regs" data-view="regs">
+              <div id="regs-panel-host" class="shell-stub">
+                <h3>Regulations</h3>
+                <p>Verdict and day rules for the current hunt context appear here. Pick a date, weapon, and area in Plan if empty.</p>
+                <button type="button" class="shell-action" id="regs-panel-refresh-btn">Refresh rules</button>
+                <button type="button" class="shell-action secondary" onclick="if(typeof openDeerRegsPanel==='function'){try{openDeerRegsPanel();}catch(e){}}">Open full panel</button>
+                <div id="regs-panel-body" style="margin-top:12px;"></div>
+              </div>
+            </div>
+            <div class="shell-view" id="view-log" data-view="log">
+              <div class="shell-stub">
+                <h3>Hunt log</h3>
+                <p>Trips from the calendar and a quick jump to stands on the map. Full unified log lands in Phase 3.</p>
+                <button type="button" class="shell-action" data-shell-view="plan">Add trip in Plan</button>
+                <div id="hunt-log-list" class="log-list" style="margin-top:12px;"></div>
+              </div>
+            </div>
+            <div class="shell-view" id="view-party" data-view="party">
+              <div class="shell-stub">
+                <h3>Party &amp; maps</h3>
+                <p>Create or join a shared map, copy invite codes, and share live location. Uses the same My Maps tools as Settings.</p>
+                <button type="button" class="shell-action" id="party-open-maps-btn" onclick="if(typeof openSettingsModal==='function')openSettingsModal('maps');">Open My Maps</button>
+                <button type="button" class="shell-action secondary" id="party-signin-btn" onclick="if(typeof openAuthGate==='function')openAuthGate(); else if(document.getElementById('auth-gate'))document.getElementById('auth-gate').style.display='flex';">Sign in</button>
+                <p class="settings-hint" style="margin-top:12px;" id="party-panel-hint">Live location needs a shared map and two signed-in users.</p>
+              </div>
+            </div>
+          </div>
+        </aside>
+        <div class="shell-map-host" id="shell-map-host">
     <div class="card card-map">
       <!-- Mobile: map name between available tracts and the map -->
       <div class="map-title-bar" id="map-title-bar" aria-live="polite">
@@ -6052,9 +6530,11 @@
         </div>
       </div>
     </div>
-
-  </div>
+        </div>
+      </div>
+    </div>
   </div><!-- /.app-shell -->
+
 
   <!-- Tagline + official links moved to bottom (v3.9) -->
   <footer class="site-footer" role="contentinfo">
@@ -6309,7 +6789,7 @@
 
   <script>
     // ========== STATE ==========
-    const APP_VERSION = '1.02-beta';
+    const APP_VERSION = '1.03-beta';
     const APP_SETTINGS_KEY = 'reg_slayer_app_settings_v1';
 
     /** User preferences (tools, defaults, display) — persisted localStorage */
@@ -17690,15 +18170,25 @@
       var mapEl = document.getElementById('leaflet-map');
       var shell = document.querySelector('.app-shell');
       var container = document.querySelector('.container');
+      var mapHost = document.getElementById('shell-map-host');
+      var stage = document.getElementById('shell-stage');
       if (!card || !mapEl) return;
 
       var vv = window.visualViewport;
       var vh = (vv && vv.height) ? vv.height : (window.innerHeight || document.documentElement.clientHeight || 0);
       if (vh < 200) return;
 
-      // Prefer filling the grid cell (shell locks to viewport); fall back to remaining viewport
+      // Phase 2 shell: fill shell-map-host / stage. Legacy: container grid cell.
       var avail = 0;
-      if (container) {
+      if (mapHost) {
+        var hr = mapHost.getBoundingClientRect();
+        avail = Math.floor(hr.height);
+      }
+      if (avail < 200 && stage) {
+        var sr = stage.getBoundingClientRect();
+        avail = Math.floor(sr.height);
+      }
+      if (avail < 200 && container) {
         var cr = container.getBoundingClientRect();
         avail = Math.floor(cr.height);
       }
@@ -17716,9 +18206,14 @@
         shell.style.minHeight = '0';
         shell.style.flex = '1 1 auto';
       }
-      if (container) {
+      if (container && !document.querySelector('.shell-v2')) {
         container.style.minHeight = '0';
         container.style.height = '100%';
+      }
+      if (mapHost) {
+        mapHost.style.minHeight = '0';
+        mapHost.style.flex = '1 1 auto';
+        mapHost.style.height = '100%';
       }
       card.style.height = avail + 'px';
       card.style.maxHeight = avail + 'px';
@@ -20703,9 +21198,313 @@
     }
 
     // ========== INIT (calendar first; map/Leaflet/USGS deferred until Step 3) ==========
+
+    // ========== Phase 2: App shell (rail + context bar + docked panels) ==========
+    var AppShell = {
+      view: 'plan',
+      panelOpen: true,
+      titles: {
+        plan: 'Plan',
+        map: 'Map',
+        conditions: 'Conditions',
+        regs: 'Regulations',
+        log: 'Hunt log',
+        party: 'Party'
+      },
+      init: function() {
+        var self = this;
+        var rail = document.getElementById('app-rail');
+        if (rail) {
+          rail.addEventListener('click', function(ev) {
+            var btn = ev.target.closest('[data-shell-view]');
+            if (!btn || !rail.contains(btn)) return;
+            var v = btn.getAttribute('data-shell-view');
+            if (v) self.setView(v);
+          });
+        }
+        document.addEventListener('click', function(ev) {
+          var btn = ev.target.closest('#view-log [data-shell-view], #shell-panel-body [data-shell-view="plan"]');
+          if (btn && btn.getAttribute('data-shell-view')) {
+            self.setView(btn.getAttribute('data-shell-view'));
+          }
+        });
+        var closeBtn = document.getElementById('shell-panel-close');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', function() { self.setView('map'); });
+        }
+        var offlineBtn = document.getElementById('rail-offline-btn');
+        if (offlineBtn) {
+          offlineBtn.addEventListener('click', function() {
+            if (typeof openSettingsModal === 'function') openSettingsModal('display');
+            else if (typeof openSettingsModal === 'function') openSettingsModal();
+          });
+        }
+        ['ctx-chip-date', 'ctx-chip-weapon', 'ctx-chip-area'].forEach(function(id) {
+          var el = document.getElementById(id);
+          if (!el) return;
+          el.addEventListener('click', function() {
+            var kind = el.getAttribute('data-ctx');
+            self.setView('plan');
+            setTimeout(function() {
+              try {
+                if (kind === 'date') {
+                  var cal = document.getElementById('calendar-container') || document.getElementById('step-1-section');
+                  if (cal) cal.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else if (kind === 'weapon') {
+                  var w = document.getElementById('step-2-section');
+                  if (w) w.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else if (kind === 'area') {
+                  var a = document.getElementById('locations-under-steps') || document.getElementById('step-3-section');
+                  if (a) a.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+              } catch (eScr) {}
+            }, 80);
+          });
+        });
+        var regsBtn = document.getElementById('regs-panel-refresh-btn');
+        if (regsBtn) {
+          regsBtn.addEventListener('click', function() { self.refreshRegsPanel(); });
+        }
+        if (typeof HuntContext !== 'undefined' && HuntContext.subscribe) {
+          HuntContext.subscribe(function() {
+            self.updateContextBar();
+          });
+        }
+        // Hook bottom-bar updates so context bar stays in sync
+        var _origUbc = window.updateBottomBarContext;
+        if (typeof _origUbc === 'function' && !_origUbc._shellHooked) {
+          window.updateBottomBarContext = function() {
+            _origUbc.apply(this, arguments);
+            try { self.updateContextBar(); } catch (eC) {}
+          };
+          window.updateBottomBarContext._shellHooked = true;
+        }
+        this.setView(this.view, { silent: true });
+        this.updateContextBar();
+        this.refreshOfflineRail();
+        this.refreshHuntLog();
+        try {
+          window.addEventListener('online', function() { self.refreshOfflineRail(); });
+          window.addEventListener('offline', function() { self.refreshOfflineRail(); });
+        } catch (eOn) {}
+      },
+      setView: function(view, opts) {
+        opts = opts || {};
+        var allowed = { plan: 1, map: 1, conditions: 1, regs: 1, log: 1, party: 1 };
+        if (!allowed[view]) view = 'plan';
+        this.view = view;
+        this.panelOpen = (view !== 'map');
+        var panel = document.getElementById('shell-panel');
+        if (panel) {
+          panel.classList.toggle('is-collapsed', !this.panelOpen);
+          panel.setAttribute('aria-hidden', this.panelOpen ? 'false' : 'true');
+        }
+        document.querySelectorAll('.shell-view').forEach(function(el) {
+          var on = el.getAttribute('data-view') === view || (view === 'map' && el.getAttribute('data-view') === 'plan');
+          // When map view, keep last content mounted but panel collapsed — still mark plan inactive visually
+          if (view === 'map') {
+            el.classList.toggle('is-active', el.getAttribute('data-view') === 'plan');
+          } else {
+            el.classList.toggle('is-active', el.getAttribute('data-view') === view);
+          }
+        });
+        if (view === 'map') {
+          // no active panel view needed; leave plan as dormant content
+          document.querySelectorAll('.shell-view').forEach(function(el) {
+            el.classList.remove('is-active');
+          });
+        }
+        var title = document.getElementById('shell-panel-title');
+        if (title) title.textContent = this.titles[view] || view;
+        document.querySelectorAll('#app-rail [data-shell-view]').forEach(function(btn) {
+          var on = btn.getAttribute('data-shell-view') === view;
+          btn.classList.toggle('is-active', on);
+          if (on) btn.setAttribute('aria-current', 'page');
+          else btn.removeAttribute('aria-current');
+        });
+        if (view === 'regs') this.refreshRegsPanel();
+        if (view === 'log') this.refreshHuntLog();
+        if (view === 'conditions') {
+          // Ensure dashboard visible if we have a selection
+          try {
+            if (typeof selectedLocationId !== 'undefined' && selectedLocationId != null &&
+                typeof selectLocationById === 'function') {
+              /* leave weather as-is */
+            }
+          } catch (eCond) {}
+        }
+        // Leaflet must reflow when panel opens/closes
+        var self = this;
+        requestAnimationFrame(function() {
+          try {
+            if (typeof fitDesktopMapHeight === 'function') fitDesktopMapHeight();
+            if (typeof fitPhoneMapSize === 'function') fitPhoneMapSize();
+            if (typeof map !== 'undefined' && map) map.invalidateSize(true);
+          } catch (eFit) {}
+          setTimeout(function() {
+            try {
+              if (typeof map !== 'undefined' && map) map.invalidateSize(true);
+            } catch (e2) {}
+          }, 200);
+        });
+        if (!opts.silent && typeof history !== 'undefined') {
+          try { /* no URL changes in phase 2 */ } catch (eH) {}
+        }
+      },
+      updateContextBar: function() {
+        var dateEl = document.getElementById('ctx-chip-date');
+        var wpnEl = document.getElementById('ctx-chip-weapon');
+        var areaEl = document.getElementById('ctx-chip-area');
+        var statusEl = document.getElementById('ctx-status');
+        var d = (typeof selectedDate !== 'undefined' && selectedDate) ? selectedDate : (HuntContext && HuntContext.date);
+        var w = (typeof selectedWeapon !== 'undefined') ? selectedWeapon : (HuntContext && HuntContext.weapon);
+        var lid = (typeof selectedLocationId !== 'undefined') ? selectedLocationId : (HuntContext && HuntContext.locationId);
+        if (dateEl) {
+          if (d) {
+            var dl = (typeof formatMbbFullDate === 'function') ? formatMbbFullDate(d) :
+              d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            dateEl.textContent = dl;
+            dateEl.classList.remove('is-empty');
+            dateEl.title = dl;
+          } else {
+            dateEl.textContent = 'Pick date';
+            dateEl.classList.add('is-empty');
+          }
+        }
+        if (wpnEl) {
+          if (w) {
+            var wl = (typeof displayWeaponName === 'function') ? displayWeaponName(w) : w;
+            wpnEl.textContent = wl;
+            wpnEl.classList.remove('is-empty');
+            wpnEl.title = wl;
+          } else {
+            wpnEl.textContent = 'Weapon';
+            wpnEl.classList.add('is-empty');
+          }
+        }
+        if (areaEl) {
+          var name = 'Area';
+          var found = null;
+          if (lid != null && typeof locations !== 'undefined') {
+            found = locations.find(function(l) { return String(l.id) === String(lid); });
+            if (found && found.name) name = found.name;
+          }
+          if (found) {
+            areaEl.textContent = name;
+            areaEl.classList.remove('is-empty');
+            areaEl.title = name;
+          } else {
+            areaEl.textContent = 'Area';
+            areaEl.classList.add('is-empty');
+            areaEl.title = 'Select a tract or use Current Location';
+          }
+        }
+        if (statusEl) {
+          var st = this.computeStatusLabel(d, w, lid);
+          statusEl.textContent = st.text;
+          statusEl.classList.remove('is-closed', 'is-unknown');
+          if (st.kind === 'closed') statusEl.classList.add('is-closed');
+          if (st.kind === 'unknown') statusEl.classList.add('is-unknown');
+          statusEl.title = st.text;
+        }
+      },
+      computeStatusLabel: function(d, w, lid) {
+        if (!d || !w) return { text: 'Set date & weapon', kind: 'unknown' };
+        try {
+          if (lid != null && typeof locations !== 'undefined' && typeof isLocationHuntable === 'function') {
+            var loc = locations.find(function(l) { return String(l.id) === String(lid); });
+            if (loc) {
+              var ok = isLocationHuntable(loc);
+              if (ok === false) return { text: 'Cannot hunt this area', kind: 'closed' };
+              if (ok === true) return { text: 'Season open · check rules', kind: 'open' };
+            }
+          }
+          if (typeof queryOpenSeasons === 'function') {
+            var open = queryOpenSeasons(d, w, (typeof selectedLand !== 'undefined' ? selectedLand : 'Public') || 'Public');
+            if (open && open.length) return { text: 'Open tracts: ' + open.length, kind: 'open' };
+            return { text: 'No open tracts for filters', kind: 'closed' };
+          }
+        } catch (eSt) {}
+        return { text: 'Context set', kind: 'unknown' };
+      },
+      refreshRegsPanel: function() {
+        var host = document.getElementById('regs-panel-body');
+        if (!host) return;
+        try {
+          if (typeof selectedDate === 'undefined' || !selectedDate || !selectedWeapon) {
+            host.innerHTML = '<p style="color:var(--muted);font-size:12px;">Pick a date and weapon in Plan, then select an area (or Current Location) to load rules.</p>';
+            return;
+          }
+          // Prefer existing condensed dashboard rules if present
+          var rulesText = document.getElementById('db-rules-text');
+          var title = document.getElementById('db-title');
+          var regSum = document.getElementById('db-reg-summary');
+          var html = '';
+          if (regSum && regSum.textContent) {
+            html += '<div style="font-weight:700;color:var(--accent);margin-bottom:8px;">' +
+              (regSum.textContent || '') + '</div>';
+          }
+          if (title && title.textContent) {
+            html += '<div style="font-size:13px;font-weight:600;margin-bottom:6px;">' +
+              title.textContent + '</div>';
+          }
+          if (rulesText && rulesText.textContent) {
+            html += '<div style="background:rgba(229,154,24,0.08);border-left:4px solid var(--accent);padding:10px;border-radius:6px;font-size:12px;margin-bottom:10px;"><strong>Today\'s rules:</strong> ' +
+              rulesText.textContent + '</div>';
+          }
+          if (!html) {
+            html = '<p style="color:var(--muted);font-size:12px;">Select a location to load condensed rules, or open the full regulations panel.</p>';
+          }
+          html += '<p class="regs-disclaimer" style="font-size:10px;color:var(--muted);margin-top:12px;">Summary only for planning. Always verify current AREA permit, refuge brochure, and full code before hunting.</p>';
+          host.innerHTML = html;
+        } catch (eR) {
+          host.innerHTML = '<p style="color:var(--danger);font-size:12px;">Could not load rules preview.</p>';
+        }
+      },
+      refreshHuntLog: function() {
+        var list = document.getElementById('hunt-log-list');
+        if (!list) return;
+        try {
+          var items = [];
+          if (typeof calendarEvents === 'object' && calendarEvents) {
+            Object.keys(calendarEvents).sort().reverse().forEach(function(ds) {
+              (calendarEvents[ds] || []).forEach(function(ev) {
+                items.push({ date: ds, text: ev.text || 'Trip', color: ev.color || '#e59a18', loc: ev.locationId });
+              });
+            });
+          }
+          if (!items.length) {
+            list.innerHTML = '<div class="log-item" style="color:var(--muted);">No trips logged yet. Add one from Plan → calendar.</div>';
+            return;
+          }
+          list.innerHTML = items.slice(0, 40).map(function(it) {
+            return '<div class="log-item" style="border-left:3px solid ' + it.color + '"><strong>' +
+              it.date + '</strong> — ' + (it.text || '').replace(/</g, '&lt;') + '</div>';
+          }).join('');
+        } catch (eL) {
+          list.innerHTML = '';
+        }
+      },
+      refreshOfflineRail: function() {
+        var btn = document.getElementById('rail-offline-btn');
+        if (!btn) return;
+        var online = true;
+        try { online = navigator.onLine !== false; } catch (e) {}
+        var label = online ? 'Online' : 'Offline';
+        btn.title = online ? 'Online — tap for offline packs' : 'Offline — tap for offline packs';
+        var lbl = btn.querySelector('.rail-lbl');
+        if (lbl) lbl.textContent = online ? 'Sync' : 'Offline';
+        btn.setAttribute('aria-label', label + ' status');
+      }
+    };
+    window.AppShell = AppShell;
+    window.setShellView = function(v) { AppShell.setView(v); };
+
+
     window.onload = function() {
       // Phone vs desktop layout (also runs early in <head>; re-apply with body ready)
       applyDeviceLayout(true);
+      try { if (window.AppShell) AppShell.init(); } catch (eShellInit) { console.warn(eShellInit); }
       // Wind (desktop) vs device compass (phone) top dial default
       if (typeof initHeadingHudDefault === 'function') initHeadingHudDefault();
       // Apply saved settings (tools / display) before first paint settles

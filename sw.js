@@ -1,8 +1,8 @@
-/* REG SLAYER — TestOffline service worker (1.02 Beta)
+/* REG SLAYER — TestOffline service worker (1.03 Beta)
  * Caches app shell for return visits with no signal.
  * Map tiles: cache-first when already stored; network otherwise (then cache).
  */
-const SHELL_CACHE = 'reg-slayer-testoffline-1.02-v1';
+const SHELL_CACHE = 'reg-slayer-testoffline-1.03-v1';
 const TILE_CACHE = 'reg-slayer-tiles-v2';
 const DATA_CACHE = 'reg-slayer-data-v1';
 
