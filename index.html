@@ -5390,7 +5390,7 @@
     <div class="brand-map-name" id="brand-map-name" title="Active map">My Map</div>
     <div class="brand-logo-wrap">
       <img class="brand-logo" src="reg-slayer-logo.png" alt="REG SLAYER - Know Before You Go" width="1100" height="240" />
-      <span class="brand-version" aria-label="Version 1.01 Beta">V1.01 Beta</span>
+      <span class="brand-version" aria-label="Version 1.02 Beta">V1.02 Beta</span>
     </div>
   </header>
 
@@ -5513,9 +5513,8 @@
                     <button class="color-dot-btn" style="background:#3498db;" onclick="selectEventColor('#3498db',this)"></button>
                     <button class="color-dot-btn" style="background:#d94136;" onclick="selectEventColor('#d94136',this)"></button>
                   </div>
-                  <div style="display:flex;align-items:center;gap:4px;">
-                    <input type="checkbox" id="link-hunt-state-chk" checked>
-                    <label for="link-hunt-state-chk" style="font-size:11px;color:var(--muted);">Link Current Hunt State</label>
+                  <div style="font-size:10px;color:var(--muted);max-width:140px;text-align:right;line-height:1.25;" title="Trips save the active date, weapon, and area from the hunt context">
+                    Uses current hunt
                   </div>
                 </div>
                 <div style="display:flex;gap:6px;margin-top:6px;">
@@ -6049,7 +6048,7 @@
           </div>
 
           <div id="map-imagery-date" class="map-imagery-date" hidden aria-live="polite" title="Approximate acquisition date of the satellite imagery under the map center"></div>
-          <div id="leaflet-map"><div id="map-placeholder" style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;background:var(--panel-light);">Map loads when you pick a weapon (Step 3)</div></div>
+          <div id="leaflet-map"><div id="map-placeholder" style="height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;background:var(--panel-light);">Loading map…</div></div>
         </div>
       </div>
     </div>
@@ -6310,7 +6309,7 @@
 
   <script>
     // ========== STATE ==========
-    const APP_VERSION = '1.01-beta';
+    const APP_VERSION = '1.02-beta';
     const APP_SETTINGS_KEY = 'reg_slayer_app_settings_v1';
 
     /** User preferences (tools, defaults, display) — persisted localStorage */
@@ -6377,6 +6376,131 @@
     let distRadiusMiles = 50;
     let distOriginMode = 'gps'; // 'gps' | 'zip' | 'address'
     let distOriginLat = null, distOriginLng = null, distOriginLabel = '';
+
+    /**
+     * HuntContext — single source of truth for the active hunt selection (Phase 1).
+     * Date / weapon / land / location / distance-origin live here; legacy globals
+     * (selectedDate, selectedWeapon, …) are dual-synced so the rest of the app
+     * keeps working until later phases read only from context.
+     */
+    var HuntContext = {
+      _listeners: [],
+      date: null,
+      weapon: null,
+      land: 'Public',
+      locationId: null,
+      distOrigin: { mode: 'gps', lat: null, lng: null, label: '' },
+
+      snapshot: function() {
+        return {
+          date: this.date,
+          weapon: this.weapon,
+          land: this.land,
+          locationId: this.locationId,
+          distOrigin: {
+            mode: this.distOrigin.mode,
+            lat: this.distOrigin.lat,
+            lng: this.distOrigin.lng,
+            label: this.distOrigin.label
+          }
+        };
+      },
+
+      subscribe: function(fn) {
+        if (typeof fn !== 'function') return function() {};
+        this._listeners.push(fn);
+        return function unsubscribe() {
+          HuntContext._listeners = HuntContext._listeners.filter(function(f) { return f !== fn; });
+        };
+      },
+
+      _notify: function(changed) {
+        var snap = this.snapshot();
+        for (var i = 0; i < this._listeners.length; i++) {
+          try { this._listeners[i](snap, changed); } catch (eL) { console.warn('HuntContext listener', eL); }
+        }
+        if (typeof updateBottomBarContext === 'function') {
+          try { updateBottomBarContext(); } catch (eB) {}
+        }
+      },
+
+      /** Pull current legacy globals into context (boot / external writers). */
+      syncFromGlobals: function() {
+        this.date = selectedDate;
+        this.weapon = selectedWeapon;
+        this.land = selectedLand || 'Public';
+        this.locationId = selectedLocationId;
+        this.distOrigin = {
+          mode: distOriginMode || 'gps',
+          lat: distOriginLat,
+          lng: distOriginLng,
+          label: distOriginLabel || ''
+        };
+        return this;
+      },
+
+      /** Push context fields out to legacy globals. */
+      syncToGlobals: function() {
+        selectedDate = this.date;
+        selectedWeapon = this.weapon;
+        selectedLand = this.land || 'Public';
+        selectedLocationId = this.locationId;
+        distOriginMode = this.distOrigin.mode || 'gps';
+        distOriginLat = this.distOrigin.lat;
+        distOriginLng = this.distOrigin.lng;
+        distOriginLabel = this.distOrigin.label || '';
+        return this;
+      },
+
+      setDate: function(d, opts) {
+        opts = opts || {};
+        this.date = (d instanceof Date && !isNaN(d.getTime())) ? d : (d ? new Date(d) : new Date());
+        if (isNaN(this.date.getTime())) this.date = new Date();
+        selectedDate = this.date;
+        if (!opts.silent) this._notify('date');
+        return this;
+      },
+
+      setWeapon: function(w, opts) {
+        opts = opts || {};
+        this.weapon = w != null ? w : null;
+        selectedWeapon = this.weapon;
+        if (!opts.silent) this._notify('weapon');
+        return this;
+      },
+
+      setLand: function(land, opts) {
+        opts = opts || {};
+        this.land = land || 'Public';
+        selectedLand = this.land;
+        if (!opts.silent) this._notify('land');
+        return this;
+      },
+
+      setLocationId: function(id, opts) {
+        opts = opts || {};
+        this.locationId = id != null ? id : null;
+        selectedLocationId = this.locationId;
+        if (!opts.silent) this._notify('location');
+        return this;
+      },
+
+      setDistOrigin: function(partial, opts) {
+        opts = opts || {};
+        partial = partial || {};
+        if (partial.mode != null) this.distOrigin.mode = partial.mode;
+        if (Object.prototype.hasOwnProperty.call(partial, 'lat')) this.distOrigin.lat = partial.lat;
+        if (Object.prototype.hasOwnProperty.call(partial, 'lng')) this.distOrigin.lng = partial.lng;
+        if (Object.prototype.hasOwnProperty.call(partial, 'label')) this.distOrigin.label = partial.label || '';
+        distOriginMode = this.distOrigin.mode || 'gps';
+        distOriginLat = this.distOrigin.lat;
+        distOriginLng = this.distOrigin.lng;
+        distOriginLabel = this.distOrigin.label || '';
+        if (!opts.silent) this._notify('distOrigin');
+        return this;
+      }
+    };
+    window.HuntContext = HuntContext;
     let distZip = '';
     let distOriginMarker = null; // map pin for address distance origin
     let distAddressQuery = '';
@@ -9809,10 +9933,17 @@
           distOriginLat = userLat;
           distOriginLng = userLng;
           distOriginLabel = 'My Location';
+          if (typeof HuntContext !== 'undefined' && HuntContext.setDistOrigin) {
+            HuntContext.setDistOrigin({ mode: 'gps', lat: distOriginLat, lng: distOriginLng, label: distOriginLabel }, { silent: true });
+            try { HuntContext._notify('distOrigin'); } catch (eHcDo) {}
+          }
           updateDistStatus();
           updateAvailableList();
           loadWeatherForDistanceOrigin();
         } else {
+          if (typeof HuntContext !== 'undefined' && HuntContext.setDistOrigin) {
+            HuntContext.setDistOrigin({ mode: 'gps' }, { silent: true });
+          }
           requestDistGps();
         }
       } else if (mode === 'zip') {
@@ -9822,9 +9953,18 @@
           distOriginLat = null;
           distOriginLng = null;
           distOriginLabel = '';
+          if (typeof HuntContext !== 'undefined' && HuntContext.setDistOrigin) {
+            HuntContext.setDistOrigin({ mode: 'zip', lat: null, lng: null, label: '' }, { silent: true });
+            try { HuntContext._notify('distOrigin'); } catch (eHcDo2) {}
+          }
         } else if (distOriginLat != null && distOriginLng != null) {
           // Same ZIP mode re-tap with known coords — keep weather on origin
+          if (typeof HuntContext !== 'undefined' && HuntContext.setDistOrigin) {
+            HuntContext.setDistOrigin({ mode: 'zip', lat: distOriginLat, lng: distOriginLng, label: distOriginLabel }, { silent: true });
+          }
           loadWeatherForDistanceOrigin();
+        } else if (typeof HuntContext !== 'undefined' && HuntContext.setDistOrigin) {
+          HuntContext.setDistOrigin({ mode: 'zip' }, { silent: true });
         }
         updateDistStatus();
       } else if (mode === 'address') {
@@ -9833,6 +9973,10 @@
           distOriginLat = lastAddressOrigin.lat;
           distOriginLng = lastAddressOrigin.lng;
           distOriginLabel = lastAddressOrigin.label || 'Address';
+          if (typeof HuntContext !== 'undefined' && HuntContext.setDistOrigin) {
+            HuntContext.setDistOrigin({ mode: 'address', lat: distOriginLat, lng: distOriginLng, label: distOriginLabel }, { silent: true });
+            try { HuntContext._notify('distOrigin'); } catch (eHcDo3) {}
+          }
           placeDistOriginMarker(distOriginLat, distOriginLng, distOriginLabel);
           if (selectedWeapon) updateAvailableList();
           loadWeatherForDistanceOrigin();
@@ -9841,6 +9985,12 @@
           distOriginLng = null;
           distOriginLabel = '';
           clearDistOriginMarker();
+          if (typeof HuntContext !== 'undefined' && HuntContext.setDistOrigin) {
+            HuntContext.setDistOrigin({ mode: 'address', lat: null, lng: null, label: '' }, { silent: true });
+            try { HuntContext._notify('distOrigin'); } catch (eHcDo4) {}
+          }
+        } else if (typeof HuntContext !== 'undefined' && HuntContext.setDistOrigin) {
+          HuntContext.setDistOrigin({ mode: 'address' }, { silent: true });
         }
         openDistAddressModal({ reopen: true });
         updateDistStatus();
@@ -9887,6 +10037,10 @@
           distOriginLat = userLat;
           distOriginLng = userLng;
           distOriginLabel = 'My Location';
+          if (typeof HuntContext !== 'undefined' && HuntContext.setDistOrigin) {
+            HuntContext.setDistOrigin({ mode: 'gps', lat: userLat, lng: userLng, label: 'My Location' }, { silent: true });
+            try { HuntContext._notify('distOrigin'); } catch (eHcGps) {}
+          }
           updateDistStatus();
           if (selectedWeapon) updateAvailableList();
           // Default weather/wind = My Location until another spot is chosen
@@ -10037,6 +10191,15 @@
       distAddressQuery = distOriginLabel;
       lastAddressOrigin = { lat: distOriginLat, lng: distOriginLng, label: distOriginLabel };
       distOriginMode = 'address';
+      if (typeof HuntContext !== 'undefined' && HuntContext.setDistOrigin) {
+        HuntContext.setDistOrigin({
+          mode: 'address',
+          lat: distOriginLat,
+          lng: distOriginLng,
+          label: distOriginLabel
+        }, { silent: true });
+        try { HuntContext._notify('distOrigin'); } catch (eHcAddr) {}
+      }
       var gpsBtn = document.getElementById('dist-origin-gps');
       var zipBtn = document.getElementById('dist-origin-zip');
       var addrBtn = document.getElementById('dist-origin-address');
@@ -17770,10 +17933,16 @@
     }
     function selectDateStep(day) {
       selectedDate = new Date(calendarTargetDate.getFullYear(), calendarTargetDate.getMonth(), day);
+      if (typeof HuntContext !== 'undefined' && HuntContext.setDate) {
+        HuntContext.setDate(selectedDate, { silent: true });
+      }
       renderCalendar(); updateEventsList(); clearEventForm();
       document.getElementById('step-2-section').classList.remove('locked');
       document.getElementById('step-2-section').classList.add('active');
       if (typeof updateBottomBarContext === 'function') updateBottomBarContext();
+      if (typeof HuntContext !== 'undefined' && HuntContext._notify) {
+        try { HuntContext._notify('date'); } catch (eHcDate) {}
+      }
 
       const daysAhead = getDaysFromToday(selectedDate);
       isHistorical = daysAhead < 0;
@@ -17835,8 +18004,15 @@
       const text = document.getElementById('event-title-input').value.trim();
       if (!text) { alert('Please write a trip description.'); return; }
       const dateStr = selectedDate.toISOString().split('T')[0];
-      const link = document.getElementById('link-hunt-state-chk').checked;
-      const obj = { id: editingEventId || ('ev_' + Date.now()), text, color: currentSelectedColor, locationId: (link && selectedLocationId) ? selectedLocationId : null, weapon: (link && selectedWeapon) ? selectedWeapon : null, land: (link && selectedLand) ? selectedLand : null };
+      // Phase 1: always use current HuntContext (no optional "Link Current Hunt State")
+      const obj = {
+        id: editingEventId || ('ev_' + Date.now()),
+        text: text,
+        color: currentSelectedColor,
+        locationId: selectedLocationId || null,
+        weapon: selectedWeapon || null,
+        land: selectedLand || null
+      };
       if (!calendarEvents[dateStr]) calendarEvents[dateStr] = [];
       if (editingEventId) {
         const idx = calendarEvents[dateStr].findIndex(e => e.id === editingEventId);
@@ -17854,7 +18030,6 @@
       document.getElementById('event-title-input').value = ev.text;
       currentSelectedColor = ev.color;
       document.querySelectorAll('.color-dot-btn').forEach(b => { b.classList.remove('selected'); if (b.style.backgroundColor === ev.color) b.classList.add('selected'); });
-      document.getElementById('link-hunt-state-chk').checked = !!ev.locationId;
       document.getElementById('save-event-btn').innerText = 'Save Changes';
       document.getElementById('cancel-edit-btn').style.display = 'inline-block';
       setEventFormVisibility(true);
@@ -17872,6 +18047,11 @@
       selectedWeapon = ev.weapon; selectedLand = ev.land || 'Public'; selectedLocationId = ev.locationId;
       selectedSubsectionIndex = null; usingCurrentLocation = false; isShowingCurrentData = false;
       isHistorical = getDaysFromToday(selectedDate) < 0;
+      if (typeof HuntContext !== 'undefined') {
+        if (HuntContext.setWeapon) HuntContext.setWeapon(selectedWeapon, { silent: true });
+        if (HuntContext.setLand) HuntContext.setLand(selectedLand, { silent: true });
+        if (HuntContext.setLocationId) HuntContext.setLocationId(selectedLocationId, { silent: true });
+      }
       document.querySelectorAll('#step-2-section .filter-btn').forEach(b => b.classList.remove('active'));
       const btn = document.getElementById('wpn-' + (ev.weapon||'').toLowerCase());
       if (btn) btn.classList.add('active');
@@ -17887,6 +18067,9 @@
           var matches = queryOpenSeasons(selectedDate, selectedWeapon, selectedLand);
           var mr = matches.find(function(m) { return m.location.id == ev.locationId; });
           selectLocation(loc, mr ? mr.rule : rules.find(function(r) { return r.locId == ev.locationId; }));
+        }
+        if (typeof HuntContext !== 'undefined' && HuntContext.syncFromGlobals) {
+          try { HuntContext.syncFromGlobals(); HuntContext._notify('eventLoad'); } catch (eHcEv) {}
         }
       });
     }
@@ -17921,6 +18104,10 @@
     // ========== RULES & LIST ==========
     function setWeapon(w) {
       selectedWeapon = w;
+      if (typeof HuntContext !== 'undefined' && HuntContext.setWeapon) {
+        HuntContext.setWeapon(w, { silent: true });
+        HuntContext.setLocationId(null, { silent: true });
+      }
       document.querySelectorAll('#step-2-section .filter-btn').forEach(function(b) { b.classList.remove('active'); });
       var btn = document.getElementById('wpn-' + w.toLowerCase());
       if (btn) btn.classList.add('active');
@@ -17929,6 +18116,9 @@
       selectedLocationId = null; selectedSubsectionIndex = null;
       lastVisibleMarkerKey = '';
       if (typeof updateBottomBarContext === 'function') updateBottomBarContext();
+      if (typeof HuntContext !== 'undefined' && HuntContext._notify) {
+        try { HuntContext._notify('weapon'); } catch (eHcWpn) {}
+      }
       // Load public land list + always (re)draw overlay if the checkbox is on
       ensureMap().then(function() {
         updateAvailableList();
@@ -17945,6 +18135,10 @@
     }
     function setLand(land) {
       selectedLand = land;
+      if (typeof HuntContext !== 'undefined' && HuntContext.setLand) {
+        HuntContext.setLand(land, { silent: true });
+        try { HuntContext._notify('land'); } catch (eHcLand) {}
+      }
       const pub = document.getElementById('land-public'), pri = document.getElementById('land-private');
       if (land === 'Public') {
         pub.classList.add('active'); pub.style.flex='1'; pub.style.fontSize='13px'; pub.style.padding='10px'; pub.style.opacity='1';
@@ -18846,6 +19040,13 @@
       }
       document.getElementById('step-3-section').classList.remove('locked');
       document.getElementById('step-3-section').classList.add('active');
+      // Keep HuntContext aligned with whatever we just defaulted
+      if (typeof HuntContext !== 'undefined' && HuntContext.syncFromGlobals) {
+        try {
+          HuntContext.syncFromGlobals();
+          HuntContext._notify('ensure');
+        } catch (eHcEns) {}
+      }
     }
 
     function selectLocationById(id, opts) {
@@ -18988,6 +19189,10 @@
       var panMap = !!opts.panMap;
       if (skipScroll) lockMapInView();
       selectedLocationId = location.id;
+      if (typeof HuntContext !== 'undefined' && HuntContext.setLocationId) {
+        HuntContext.setLocationId(location.id, { silent: true });
+        try { HuntContext._notify('location'); } catch (eHcLoc) {}
+      }
       selectedSubsectionIndex = null;
       document.querySelectorAll('.location-item').forEach(function(el) { el.classList.remove('selected'); });
       updateAvailableList(true);
@@ -20507,6 +20712,11 @@
       applyAppSettings({ fromUi: false });
       calendarTargetDate = new Date();
       selectedDate = new Date();
+      if (typeof HuntContext !== 'undefined' && HuntContext.setDate) {
+        HuntContext.setDate(selectedDate, { silent: true });
+        HuntContext.setLand('Public', { silent: true });
+        HuntContext.setDistOrigin({ mode: 'gps', lat: null, lng: null, label: '' }, { silent: true });
+      }
       renderCalendar();
       if (typeof updateBottomBarContext === 'function') updateBottomBarContext();
       if (typeof updateSortByButtonLabel === 'function') updateSortByButtonLabel();
@@ -20537,6 +20747,13 @@
       wireMapToolsMenu();
       updatePublicLandToggleUI();
       updateDeerZoneToggleUI();
+      // Phase 1: map mounts on boot (not gated on Step 2 weapon pick)
+      try {
+        ensureMap().then(function() {
+          if (typeof ensureUserGpsMarker === 'function') ensureUserGpsMarker();
+          if (typeof startUserGpsPresence === 'function') startUserGpsPresence();
+        }).catch(function() {});
+      } catch (eMapBoot) { console.warn(eMapBoot); }
       var _plannerResizeTimer = null;
       var _desktopMapScrollTimer = null;
       function onViewportChange() {
@@ -20614,6 +20831,9 @@
           distOriginLat = userLat;
           distOriginLng = userLng;
           distOriginLabel = 'My Location';
+          if (typeof HuntContext !== 'undefined' && HuntContext.setDistOrigin) {
+            HuntContext.setDistOrigin({ mode: 'gps', lat: userLat, lng: userLng, label: 'My Location' }, { silent: true });
+          }
           updateDistStatus();
           var detected = detectBoundaryAndZone(userLat, userLng);
           currentLocationObj = { id:9999, name:'My Location (' + detected.name + ')', type:'Current Location', zone:detected.zone, lat:userLat, lng:userLng, subSections:[] };
@@ -20627,6 +20847,9 @@
           var rule = rules.find(function(r) { return r.locId==tid && dateStr>=r.start && dateStr<=r.end; }) || { weapon:'General', target:'Statewide Rules', limit:'Statewide Limit', notes:'Check regulations.' };
           // Weather without pan
           selectLocation(currentLocationObj, rule, { panMap: false, skipScroll: true });
+          if (typeof HuntContext !== 'undefined' && HuntContext.syncFromGlobals) {
+            try { HuntContext.syncFromGlobals(); HuntContext._notify('boot'); } catch (eHcBoot) {}
+          }
           // Put red GPS arrow on the map as soon as the map shell is ready
           ensureMap().then(function() {
             if (typeof ensureUserGpsMarker === 'function') ensureUserGpsMarker();
