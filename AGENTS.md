@@ -1,38 +1,30 @@
 # TestOffline agent notes
 
-**Current snapshot:** **V1.03 Beta** (`APP_VERSION = '1.03-beta'`)  
-Restructure work lives **only** in this repo. Do not modify Hunt-Slayer / regslayer.com unless the user asks.
+**Current snapshot:** **V1.10 Beta** (`APP_VERSION = '1.10-beta'`)  
+Restructure phases **1–6 complete** on TestOffline only. Do not modify Hunt-Slayer unless the user asks.
 
-## Restructure phases
+## Architecture (post-restructure)
 
-| Phase | Status | Focus |
-|-------|--------|--------|
-| 1 | Done (1.02) | `HuntContext`, dual-sync globals, `ensureMap` on boot, remove Link Hunt State |
-| **2** | **Done (1.03)** | Rail + context bar + permanent map + docked panels; Plan/Conditions mounted as-is |
-| 3 | Pending | Migration cleanup, Settings diet, Party extraction, modal policy |
-| 4 | Pending | Map tools — floating cluster, status strip |
-| 5 | Pending | Mobile — bottom tabs polish, summary strip, sheets |
-| 6 | Pending | Polish — copy, empty states, a11y |
+| Piece | API / location |
+|-------|----------------|
+| Hunt context | `window.HuntContext` (dual-synced with `selectedDate` / `selectedWeapon` / …) |
+| Navigation | `window.AppShell` / `setShellView(view)` — `plan` `map` `conditions` `regs` `log` `party` |
+| Map host | `#shell-map-host` — Leaflet never remounted on view change |
+| Party / My Maps | `#view-party` holds map-management IDs (`set-all-maps-list`, create/join, etc.) |
+| Settings | Account · Defaults · Offline (tools always on; section-hide removed) |
+| Tool chrome | Floating cluster via `.shell-v2 .map-bottom-bar`; `#map-tool-status-strip` |
 
-Stop for user review after each phase.
+## Phases
 
-## App shell (Phase 2)
-
-- `window.AppShell` / `setShellView(view)` — views: `plan` | `map` | `conditions` | `regs` | `log` | `party`
-- Map view collapses `#shell-panel`; other views open the panel and show the matching `.shell-view`
-- Context bar chips jump to Plan and scroll to date/weapon/area sections
-- `#shell-map-host` always holds the map card (do not destroy Leaflet when switching views)
-- `fitDesktopMapHeight` prefers `#shell-map-host` / `#shell-stage`
-
-## HuntContext (Phase 1)
-
-- Global: `window.HuntContext`
-- Fields: `date`, `weapon`, `land`, `locationId`, `distOrigin { mode, lat, lng, label }`
-- Legacy `selectedDate`, `selectedWeapon`, etc. remain dual-synced
+| Phase | Version | Status |
+|-------|---------|--------|
+| 1 HuntContext | 1.02 | Done |
+| 2 Shell | 1.03 | Done |
+| 3–6 migration, tools, mobile, polish | **1.10** | **Done** |
 
 ## Pin & tool icons
 
-**Full procedure:** [`docs/PIN_AND_TOOL_ICONS.md`](docs/PIN_AND_TOOL_ICONS.md)
+[`docs/PIN_AND_TOOL_ICONS.md`](docs/PIN_AND_TOOL_ICONS.md)
 
 ## Scope
 

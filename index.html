@@ -5777,6 +5777,229 @@
       html.layout-phone .rail-btn .rail-lbl { display: none; }
     }
 
+
+    /* ========== Phases 3–6: migration, tools float, mobile, polish ========== */
+    .db-skeleton .skel-line {
+      height: 12px; background: rgba(255,255,255,0.08); border-radius: 6px;
+      margin: 0 auto 8px; max-width: 220px;
+    }
+    .db-skeleton .skel-line.short { max-width: 140px; }
+    .db-skeleton .skel-block {
+      height: 72px; background: rgba(255,255,255,0.06); border-radius: 10px;
+      margin: 16px auto 0; max-width: 280px;
+    }
+    .sort-by-inline {
+      background: var(--panel); color: var(--ink); border: 1px solid var(--border);
+      border-radius: 6px; font-size: 11px; padding: 4px 6px; max-width: 110px;
+    }
+    .party-panel-inner { padding: 4px 2px 16px; }
+    .party-panel-inner .settings-inline-row {
+      display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap;
+    }
+    .party-panel-inner .settings-inline-row input {
+      flex: 1 1 120px; min-width: 0; background: var(--panel); border: 1px solid var(--border);
+      color: var(--ink); border-radius: 6px; padding: 6px 8px; font-size: 12px;
+    }
+    .party-panel-inner .settings-inline-row button,
+    .party-panel-inner .settings-subbtn {
+      background: var(--panel); border: 1px solid var(--border); color: var(--ink);
+      border-radius: 6px; padding: 6px 10px; font-size: 12px; cursor: pointer;
+    }
+    .party-panel-inner .settings-subbtn { display: block; width: 100%; text-align: left; margin-top: 4px; }
+    .regs-panel-host { padding: 4px 2px 16px; }
+    .regs-panel-verdict {
+      font-weight: 800; font-size: 14px; padding: 10px 12px; border-radius: 8px;
+      margin-bottom: 8px; background: rgba(255,255,255,0.05); color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .regs-panel-verdict.is-open {
+      background: rgba(74,124,42,0.28); color: #bbf7d0; border-color: rgba(74,124,42,0.5);
+    }
+    .regs-panel-verdict.is-closed {
+      background: rgba(217,65,54,0.22); color: #fecaca; border-color: rgba(217,65,54,0.5);
+    }
+    .regs-panel-verdict-detail { font-size: 12px; color: var(--muted); margin: -4px 0 12px; }
+    .regs-panel-h { margin: 0 0 6px; font-size: 12px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; }
+    .regs-panel-bullets { margin: 0 0 12px; padding-left: 18px; font-size: 12px; line-height: 1.45; }
+    .regs-panel-bullets li { margin-bottom: 4px; }
+    .regs-panel-details { margin: 8px 0; font-size: 12px; }
+    .regs-panel-details summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+    .log-filter-row { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
+    .log-filter-row .filter-btn { font-size: 10px; padding: 4px 8px; }
+    .ctx-summary {
+      display: none; flex: 1 1 auto; text-align: left;
+      border: 1px solid var(--border); background: var(--panel); color: var(--ink);
+      border-radius: 999px; padding: 7px 12px; font-size: 12px; font-weight: 600;
+      cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      max-width: 100%;
+    }
+    .shell-sheet-handle {
+      display: none; width: 36px; height: 4px; border-radius: 4px;
+      background: rgba(255,255,255,0.2); margin: 0 auto 6px;
+    }
+    /* Phase 4: floating tool cluster (top-right) */
+    .shell-v2 .map-bottom-bar {
+      top: 10px !important;
+      right: 10px !important;
+      left: auto !important;
+      bottom: auto !important;
+      width: auto !important;
+      max-width: min(220px, 46vw);
+      height: auto !important;
+      min-height: 0 !important;
+      flex-direction: column !important;
+      align-items: stretch !important;
+      justify-content: flex-start !important;
+      gap: 8px !important;
+      padding: 0 !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      grid-template-columns: none !important;
+      display: flex !important;
+    }
+    .shell-v2 .map-bottom-bar > .mbb-left,
+    .shell-v2 .map-bottom-bar > .mbb-center,
+    .shell-v2 .map-bottom-bar > .mbb-right {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 4px !important;
+      background: rgba(10, 12, 9, 0.9) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 12px !important;
+      padding: 6px !important;
+      width: 100% !important;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+    }
+    .shell-v2 .map-bottom-bar .mbb-context { display: none !important; }
+    .shell-v2 .map-bottom-bar .map-draw-tools {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 4px !important;
+      width: 100% !important;
+    }
+    .shell-v2 .map-bottom-bar .mdt-btn,
+    .shell-v2 .map-bottom-bar .mbb-icon-btn,
+    .shell-v2 .map-bottom-bar .mbb-compass-btn,
+    .shell-v2 .map-bottom-bar .map-radar-toggle,
+    .shell-v2 .map-bottom-bar .map-settings-btn {
+      width: 100% !important;
+      min-height: 40px !important;
+      height: 40px !important;
+      border-radius: 10px !important;
+      justify-content: center !important;
+    }
+    .shell-v2 .map-bottom-bar .mbb-center {
+      flex-direction: row !important;
+      flex-wrap: wrap !important;
+    }
+    .shell-v2 .map-bottom-bar .mbb-center .mbb-icon-btn { flex: 1 1 40%; }
+    .shell-v2 .map-bottom-bar .mdt-tools-panel {
+      position: static !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 4px !important;
+      width: 100% !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+    }
+    .shell-v2 .map-bottom-bar .map-track-live-hud {
+      position: static !important;
+      width: 100% !important;
+      margin: 0 !important;
+    }
+    .shell-v2 .map-bottom-bar .map-radar-control {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 4px !important;
+      width: 100% !important;
+    }
+    .shell-v2 .map-bottom-bar .map-layers-menu {
+      position: absolute !important;
+      right: 0 !important;
+      top: 100% !important;
+      left: auto !important;
+      bottom: auto !important;
+    }
+    /* Tool status strip (active measure/draw) — top-left of map */
+    .shell-v2 .map-tool-status-strip {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 1200;
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      background: rgba(10,12,9,0.92);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 10px;
+      min-width: 140px;
+      max-width: min(260px, 50vw);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+      font-size: 11px;
+      color: var(--ink);
+    }
+    .shell-v2 .map-tool-status-strip.is-on { display: flex; }
+    .shell-v2 .map-tool-status-strip .mts-actions { display: flex; flex-wrap: wrap; gap: 4px; }
+    .shell-v2 .map-tool-status-strip button {
+      background: var(--panel); border: 1px solid var(--border); color: var(--ink);
+      border-radius: 6px; padding: 4px 8px; font-size: 11px; font-weight: 600; cursor: pointer;
+    }
+    /* Phase 5 mobile: summary strip, sheet handle, More menu */
+    html.layout-phone .ctx-summary { display: block; }
+    html.layout-phone .context-bar .ctx-chip,
+    html.layout-phone .context-bar .ctx-status { display: none !important; }
+    html.layout-phone .context-bar.is-expanded .ctx-chip,
+    html.layout-phone .context-bar.is-expanded .ctx-status { display: inline-flex !important; }
+    html.layout-phone .context-bar.is-expanded .ctx-status { display: block !important; margin-left: 0; width: 100%; }
+    html.layout-phone .context-bar.is-expanded {
+      flex-wrap: wrap;
+    }
+    html.layout-phone .shell-sheet-handle { display: block; }
+    html.layout-phone .shell-panel {
+      flex: 0 0 55% !important;
+      max-height: 62vh;
+      border-radius: 14px 14px 0 0;
+      box-shadow: 0 -8px 28px rgba(0,0,0,0.4);
+    }
+    html.layout-phone .shell-panel.is-collapsed {
+      flex: 0 0 0 !important;
+      max-height: 0 !important;
+    }
+    html.layout-phone .rail-btn[data-shell-view="log"],
+    html.layout-phone .rail-btn[data-shell-view="party"] {
+      display: none !important;
+    }
+    .rail-more-sheet {
+      display: none;
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      z-index: 5000;
+      background: #12160f;
+      border-top: 1px solid var(--border);
+      border-radius: 14px 14px 0 0;
+      padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px));
+      box-shadow: 0 -10px 30px rgba(0,0,0,0.45);
+    }
+    .rail-more-sheet.is-open { display: block; }
+    .rail-more-sheet h3 { margin: 0 0 10px; font-size: 13px; color: var(--accent); }
+    .rail-more-sheet button {
+      display: block; width: 100%; text-align: left;
+      background: var(--panel); border: 1px solid var(--border); color: var(--ink);
+      border-radius: 8px; padding: 12px; margin-bottom: 6px; font-size: 13px; font-weight: 600;
+      cursor: pointer;
+    }
+    .rail-more-backdrop {
+      display: none; position: fixed; inset: 0; z-index: 4999; background: rgba(0,0,0,0.45);
+    }
+    .rail-more-backdrop.is-open { display: block; }
+    html.layout-phone .app-rail .rail-btn[data-shell-view="more"] { display: flex !important; }
+    .rail-btn[data-shell-view="more"] { display: none; }
+
   </style>
 </head>
 <body>
@@ -5785,7 +6008,7 @@
     <div class="brand-map-name" id="brand-map-name" title="Active map">My Map</div>
     <div class="brand-logo-wrap">
       <img class="brand-logo" src="reg-slayer-logo.png" alt="REG SLAYER - Know Before You Go" width="1100" height="240" />
-      <span class="brand-version" aria-label="Version 1.03 Beta">V1.03 Beta</span>
+      <span class="brand-version" aria-label="Version 1.10 Beta">V1.10 Beta</span>
     </div>
   </header>
 
@@ -5871,7 +6094,7 @@
   <div class="app-shell shell-v2" id="app-shell">
     <nav class="app-rail" id="app-rail" aria-label="Main navigation">
       <div class="rail-top">
-        <div class="rail-mark" title="REG SLAYER V1.03 Beta" aria-hidden="true">RS</div>
+        <div class="rail-mark" title="REG SLAYER V1.10 Beta" aria-hidden="true">RS</div>
       <button type="button" class="rail-btn is-active" data-shell-view="plan" aria-label="Plan" aria-current="page" title="Plan">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 3h10a2 2 0 0 1 2 2v14l-7-3-7 3V5a2 2 0 0 1 2-2zm0 2v11.2l5-2.1 5 2.1V5H7z"/></svg>
         <span class="rail-lbl">Plan</span>
@@ -5896,6 +6119,10 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm6 0a3 3 0 1 1 0-6 3 3 0 0 1 0 6zM9 13c-2.7 0-5 1.6-5 3.5V19h10v-2.5C14 14.6 11.7 13 9 13zm6 0c-.4 0-.8 0-1.2.1 1.2.8 2.2 2 2.2 3.4V19h5v-2.5c0-1.9-2.3-3.5-6-3.5z"/></svg>
         <span class="rail-lbl">Party</span>
       </button>
+      <button type="button" class="rail-btn" data-shell-view="more" aria-label="More" title="More">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="18" cy="12" r="1.8" fill="currentColor"/></svg>
+        <span class="rail-lbl">More</span>
+      </button>
       </div>
       <div class="rail-bottom">
         <button type="button" class="rail-btn" id="rail-offline-btn" aria-label="Offline and sync status" title="Offline / sync">
@@ -5910,6 +6137,7 @@
     </nav>
     <div class="shell-workspace">
       <div class="context-bar" id="context-bar" role="region" aria-label="Hunt context">
+        <button type="button" class="ctx-summary" id="ctx-summary" title="Edit hunt context">Pick date · Weapon · Area</button>
         <button type="button" class="ctx-chip is-empty" id="ctx-chip-date" data-ctx="date" title="Hunt date">Pick date</button>
         <button type="button" class="ctx-chip is-empty" id="ctx-chip-weapon" data-ctx="weapon" title="Weapon">Weapon</button>
         <button type="button" class="ctx-chip is-empty" id="ctx-chip-area" data-ctx="area" title="Area">Area</button>
@@ -5918,8 +6146,9 @@
       <div class="shell-stage" id="shell-stage">
         <aside class="shell-panel" id="shell-panel" aria-label="Side panel">
           <div class="shell-panel-head">
+            <div class="shell-sheet-handle" aria-hidden="true"></div>
             <h2 id="shell-panel-title">Plan</h2>
-            <button type="button" class="shell-panel-close" id="shell-panel-close" title="Show map only">Map</button>
+            <button type="button" class="shell-panel-close" id="shell-panel-close" title="Show map only" aria-label="Show map only">Map</button>
           </div>
           <div class="shell-panel-body" id="shell-panel-body">
             <div class="shell-view is-active" id="view-plan" data-view="plan">
@@ -6045,6 +6274,12 @@
               <button class="filter-btn active" id="v-toggle-all" onclick="setViewFilterMode('all')">Show All</button>
               <button class="filter-btn" id="v-toggle-sel" onclick="setViewFilterMode('selected')">Selected</button>
               <button type="button" class="filter-btn" id="sort-by-btn" onclick="openSortHuntsModal()" title="Change list order">Sort by</button>
+              <select id="sort-by-inline" class="sort-by-inline" title="Sort available hunts" aria-label="Sort available hunts" onchange="if(typeof setHuntListSortMode==='function')setHuntListSortMode(this.value);">
+                <option value="dist-closest">Closest</option>
+                <option value="dist-furthest">Furthest</option>
+                <option value="alpha">A–Z</option>
+                <option value="peak-rut">Peak rut</option>
+              </select>
             </div>
             <button id="restore-hidden-btn" onclick="restoreAllHidden()" style="background:var(--green);border:none;color:#fff;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:10px;font-weight:bold;display:none;">Restore</button>
             <span id="hidden-count-label" style="font-size:10px;color:var(--muted);"></span>
@@ -6056,13 +6291,16 @@
             </div>
             <div class="shell-view" id="view-conditions" data-view="conditions">
       <div id="dashboard-container" class="dashboard-under-steps">
-      <div id="db-blank" style="text-align:center;padding:120px 0;color:var(--muted);">
-        <h3>Step 4: Weather & Water Dashboard</h3>
-        <p>Select a date and weapon, then choose a location or use Current Location. Water levels appear only when within 3 miles of a USGS gauge.</p>
+      <div id="db-blank" style="text-align:center;padding:48px 16px;color:var(--muted);">
+        <h3 style="margin:0 0 8px;color:var(--ink);font-size:15px;">Conditions</h3>
+        <p style="margin:0 0 12px;font-size:13px;line-height:1.45;">Pick a tract in Plan to see weather and water here. Water levels show only within 3 miles of a USGS gauge.</p>
+        <button type="button" class="shell-action" onclick="if(window.AppShell)AppShell.setView('plan');">Go to Plan</button>
       </div>
-      <div id="db-loading" style="display:none;text-align:center;padding:120px 0;">
-        <div class="loader"></div>
-        <p>Syncing live weather...</p>
+      <div id="db-loading" style="display:none;text-align:center;padding:48px 16px;" class="db-skeleton" aria-busy="true">
+        <div class="skel-line"></div>
+        <div class="skel-line short"></div>
+        <div class="skel-block"></div>
+        <p style="margin-top:12px;font-size:12px;color:var(--muted);">Loading conditions…</p>
       </div>
       <div id="db-content" style="display:none;" class="dashboard-grid">
         <div id="current-data-banner" class="current-data-banner"></div>
@@ -6079,7 +6317,7 @@
         </div>
         <hr style="border:0;border-top:1px solid var(--border);margin:0;">
         <div id="db-rules-box" style="background:rgba(229,154,24,0.08);border-left:4px solid var(--accent);padding:12px;border-radius:6px;font-size:13px;">
-          <strong>Field Directives:</strong> <span id="db-rules-text">Active regulations.</span>
+          <strong>Today's rules:</strong> <span id="db-rules-text">Active regulations.</span>
         </div>
         <div id="db-tva-note" class="tva-note"></div>
         <div class="subsections-box">
@@ -6140,29 +6378,64 @@
     </div>
             </div>
             <div class="shell-view" id="view-regs" data-view="regs">
-              <div id="regs-panel-host" class="shell-stub">
-                <h3>Regulations</h3>
-                <p>Verdict and day rules for the current hunt context appear here. Pick a date, weapon, and area in Plan if empty.</p>
-                <button type="button" class="shell-action" id="regs-panel-refresh-btn">Refresh rules</button>
-                <button type="button" class="shell-action secondary" onclick="if(typeof openDeerRegsPanel==='function'){try{openDeerRegsPanel();}catch(e){}}">Open full panel</button>
-                <div id="regs-panel-body" style="margin-top:12px;"></div>
+              <div id="regs-panel-host" class="regs-panel-host">
+                <div id="regs-panel-verdict" class="regs-panel-verdict is-unknown" role="status">Set date, weapon, and area</div>
+                <div id="regs-panel-verdict-detail" class="regs-panel-verdict-detail"></div>
+                <h3 class="regs-panel-h">Today's rules</h3>
+                <ul id="regs-panel-bullets" class="regs-panel-bullets"></ul>
+                <details class="regs-panel-details">
+                  <summary>Official sources</summary>
+                  <div id="regs-panel-links" class="regs-link-row"></div>
+                </details>
+                <p class="regs-disclaimer">Summary only for planning. Always verify the current area permit, refuge brochure, and full code before hunting.</p>
+                <button type="button" class="shell-action" id="regs-panel-refresh-btn" style="margin-top:8px;">Refresh</button>
               </div>
             </div>
             <div class="shell-view" id="view-log" data-view="log">
-              <div class="shell-stub">
-                <h3>Hunt log</h3>
-                <p>Trips from the calendar and a quick jump to stands on the map. Full unified log lands in Phase 3.</p>
-                <button type="button" class="shell-action" data-shell-view="plan">Add trip in Plan</button>
-                <div id="hunt-log-list" class="log-list" style="margin-top:12px;"></div>
+              <div class="shell-stub" style="padding-top:4px;">
+                <div class="log-filter-row" role="group" aria-label="Log filters">
+                  <button type="button" class="filter-btn active" data-log-filter="all">All</button>
+                  <button type="button" class="filter-btn" data-log-filter="trip">Trips</button>
+                  <button type="button" class="filter-btn" data-log-filter="pin">Pins</button>
+                  <button type="button" class="filter-btn" data-log-filter="hunt">Hunts</button>
+                </div>
+                <button type="button" class="shell-action" data-shell-view="plan" style="margin:10px 0;">Add trip in Plan</button>
+                <div id="hunt-log-list" class="log-list"></div>
               </div>
             </div>
             <div class="shell-view" id="view-party" data-view="party">
-              <div class="shell-stub">
-                <h3>Party &amp; maps</h3>
-                <p>Create or join a shared map, copy invite codes, and share live location. Uses the same My Maps tools as Settings.</p>
-                <button type="button" class="shell-action" id="party-open-maps-btn" onclick="if(typeof openSettingsModal==='function')openSettingsModal('maps');">Open My Maps</button>
-                <button type="button" class="shell-action secondary" id="party-signin-btn" onclick="if(typeof openAuthGate==='function')openAuthGate(); else if(document.getElementById('auth-gate'))document.getElementById('auth-gate').style.display='flex';">Sign in</button>
-                <p class="settings-hint" style="margin-top:12px;" id="party-panel-hint">Live location needs a shared map and two signed-in users.</p>
+              <div class="party-panel-inner" id="party-panel-inner">
+                <p class="settings-hint" id="party-panel-hint" style="margin:0 0 10px;">Shared maps and live location. Sign in to sync and share.</p>
+                <button type="button" class="shell-action secondary" id="party-signin-btn" style="margin-bottom:10px;" onclick="var g=document.getElementById('auth-gate'); if(g){g.style.display='flex';g.setAttribute('aria-hidden','false');}">Sign in</button>
+                <div id="set-map-mode-label">Viewing: My Map (personal)</div>
+                <p class="settings-hint">Maps you are in appear first. Tap a map to expand View / Share and its settings.</p>
+                <div class="settings-section-title">My Maps</div>
+                <div id="set-all-maps-list"></div>
+                <div id="set-private-maps-list" hidden aria-hidden="true"></div>
+                <div id="set-shared-maps-list" hidden aria-hidden="true"></div>
+                <div id="set-party-section" hidden aria-hidden="true" style="display:none;">
+                  <div id="set-party-members"></div>
+                </div>
+                <button type="button" class="settings-subbtn" id="set-use-personal-btn" style="margin-top:8px;">Use default private map</button>
+                <button type="button" class="settings-subbtn" id="set-rename-current-btn">Rename current map</button>
+                <button type="button" class="settings-subbtn" id="set-share-code-btn">Copy invite for current shared map</button>
+                <div class="settings-section-title">New private map</div>
+                <div class="settings-inline-row">
+                  <input type="text" id="set-create-private-name" maxlength="60" placeholder="New private map name">
+                  <button type="button" id="set-create-private-btn">Create</button>
+                </div>
+                <div class="settings-section-title">Create shared map</div>
+                <div class="settings-inline-row">
+                  <input type="text" id="set-create-map-name" maxlength="60" placeholder="Map name (e.g. Saturday club)">
+                  <button type="button" id="set-create-map-btn">Create</button>
+                </div>
+                <p class="settings-hint">Creates a unique 6-digit code. Invite is copied automatically.</p>
+                <div class="settings-section-title">Join shared map</div>
+                <div class="settings-inline-row">
+                  <input type="text" id="set-join-map-code" maxlength="12" inputmode="numeric" placeholder="6-digit code">
+                  <button type="button" id="set-join-map-btn">Join</button>
+                </div>
+                <p class="settings-hint">Live location needs a shared map and two signed-in users.</p>
               </div>
             </div>
           </div>
@@ -6222,6 +6495,16 @@
           </div>
           <button id="map-maximize-btn" class="map-fs-btn" onclick="toggleMapFullscreen()" type="button" title="Maximize map">Max</button>
           <button id="map-minimize-btn" class="map-fs-btn" onclick="toggleMapFullscreen()" type="button" style="display:none;" title="Minimize map">Min</button>
+
+          <div class="map-tool-status-strip" id="map-tool-status-strip" role="status" aria-live="polite">
+            <div id="mts-label" class="mts-label">Tool active</div>
+            <div id="mts-detail" class="mts-detail"></div>
+            <div class="mts-actions">
+              <button type="button" id="mts-undo" onclick="if(typeof undoMapDrawVertex==='function')undoMapDrawVertex();">Undo point</button>
+              <button type="button" id="mts-finish" onclick="if(typeof finishMapDraw==='function')finishMapDraw();">Finish</button>
+              <button type="button" id="mts-cancel" onclick="if(typeof cancelMapDraw==='function')cancelMapDraw();">Cancel</button>
+            </div>
+          </div>
 
           <!-- Slim bottom bar: [date+tools] | CL (center) | [radar layers settings] -->
           <div class="map-bottom-bar" id="map-bottom-bar">
@@ -6535,6 +6818,16 @@
     </div>
   </div><!-- /.app-shell -->
 
+  <div class="rail-more-backdrop" id="rail-more-backdrop" hidden></div>
+  <div class="rail-more-sheet" id="rail-more-sheet" role="dialog" aria-label="More" hidden>
+    <h3>More</h3>
+    <button type="button" data-more-view="log">Hunt log</button>
+    <button type="button" data-more-view="party">Party &amp; maps</button>
+    <button type="button" id="more-offline-btn">Offline packs</button>
+    <button type="button" id="more-settings-btn">Settings</button>
+    <button type="button" id="more-close-btn">Close</button>
+  </div>
+
 
   <!-- Tagline + official links moved to bottom (v3.9) -->
   <footer class="site-footer" role="contentinfo">
@@ -6688,23 +6981,12 @@
         <button type="button" class="settings-close" onclick="closeSettingsModal()" title="Close">&times;</button>
       </div>
       <div class="settings-tabs" role="tablist">
-        <button type="button" class="settings-tab active" data-stab="tools" onclick="switchSettingsTab('tools')">Tools</button>
+        <button type="button" class="settings-tab active" data-stab="tools" onclick="switchSettingsTab('tools')">Account</button>
         <button type="button" class="settings-tab" data-stab="defaults" onclick="switchSettingsTab('defaults')">Defaults</button>
-        <button type="button" class="settings-tab" data-stab="maps" onclick="switchSettingsTab('maps')">My Maps</button>
-        <button type="button" class="settings-tab" data-stab="display" onclick="switchSettingsTab('display')">Display</button>
+        <button type="button" class="settings-tab" data-stab="display" onclick="switchSettingsTab('display')">Offline</button>
       </div>
       <div class="settings-body">
         <div class="settings-pane active" id="settings-pane-tools">
-          <div class="settings-section-title">Map tools</div>
-          <label class="settings-row"><input type="checkbox" id="set-tool-measure" onchange="onSettingsToolsChange()"><span class="sr-text">Measure<span class="sr-sub">Distance path on map</span></span></label>
-          <label class="settings-row"><input type="checkbox" id="set-tool-draw" onchange="onSettingsToolsChange()"><span class="sr-text">Draw shape<span class="sr-sub">Custom hunt areas</span></span></label>
-          <label class="settings-row"><input type="checkbox" id="set-tool-track" onchange="onSettingsToolsChange()"><span class="sr-text">GPS track<span class="sr-sub">Record movement</span></span></label>
-          <label class="settings-row"><input type="checkbox" id="set-tool-gps" onchange="onSettingsToolsChange()"><span class="sr-text">Current Location<span class="sr-sub">Red GPS arrow on map + snap button (on by default)</span></span></label>
-          <p class="settings-hint">Unchecked tools are removed from the bottom bar. Active Measure/Draw still show Undo/Finish/Cancel top-left.</p>
-          <div class="settings-section-title">Map chrome</div>
-          <label class="settings-row"><input type="checkbox" id="set-show-compass" onchange="onSettingsToolsChange()"><span class="sr-text">Wind / compass<span class="sr-sub">Top dial — hides both wind indicator and compass</span></span></label>
-          <label class="settings-row"><input type="checkbox" id="set-show-radar" onchange="onSettingsToolsChange()"><span class="sr-text">Radar<span class="sr-sub">Radar dish on the bottom bar</span></span></label>
-          <p class="settings-hint">Wind and compass share one setting. Radar is separate on the slim bottom bar.</p>
           <div class="settings-section-title">Account</div>
           <p class="settings-hint" id="auth-user-chip">Not signed in</p>
           <button type="button" class="settings-subbtn" id="set-signout-btn">Sign out on this device</button>
@@ -6712,6 +6994,15 @@
           <div id="set-sync-status">Cloud sync ready</div>
           <label class="settings-row"><input type="checkbox" id="set-offline-mode"><span class="sr-text">Offline mode<span class="sr-sub">Save on this device only — pause cloud upload</span></span></label>
           <p class="settings-hint">Edits save on this device first, then upload when online (and not in Offline mode).</p>
+          <!-- Hidden tool toggles kept checked for legacy applyMapToolsVisibility -->
+          <div hidden aria-hidden="true">
+            <input type="checkbox" id="set-tool-measure" checked>
+            <input type="checkbox" id="set-tool-draw" checked>
+            <input type="checkbox" id="set-tool-track" checked>
+            <input type="checkbox" id="set-tool-gps" checked>
+            <input type="checkbox" id="set-show-compass" checked>
+            <input type="checkbox" id="set-show-radar" checked>
+          </div>
         </div>
         <div class="settings-pane" id="settings-pane-defaults">
           <button type="button" class="settings-subbtn" onclick="toggleSettingsSubpanel('set-def-overlays')">Overlays ▾</button>
@@ -6733,50 +7024,19 @@
             <label class="settings-row"><input type="checkbox" id="set-weather-map-fs" onchange="saveAppSettingsFromUi()"><span class="sr-text">Weather on map when fullscreen<span class="sr-sub">Compact card while map is Max</span></span></label>
           </div>
         </div>
-        <div class="settings-pane" id="settings-pane-maps">
-          <div id="set-map-mode-label">Viewing: My Map (personal)</div>
-          <p class="settings-hint">Maps you are in appear first. Tap a map to expand View / Share and its settings.</p>
-
-          <div class="settings-section-title">My Maps</div>
-          <div id="set-all-maps-list"></div>
-          <!-- Kept for script compatibility; filled only if needed -->
-          <div id="set-private-maps-list" hidden aria-hidden="true"></div>
-          <div id="set-shared-maps-list" hidden aria-hidden="true"></div>
-          <div id="set-party-section" hidden aria-hidden="true" style="display:none;">
-            <div id="set-party-members"></div>
-          </div>
-
-          <button type="button" class="settings-subbtn" id="set-use-personal-btn" style="margin-top:8px;">Use default private map</button>
-          <button type="button" class="settings-subbtn" id="set-rename-current-btn">Rename current map</button>
-          <button type="button" class="settings-subbtn" id="set-share-code-btn">Copy invite for current shared map</button>
-
-          <div class="settings-section-title">New private map</div>
-          <div class="settings-inline-row">
-            <input type="text" id="set-create-private-name" maxlength="60" placeholder="New private map name">
-            <button type="button" id="set-create-private-btn">Create</button>
-          </div>
-
-          <div class="settings-section-title">Create shared map</div>
-          <div class="settings-inline-row">
-            <input type="text" id="set-create-map-name" maxlength="60" placeholder="Map name (e.g. Saturday club)">
-            <button type="button" id="set-create-map-btn">Create</button>
-          </div>
-          <p class="settings-hint">Creates a unique 6-digit code. Invite is copied automatically.</p>
-
-          <div class="settings-section-title">Join shared map</div>
-          <div class="settings-inline-row">
-            <input type="text" id="set-join-map-code" maxlength="12" inputmode="numeric" placeholder="6-digit code">
-            <button type="button" id="set-join-map-btn">Join</button>
-          </div>
-          <p class="settings-hint">Live location needs a shared map and two signed-in users.</p>
+        <div class="settings-pane" id="settings-pane-maps" hidden aria-hidden="true">
+          <!-- My Maps moved to Party panel (Phase 3). IDs live under #view-party. -->
         </div>
 
         <div class="settings-pane" id="settings-pane-display">
-          <p class="settings-hint">Uncheck a section to hide it in the app until re-enabled here.</p>
-          <label class="settings-row"><input type="checkbox" id="set-disp-planner" onchange="onSettingsDisplayChange()"><span class="sr-text">Steps 1–3: Calendar, weapon, open tracts<span class="sr-sub">Hunt planner controls</span></span></label>
-          <label class="settings-row"><input type="checkbox" id="set-disp-weather" onchange="onSettingsDisplayChange()"><span class="sr-text">Weather<span class="sr-sub">Step 4 dashboard under the planner</span></span></label>
-          <label class="settings-row"><input type="checkbox" id="set-disp-map" onchange="onSettingsDisplayChange()"><span class="sr-text">Map<span class="sr-sub">Alabama map card</span></span></label>
-          <label class="settings-row" style="padding-left:28px;"><input type="checkbox" id="set-disp-map-fs" onchange="onSettingsDisplayChange()"><span class="sr-text">Open map full screen on launch<span class="sr-sub">Also used when only Map is enabled</span></span></label>
+          <div class="settings-section-title">Launch</div>
+          <label class="settings-row"><input type="checkbox" id="set-disp-map-fs" onchange="onSettingsDisplayChange()"><span class="sr-text">Open map full screen on launch<span class="sr-sub">Default view preference</span></span></label>
+          <!-- Hidden legacy display flags always on for shell architecture -->
+          <div hidden aria-hidden="true">
+            <input type="checkbox" id="set-disp-planner" checked onchange="onSettingsDisplayChange()">
+            <input type="checkbox" id="set-disp-weather" checked onchange="onSettingsDisplayChange()">
+            <input type="checkbox" id="set-disp-map" checked onchange="onSettingsDisplayChange()">
+          </div>
           <div class="settings-section-title" style="margin-top:14px;">Offline maps</div>
           <p class="settings-hint" id="offline-packs-summary">Map packs, custom draw areas, pins, stands, and public lands stay on this device. Nothing is a native app install.</p>
           <button type="button" class="settings-subbtn" onclick="window.refreshOfflinePacksSummary && window.refreshOfflinePacksSummary()">Refresh offline status</button>
@@ -6789,7 +7049,7 @@
 
   <script>
     // ========== STATE ==========
-    const APP_VERSION = '1.03-beta';
+    const APP_VERSION = '1.10-beta';
     const APP_SETTINGS_KEY = 'reg_slayer_app_settings_v1';
 
     /** User preferences (tools, defaults, display) — persisted localStorage */
@@ -21500,6 +21760,342 @@
     window.AppShell = AppShell;
     window.setShellView = function(v) { AppShell.setView(v); };
 
+
+
+    // ========== Phases 3–6 enhancements ==========
+    (function enhanceShellPhases() {
+      function esc(s) {
+        return String(s == null ? '' : s)
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      }
+
+      // Force tools always available (Settings diet)
+      if (typeof window.applyMapToolsVisibility === 'function') {
+        var _origTools = window.applyMapToolsVisibility;
+        window.applyMapToolsVisibility = function() {
+          try {
+            if (appSettings && appSettings.tools) {
+              appSettings.tools.measure = true;
+              appSettings.tools.draw = true;
+              appSettings.tools.track = true;
+              appSettings.tools.gps = true;
+              appSettings.tools.compass = true;
+              appSettings.tools.radar = true;
+            }
+          } catch (e) {}
+          return _origTools.apply(this, arguments);
+        };
+      }
+      // Display hide-sections no longer hide planner/weather/map
+      if (typeof window.applyDisplayVisibility === 'function') {
+        var _origDisp = window.applyDisplayVisibility;
+        window.applyDisplayVisibility = function() {
+          try {
+            if (appSettings && appSettings.display) {
+              appSettings.display.planner = true;
+              appSettings.display.weather = true;
+              appSettings.display.map = true;
+            }
+          } catch (e) {}
+          return _origDisp.apply(this, arguments);
+        };
+      }
+
+      // openSettingsModal('maps') → Party view
+      if (typeof window.openSettingsModal === 'function') {
+        var _origOpenSet = window.openSettingsModal;
+        window.openSettingsModal = function(tab) {
+          if (tab === 'maps') {
+            if (window.AppShell) AppShell.setView('party');
+            return;
+          }
+          return _origOpenSet.apply(this, arguments);
+        };
+      }
+
+      if (!window.AppShell) return;
+      var AS = window.AppShell;
+
+      AS.refreshRegsPanel = function() {
+        var verdict = document.getElementById('regs-panel-verdict');
+        var detail = document.getElementById('regs-panel-verdict-detail');
+        var bullets = document.getElementById('regs-panel-bullets');
+        var links = document.getElementById('regs-panel-links');
+        if (!verdict) return;
+        try {
+          if (!selectedDate || !selectedWeapon) {
+            verdict.textContent = 'Set date & weapon in Plan';
+            verdict.className = 'regs-panel-verdict is-unknown';
+            if (detail) detail.textContent = '';
+            if (bullets) bullets.innerHTML = '';
+            if (links) links.innerHTML = '';
+            return;
+          }
+          var name = 'Selected area';
+          var layerKey = '';
+          var attrs = {};
+          var loc = null;
+          if (selectedLocationId != null && typeof locations !== 'undefined') {
+            loc = locations.find(function(l) { return String(l.id) === String(selectedLocationId); });
+            if (loc) {
+              name = loc.name || name;
+              attrs = loc.attrs || attrs;
+              layerKey = loc.layerKey || loc.adcnrKey || '';
+            }
+          }
+          var info = null;
+          if (typeof buildDeerRegsInfo === 'function') {
+            try { info = buildDeerRegsInfo(name, layerKey, attrs || {}); } catch (eB) { info = null; }
+          }
+          if (info) {
+            var showClosed = !!(info.statusKnown && !info.canHuntToday);
+            var showOpen = !!(info.statusKnown && info.canHuntToday);
+            if (showClosed) {
+              verdict.textContent = (typeof huntCannotTitle === 'function') ? huntCannotTitle(selectedDate) : 'Cannot hunt this area';
+              verdict.className = 'regs-panel-verdict is-closed';
+              if (detail) detail.textContent = info.closedReason || info.jurisdictionLabel || '';
+            } else if (showOpen) {
+              verdict.textContent = (typeof huntCanTitleWithConfirm === 'function') ? huntCanTitleWithConfirm(selectedDate) : 'Can hunt today';
+              verdict.className = 'regs-panel-verdict is-open';
+              if (detail) detail.textContent = (info.jurisdictionLabel || '') + (selectedWeapon ? ' · ' + displayWeaponName(selectedWeapon) : '');
+            } else {
+              verdict.textContent = info.jurisdictionLabel || 'Verify regulations';
+              verdict.className = 'regs-panel-verdict is-unknown';
+              if (detail) detail.textContent = 'Status not fully known for this spot — check official sources.';
+            }
+            if (bullets) {
+              bullets.innerHTML = (info.bullets || []).map(function(b) {
+                return '<li>' + esc(b) + '</li>';
+              }).join('') || '<li style="color:var(--muted);">No condensed bullets for this selection.</li>';
+            }
+            if (links) {
+              var all = [].concat(info.legislation || [], info.outdoorAlabama || []);
+              links.innerHTML = all.map(function(l, i) {
+                return '<a class="regs-link-btn' + (i === 0 ? ' primary' : '') + '" href="' + esc(l.url) + '" target="_blank" rel="noopener">' + esc(l.label) + '</a>';
+              }).join('') || '<span style="color:var(--muted);font-size:12px;">See Outdoor Alabama for official deer seasons.</span>';
+            }
+          } else {
+            // Fallback: dashboard rules text
+            var rulesText = document.getElementById('db-rules-text');
+            var regSum = document.getElementById('db-reg-summary');
+            verdict.textContent = (regSum && regSum.textContent) || 'Rules for current context';
+            verdict.className = 'regs-panel-verdict is-unknown';
+            if (detail) detail.textContent = (document.getElementById('db-title') || {}).textContent || '';
+            if (bullets) {
+              bullets.innerHTML = rulesText && rulesText.textContent
+                ? '<li>' + esc(rulesText.textContent) + '</li>'
+                : '<li style="color:var(--muted);">Select an area to load condensed rules.</li>';
+            }
+            if (links) links.innerHTML = '<a class="regs-link-btn primary" href="https://www.outdooralabama.com/seasons-and-bag-limits/deer-season" target="_blank" rel="noopener">Outdoor Alabama deer season</a>';
+          }
+        } catch (eR) {
+          verdict.textContent = 'Could not load regulations preview';
+          verdict.className = 'regs-panel-verdict is-unknown';
+        }
+      };
+
+      AS._logFilter = 'all';
+      AS.refreshHuntLog = function() {
+        var list = document.getElementById('hunt-log-list');
+        if (!list) return;
+        var filter = AS._logFilter || 'all';
+        var items = [];
+        try {
+          if (typeof calendarEvents === 'object' && calendarEvents) {
+            Object.keys(calendarEvents).sort().reverse().forEach(function(ds) {
+              (calendarEvents[ds] || []).forEach(function(ev) {
+                items.push({ type: 'trip', date: ds, title: ev.text || 'Trip', color: ev.color || '#e59a18' });
+              });
+            });
+          }
+        } catch (e1) {}
+        try {
+          var pins = JSON.parse(localStorage.getItem('alabama_hunt_custom_pins') || '[]');
+          (pins || []).forEach(function(pin) {
+            items.push({
+              type: (pin.kind === 'hunt' || pin.type === 'hunt' || (pin.icon && String(pin.icon).indexOf('stand') >= 0)) ? 'hunt' : 'pin',
+              date: pin.date || pin.created || '',
+              title: pin.name || pin.label || pin.type || 'Pin',
+              color: pin.color || '#e59a18'
+            });
+          });
+        } catch (e2) {}
+        items = items.filter(function(it) {
+          if (filter === 'all') return true;
+          return it.type === filter;
+        });
+        // newest first when date present
+        items.sort(function(a, b) {
+          return String(b.date || '').localeCompare(String(a.date || ''));
+        });
+        if (!items.length) {
+          list.innerHTML = '<div class="log-item" style="color:var(--muted);">No entries yet. Add a trip in Plan, or place pins/stands on the map.</div>';
+          return;
+        }
+        list.innerHTML = items.slice(0, 80).map(function(it) {
+          var tag = it.type === 'trip' ? 'Trip' : (it.type === 'hunt' ? 'Hunt/Stand' : 'Pin');
+          return '<div class="log-item" style="border-left:3px solid ' + esc(it.color) + '">' +
+            '<div style="font-size:10px;color:var(--muted);text-transform:uppercase;">' + tag +
+            (it.date ? ' · ' + esc(it.date) : '') + '</div>' +
+            '<strong>' + esc(it.title) + '</strong></div>';
+        }).join('');
+      };
+
+      var _origUpdateCtx = AS.updateContextBar;
+      AS.updateContextBar = function() {
+        if (_origUpdateCtx) _origUpdateCtx.call(AS);
+        var sum = document.getElementById('ctx-summary');
+        if (!sum) return;
+        var d = document.getElementById('ctx-chip-date');
+        var w = document.getElementById('ctx-chip-weapon');
+        var a = document.getElementById('ctx-chip-area');
+        var st = document.getElementById('ctx-status');
+        var parts = [];
+        if (d && !d.classList.contains('is-empty')) parts.push(d.textContent);
+        if (w && !w.classList.contains('is-empty')) parts.push(w.textContent);
+        if (a && !a.classList.contains('is-empty')) parts.push(a.textContent);
+        var status = st ? st.textContent : '';
+        if (status && status.indexOf('Cannot') === 0) parts.push('Closed');
+        else if (status && (status.indexOf('open') >= 0 || status.indexOf('Open') >= 0 || status.indexOf('Season') === 0)) parts.push('Open ✓');
+        sum.textContent = parts.length ? parts.join(' · ') : 'Pick date · Weapon · Area';
+        sum.title = sum.textContent;
+      };
+
+      var _origInit = AS.init;
+      AS.init = function() {
+        if (_origInit) _origInit.call(AS);
+        // Log filters
+        document.querySelectorAll('[data-log-filter]').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            AS._logFilter = btn.getAttribute('data-log-filter') || 'all';
+            document.querySelectorAll('[data-log-filter]').forEach(function(b) {
+              b.classList.toggle('active', b === btn);
+            });
+            AS.refreshHuntLog();
+          });
+        });
+        // Mobile context summary expands chips
+        var sum = document.getElementById('ctx-summary');
+        var bar = document.getElementById('context-bar');
+        if (sum && bar) {
+          sum.addEventListener('click', function() {
+            if (typeof isPhoneLayout === 'function' && isPhoneLayout()) {
+              bar.classList.toggle('is-expanded');
+            } else {
+              AS.setView('plan');
+            }
+          });
+        }
+        // Inline sort select sync
+        var sel = document.getElementById('sort-by-inline');
+        if (sel && typeof huntListSortMode !== 'undefined') {
+          sel.value = huntListSortMode || 'dist-closest';
+        }
+        // More sheet
+        var moreSheet = document.getElementById('rail-more-sheet');
+        var moreBack = document.getElementById('rail-more-backdrop');
+        function closeMore() {
+          if (moreSheet) { moreSheet.classList.remove('is-open'); moreSheet.hidden = true; }
+          if (moreBack) { moreBack.classList.remove('is-open'); moreBack.hidden = true; }
+        }
+        function openMore() {
+          if (moreSheet) { moreSheet.classList.add('is-open'); moreSheet.hidden = false; }
+          if (moreBack) { moreBack.classList.add('is-open'); moreBack.hidden = false; }
+        }
+        AS.openMoreSheet = openMore;
+        AS.closeMoreSheet = closeMore;
+        if (moreBack) moreBack.addEventListener('click', closeMore);
+        var moreClose = document.getElementById('more-close-btn');
+        if (moreClose) moreClose.addEventListener('click', closeMore);
+        if (moreSheet) {
+          moreSheet.addEventListener('click', function(ev) {
+            var b = ev.target.closest('[data-more-view]');
+            if (b) {
+              closeMore();
+              AS.setView(b.getAttribute('data-more-view'));
+            }
+          });
+        }
+        var moreOff = document.getElementById('more-offline-btn');
+        if (moreOff) moreOff.addEventListener('click', function() {
+          closeMore();
+          if (typeof openSettingsModal === 'function') openSettingsModal('display');
+        });
+        var moreSet = document.getElementById('more-settings-btn');
+        if (moreSet) moreSet.addEventListener('click', function() {
+          closeMore();
+          if (typeof openSettingsModal === 'function') openSettingsModal();
+        });
+        // Intercept More rail
+        var rail = document.getElementById('app-rail');
+        if (rail) {
+          rail.addEventListener('click', function(ev) {
+            var btn = ev.target.closest('[data-shell-view="more"]');
+            if (btn) {
+              ev.preventDefault();
+              ev.stopPropagation();
+              openMore();
+            }
+          }, true);
+        }
+        // Sync tool status strip with measure/draw panel
+        function syncToolStrip() {
+          var strip = document.getElementById('map-tool-status-strip');
+          var panel = document.getElementById('mdt-tools-panel');
+          var hint = document.getElementById('map-draw-hint');
+          var stats = document.getElementById('map-draw-stats');
+          if (!strip) return;
+          var active = document.body.classList.contains('mode-measure') ||
+            document.body.classList.contains('mode-draw') ||
+            document.documentElement.classList.contains('mode-measure') ||
+            document.documentElement.classList.contains('mode-draw') ||
+            (document.getElementById('map-wrapper') && (
+              document.getElementById('map-wrapper').classList.contains('mode-measure') ||
+              document.getElementById('map-wrapper').classList.contains('mode-draw') ||
+              document.getElementById('map-wrapper').classList.contains('tool-active')
+            ));
+          var trackHud = document.getElementById('map-track-live-hud');
+          var tracking = trackHud && !trackHud.hidden;
+          if (active || tracking) {
+            strip.classList.add('is-on');
+            var lab = document.getElementById('mts-label');
+            var det = document.getElementById('mts-detail');
+            if (tracking) {
+              if (lab) lab.textContent = 'Tracking';
+              if (det) det.textContent = (document.getElementById('mtl-dist') || {}).textContent + ' · ' +
+                ((document.getElementById('mtl-time') || {}).textContent || '');
+            } else {
+              if (lab) lab.textContent = document.body.classList.contains('mode-measure') ||
+                (document.getElementById('map-wrapper') && document.getElementById('map-wrapper').classList.contains('mode-measure'))
+                ? 'Measuring' : 'Drawing';
+              if (det) det.textContent = ((hint && hint.textContent) || '') + ' ' + ((stats && stats.textContent) || '');
+            }
+          } else {
+            strip.classList.remove('is-on');
+          }
+        }
+        setInterval(syncToolStrip, 400);
+        AS.syncToolStrip = syncToolStrip;
+      };
+
+      // Inline sort select → existing applyHuntListSort
+      window.setHuntListSortMode = function(mode) {
+        try {
+          if (typeof applyHuntListSort === 'function') applyHuntListSort(mode);
+          var sel = document.getElementById('sort-by-inline');
+          if (sel && mode) sel.value = mode;
+        } catch (eS) {}
+      };
+      var _origApplySort = window.applyHuntListSort;
+      if (typeof _origApplySort === 'function') {
+        window.applyHuntListSort = function(mode) {
+          var r = _origApplySort.apply(this, arguments);
+          var sel = document.getElementById('sort-by-inline');
+          if (sel && mode) sel.value = mode;
+          return r;
+        };
+      }
+    })();
 
     window.onload = function() {
       // Phone vs desktop layout (also runs early in <head>; re-apply with body ready)
