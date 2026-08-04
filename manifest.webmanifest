@@ -1,7 +1,7 @@
 {
-  "name": "REG SLAYER Offline Test",
+  "name": "REG SLAYER TestOffline 1.01",
   "short_name": "REG SLAYER",
-  "description": "Alabama deer planner — offline test build (2 mi map packs, cached lands & weather).",
+  "description": "Alabama deer planner — TestOffline 1.01 Beta field build.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

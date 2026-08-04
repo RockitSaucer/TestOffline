@@ -10,16 +10,23 @@
   var PRESENCE_KEY = 'reg_slayer_sharing_loc_v1';
   var ARROW_KEY = 'reg_slayer_my_arrow_color_v1';
   var HIDDEN_MEMBERS_KEY = 'reg_slayer_hidden_party_content_v1';
-  var MOVE_M = 12; // meters = "moving"
-  var STILL_MS = 15 * 60 * 1000;
-  var MOVE_MS = 10 * 1000;
+  var MOVE_M = 8; // meters = "moving"
+  var MOVE_MS = 4000; // min interval when moving
+  var HEARTBEAT_MS = 5000; // always push at least this often while sharing
+  var HEADING_PUSH_DEG = 8; // re-push when facing turns this many degrees
+  var HEADING_PUSH_MS = 1200; // min interval for heading-only updates
   var MAX_SHARE_MS = 60 * 60 * 1000;
+  var PULL_MS = 3000; // peer visibility poll (mobile + desktop)
 
   var presenceTimer = null;
   var presenceWatch = null;
+  var headingOrientHandler = null;
+  var headingWatchOn = false;
   var sharing = false;
   var shareStartedAt = 0;
-  var lastSent = { lat: null, lng: null, at: 0 };
+  var lastSent = { lat: null, lng: null, heading: null, at: 0 };
+  var lastFacingHeading = null; // device compass / GPS course
+  var lastHeadingPushAt = 0;
   var partyLayer = null;
   var partyMarkers = {};
   var myArrowColor = '#e11d1d';
@@ -37,16 +44,39 @@
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
   function getSb() {
-    return C._sb || (window.supabase && C.getClient && C.getClient());
+    // Prefer live client from auth-sync (same session). Fallbacks for load order races.
+    try {
+      if (C && typeof C.getClient === 'function' && C.getClient()) return C.getClient();
+    } catch (e0) {}
+    try {
+      if (C && C._sb) return C._sb;
+    } catch (e1) {}
+    return window.__rsSb || null;
+  }
+  function getUser() {
+    if (window.__rsUser) return window.__rsUser;
+    return null;
+  }
+  /** Leaflet map — index.html uses `let map` and also sets window.map after init. */
+  function getMap() {
+    if (window.map) return window.map;
+    try {
+      if (typeof map !== 'undefined' && map) return map;
+    } catch (e) {}
+    return null;
   }
 
   // Expose helpers the original module doesn't
   // Patch: we reach into original by re-wrapping public API after boot
   function ensurePartyLayer() {
-    if (!window.map || typeof L === 'undefined') return null;
+    var m = getMap();
+    if (!m || typeof L === 'undefined') return null;
     if (!partyLayer) {
-      partyLayer = L.layerGroup().addTo(window.map);
+      partyLayer = L.layerGroup().addTo(m);
+    } else if (!m.hasLayer(partyLayer)) {
+      try { partyLayer.addTo(m); } catch (eA) {}
     }
+    try { partyLayer.bringToFront(); } catch (eF) {}
     return partyLayer;
   }
 
@@ -61,15 +91,46 @@
     return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
   }
 
+  function normalizeHeading(d) {
+    d = Number(d);
+    if (isNaN(d)) return null;
+    d = d % 360;
+    if (d < 0) d += 360;
+    return d;
+  }
+
+  function headingDelta(a, b) {
+    a = normalizeHeading(a);
+    b = normalizeHeading(b);
+    if (a == null || b == null) return 180;
+    var d = Math.abs(a - b) % 360;
+    return d > 180 ? 360 - d : d;
+  }
+
+  /** Prefer device compass; fall back to GPS course-over-ground. */
+  function resolveFacingHeading(gpsHeading) {
+    var h = null;
+    try {
+      if (typeof window.deviceHeadingDeg === 'number' && !isNaN(window.deviceHeadingDeg)) {
+        h = window.deviceHeadingDeg;
+      }
+    } catch (e0) {}
+    if (h == null && lastFacingHeading != null) h = lastFacingHeading;
+    if (h == null && gpsHeading != null && !isNaN(gpsHeading)) h = gpsHeading;
+    h = normalizeHeading(h);
+    if (h != null) lastFacingHeading = h;
+    return h;
+  }
+
   function buildPartyArrowIcon(color, label, heading) {
     var rot = heading != null && !isNaN(heading) ? (((Number(heading) % 360) + 360) % 360) : 0;
     var c = color || '#2563eb';
-    var w = 22, h = 30;
+    var w = 24, h = 34;
     var name = esc((label || '').slice(0, 16));
     var html =
-      '<div style="display:flex;flex-direction:column;align-items:center;pointer-events:auto;">' +
+      '<div class="party-arrow-wrap" style="display:flex;flex-direction:column;align-items:center;pointer-events:auto;">' +
         '<div style="font-size:10px;font-weight:800;color:#fff;text-shadow:0 0 3px #000,0 1px 2px #000;background:rgba(0,0,0,.55);padding:1px 5px;border-radius:4px;margin-bottom:2px;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + name + '</div>' +
-        '<div style="width:' + w + 'px;height:' + h + 'px;transform:rotate(' + rot.toFixed(1) + 'deg);transform-origin:center center;">' +
+        '<div class="party-arrow-rot" style="width:' + w + 'px;height:' + h + 'px;transform:rotate(' + rot.toFixed(1) + 'deg);transform-origin:center 70%;will-change:transform;">' +
           '<svg viewBox="0 0 24 32" width="' + w + '" height="' + h + '">' +
             '<path d="M12 1.5 L22.5 29.5 L12 23.2 L1.5 29.5 Z" fill="' + c + '" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/>' +
           '</svg>' +
@@ -78,9 +139,36 @@
     return L.divIcon({
       className: 'party-presence-icon',
       html: html,
-      iconSize: [96, 52],
-      iconAnchor: [48, 40]
+      iconSize: [100, 56],
+      iconAnchor: [50, 44]
     });
+  }
+
+  /** Smooth in-place rotation without full icon rebuild when possible. */
+  function updatePartyMarkerHeading(uid, heading) {
+    var mk = partyMarkers[uid];
+    if (!mk) return;
+    heading = normalizeHeading(heading);
+    if (heading == null) return;
+    try {
+      var el = mk.getElement && mk.getElement();
+      if (el) {
+        var rot = el.querySelector('.party-arrow-rot');
+        if (rot) {
+          rot.style.transform = 'rotate(' + heading.toFixed(1) + 'deg)';
+          mk._rsHeading = heading;
+          return;
+        }
+      }
+    } catch (e) {}
+    // Fallback: rebuild icon
+    try {
+      var mem = (window.__rsPartyMembers || []).find(function (x) { return String(x.user_id) === String(uid); }) ||
+        { user_id: uid, username: 'Hunter' };
+      var icon = buildPartyArrowIcon(memberColor(mem), memberLabel(mem), heading);
+      mk.setIcon(icon);
+      mk._rsHeading = heading;
+    } catch (e2) {}
   }
 
   function formatAgo(iso) {
@@ -92,6 +180,151 @@
     if (s < 3600) return Math.floor(s / 60) + 'm ago';
     return Math.floor(s / 3600) + 'h ago';
   }
+
+  function escJs(s) {
+    return String(s == null ? '' : s)
+      .replace(/\\/g, '\\\\')
+      .replace(/'/g, "\\'")
+      .replace(/"/g, '\\"')
+      .replace(/\n/g, ' ');
+  }
+
+  /**
+   * Party member popup: last update, Edit friend, Save pin — no facing degrees.
+   */
+  function buildPartyMemberPopupHtml(row, mem) {
+    var uid = String(row.user_id);
+    var label = memberLabel(mem);
+    var lat = Number(row.lat);
+    var lng = Number(row.lng);
+    return (
+      '<div class="map-dot-menu party-member-popup" onclick="event.stopPropagation();">' +
+        '<div class="mdm-title">' + esc(label) + '</div>' +
+        '<div class="mdm-sub" style="margin:4px 0 10px;">Last update: <strong>' +
+          esc(formatAgo(row.updated_at)) + '</strong></div>' +
+        '<button type="button" class="mdm-btn pin" ' +
+          'onclick="event.preventDefault();event.stopPropagation();' +
+          'window.rsEditPartyFriend&&window.rsEditPartyFriend(\'' + escJs(uid) + '\');return false;">' +
+          'Edit friend</button>' +
+        '<button type="button" class="mdm-btn" ' +
+          'onclick="event.preventDefault();event.stopPropagation();' +
+          'window.rsSavePartyPin&&window.rsSavePartyPin(\'' + escJs(uid) + '\',' +
+          lat + ',' + lng + ',\'' + escJs(label) + '\');return false;">' +
+          'Save pin</button>' +
+      '</div>'
+    );
+  }
+
+  function findPartyMember(uid) {
+    var members = window.__rsPartyMembers || [];
+    uid = String(uid);
+    for (var i = 0; i < members.length; i++) {
+      if (String(members[i].user_id) === uid) return members[i];
+    }
+    return { user_id: uid, username: 'Hunter', display_name: 'Hunter' };
+  }
+
+  window.rsEditPartyFriend = function (uid) {
+    uid = String(uid || '');
+    if (!uid) return;
+    var mem = findPartyMember(uid);
+    var pref = partyPrefs[uid] || partyPrefs[mem.user_id] || {};
+    var nick = pref.nickname || '';
+    var col = pref.arrow_color || mem.arrow_color || memberColor(mem) || '#2563eb';
+    var body =
+      '<p class="settings-hint" style="margin:0 0 8px;">Nickname and arrow color are only for you.</p>' +
+      '<label style="display:block;font-size:11px;font-weight:700;margin:6px 0 4px;">Nickname</label>' +
+      '<input type="text" id="rs-friend-nick" maxlength="32" value="' + esc(nick) + '" ' +
+        'style="width:100%;box-sizing:border-box;padding:8px;border-radius:6px;border:1px solid #444;background:#1a1a1a;color:#fff;">' +
+      '<label style="display:block;font-size:11px;font-weight:700;margin:10px 0 4px;">Arrow color</label>' +
+      '<input type="color" id="rs-friend-color" value="' + esc(col) + '" ' +
+        'style="width:100%;height:40px;padding:0;border:none;background:transparent;cursor:pointer;">';
+    showSimpleModal('Edit friend — ' + (mem.display_name || mem.username || 'Hunter'), body, [
+      {
+        label: 'Save',
+        primary: true,
+        onClick: function () {
+          var nEl = document.getElementById('rs-friend-nick');
+          var cEl = document.getElementById('rs-friend-color');
+          var n = nEl ? String(nEl.value || '').trim() : '';
+          var c = cEl ? (cEl.value || col) : col;
+          savePartyPref(uid, {
+            nickname: n || null,
+            arrow_color: c
+          }).then(function () {
+            pullPresence();
+            try {
+              if (window.showAppCopyToast) {
+                showAppCopyToast('<span class="act">Friend updated</span><br>' + esc(n || mem.username || 'Hunter'));
+              }
+            } catch (eT) {}
+          }).catch(function (e) {
+            alert((e && e.message) || String(e));
+          });
+        }
+      },
+      { label: 'Cancel' }
+    ]);
+    // Close leaflet popup so it does not sit under the modal
+    try {
+      var m = getMap();
+      if (m) m.closePopup();
+    } catch (eC) {}
+  };
+
+  window.rsSavePartyPin = function (uid, lat, lng, label) {
+    lat = Number(lat);
+    lng = Number(lng);
+    if (isNaN(lat) || isNaN(lng)) {
+      alert('Location not available.');
+      return;
+    }
+    var mem = findPartyMember(uid);
+    var name = (label || memberLabel(mem) || 'Party member') + ' location';
+    var color = memberColor(mem) || '#2563eb';
+    var pin = {
+      id: 'pin_party_' + Date.now() + '_' + Math.floor(Math.random() * 999),
+      name: name,
+      lat: lat,
+      lng: lng,
+      isPin: true,
+      color: color,
+      notes: 'Saved from party live location',
+      createdAt: new Date().toISOString()
+    };
+    stampOwner(pin);
+    try {
+      if (typeof locations !== 'undefined' && Array.isArray(locations)) {
+        locations.push(pin);
+      }
+    } catch (eL) {}
+    try {
+      var pins = JSON.parse(localStorage.getItem('alabama_hunt_custom_pins') || '[]');
+      if (!Array.isArray(pins)) pins = [];
+      pins.push(pin);
+      localStorage.setItem('alabama_hunt_custom_pins', JSON.stringify(pins));
+    } catch (eS) {
+      alert('Could not save pin on this device.');
+      return;
+    }
+    try {
+      if (typeof drawPinsOnMap === 'function') drawPinsOnMap();
+    } catch (eD) {}
+    try {
+      if (typeof window.regSlayerMapDataChanged === 'function') window.regSlayerMapDataChanged();
+    } catch (eM) {}
+    try {
+      var m = getMap();
+      if (m) m.closePopup();
+    } catch (eC) {}
+    try {
+      if (window.showAppCopyToast) {
+        showAppCopyToast('<span class="act">Pin saved</span><br>' + esc(name));
+      } else {
+        alert('Pin saved: ' + name);
+      }
+    } catch (eT) {}
+  };
 
   async function loadPartyPrefs(mapId) {
     partyPrefs = {};
@@ -141,44 +374,84 @@
 
   async function pullPresence() {
     var vs = C.getViewState && C.getViewState();
-    var sb = window.__rsSb;
-    var user = window.__rsUser;
-    if (!vs || vs.mode !== 'shared' || !vs.sharedMapId || !sb || !window.map) {
-      clearPartyMarkers();
+    var sb = getSb();
+    var user = getUser();
+    var m = getMap();
+    // Keep window.map in sync when the main app only has a local `map` binding
+    if (m && !window.map) {
+      try { window.map = m; } catch (eWm) {}
+    }
+    if (!vs || vs.mode !== 'shared' || !vs.sharedMapId || !sb || !m) {
+      // Don't wipe markers just because map isn't ready yet — only when not on shared
+      if (!vs || vs.mode !== 'shared' || !vs.sharedMapId) clearPartyMarkers();
       return;
     }
     var layer = ensurePartyLayer();
     if (!layer) return;
     try {
-      var { data } = await sb.from('party_presence')
+      // Refresh member labels occasionally
+      try {
+        if (!window.__rsPartyMembers || !window.__rsPartyMembers.length) {
+          await listMembers();
+        }
+      } catch (eMem) {}
+
+      var res = await sb.from('party_presence')
         .select('user_id, is_sharing, lat, lng, heading, updated_at, started_at')
         .eq('map_id', vs.sharedMapId)
         .eq('is_sharing', true);
+      if (res.error) {
+        console.warn('presence pull error', res.error);
+        return;
+      }
+      var data = res.data || [];
       var members = window.__rsPartyMembers || [];
       var byId = {};
-      members.forEach(function (m) { byId[m.user_id] = m; });
+      members.forEach(function (mm) {
+        byId[mm.user_id] = mm;
+        byId[String(mm.user_id)] = mm;
+      });
       var seen = {};
-      (data || []).forEach(function (row) {
+      data.forEach(function (row) {
         if (!row.is_sharing || row.lat == null || row.lng == null) return;
         // Hide self from party layer (own GPS marker is separate)
-        if (user && row.user_id === user.id) return;
-        // Stale > 20 min hide
+        if (user && String(row.user_id) === String(user.id)) return;
+        // Stale > 3 min hide (heartbeats are ~5s — 20 min was too forgiving for "offline")
         var age = Date.now() - new Date(row.updated_at).getTime();
-        if (age > 20 * 60 * 1000) return;
-        seen[row.user_id] = true;
-        var m = byId[row.user_id] || { user_id: row.user_id, username: 'Hunter', display_name: 'Hunter' };
-        var label = memberLabel(m);
-        var color = memberColor(m);
-        var icon = buildPartyArrowIcon(color, label, row.heading);
-        var popup = '<strong>' + esc(label) + '</strong><br>Last updated: ' + esc(formatAgo(row.updated_at));
-        if (partyMarkers[row.user_id]) {
-          partyMarkers[row.user_id].setLatLng([row.lat, row.lng]);
-          try { partyMarkers[row.user_id].setIcon(icon); } catch (eI) {}
-          partyMarkers[row.user_id].setPopupContent(popup);
+        if (isNaN(age) || age > 3 * 60 * 1000) return;
+        var uid = String(row.user_id);
+        seen[uid] = true;
+        var mem = byId[row.user_id] || byId[uid] ||
+          { user_id: row.user_id, username: 'Hunter', display_name: 'Hunter' };
+        var label = memberLabel(mem);
+        var color = memberColor(mem);
+        var hdg = normalizeHeading(row.heading);
+        var popup = buildPartyMemberPopupHtml(row, mem);
+        if (partyMarkers[uid]) {
+          partyMarkers[uid].setLatLng([row.lat, row.lng]);
+          try {
+            partyMarkers[uid].setPopupContent(popup);
+          } catch (eP) {}
+          // Keep arrow facing direction on the icon only (not in the popup text)
+          if (hdg != null) {
+            if (partyMarkers[uid]._rsHeading == null ||
+                headingDelta(partyMarkers[uid]._rsHeading, hdg) >= 2) {
+              updatePartyMarkerHeading(uid, hdg);
+            }
+          }
         } else {
-          var mk = L.marker([row.lat, row.lng], { icon: icon, zIndexOffset: 800 }).addTo(layer);
-          mk.bindPopup(popup);
-          partyMarkers[row.user_id] = mk;
+          var icon = buildPartyArrowIcon(color, label, hdg);
+          var mk = L.marker([row.lat, row.lng], { icon: icon, zIndexOffset: 900 }).addTo(layer);
+          mk.bindPopup(popup, {
+            className: 'map-dot-popup party-member-leaflet-popup',
+            closeButton: true,
+            autoPan: false,
+            maxWidth: 260,
+            closeOnClick: false
+          });
+          mk._rsHeading = hdg;
+          mk._rsUserId = uid;
+          partyMarkers[uid] = mk;
         }
       });
       Object.keys(partyMarkers).forEach(function (uid) {
@@ -187,6 +460,7 @@
           delete partyMarkers[uid];
         }
       });
+      try { layer.bringToFront(); } catch (eBf) {}
     } catch (e) {
       console.warn('presence pull', e);
     }
@@ -201,81 +475,215 @@
 
   async function pushPresence(lat, lng, heading, force) {
     var vs = C.getViewState && C.getViewState();
-    var sb = window.__rsSb;
-    var user = window.__rsUser;
-    if (!sharing || !vs || vs.mode !== 'shared' || !vs.sharedMapId || !sb || !user) return;
+    var sb = getSb();
+    var user = getUser();
+    if (!sharing || !vs || vs.mode !== 'shared' || !vs.sharedMapId || !sb || !user) return false;
     if (Date.now() - shareStartedAt > MAX_SHARE_MS) {
       stopSharing('auto');
-      return;
+      return false;
     }
+    // Always resolve best facing heading (never wipe with null on heartbeat)
+    var hdg = resolveFacingHeading(heading);
+    if (hdg == null && lastSent.heading != null) hdg = lastSent.heading;
+
     var now = Date.now();
     var moved = true;
     if (lastSent.lat != null) {
       var d = haversineM(lastSent.lat, lastSent.lng, lat, lng);
       moved = d >= MOVE_M;
     }
-    var interval = moved ? MOVE_MS : STILL_MS;
-    if (!force && lastSent.at && (now - lastSent.at) < interval) return;
+    var headingTurned = lastSent.heading == null
+      ? (hdg != null)
+      : (hdg != null && headingDelta(lastSent.heading, hdg) >= HEADING_PUSH_DEG);
 
+    if (!force && lastSent.at) {
+      var elapsed = now - lastSent.at;
+      if (moved && elapsed < MOVE_MS) return true;
+      if (!moved && headingTurned && elapsed < HEADING_PUSH_MS) return true;
+      if (!moved && !headingTurned && elapsed < HEARTBEAT_MS) return true;
+    }
+
+    var payload = {
+      map_id: vs.sharedMapId,
+      user_id: user.id,
+      is_sharing: true,
+      lat: lat,
+      lng: lng,
+      heading: hdg,
+      started_at: new Date(shareStartedAt).toISOString(),
+      last_moved_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
     try {
-      await sb.from('party_presence').upsert({
-        map_id: vs.sharedMapId,
-        user_id: user.id,
-        is_sharing: true,
-        lat: lat,
-        lng: lng,
-        heading: heading != null ? heading : null,
-        started_at: new Date(shareStartedAt).toISOString(),
-        last_moved_at: moved || !lastSent.at ? new Date().toISOString() : undefined,
-        updated_at: new Date().toISOString()
-      });
-      // fix last_moved_at optional overwrite
-      await sb.from('party_presence').upsert({
-        map_id: vs.sharedMapId,
-        user_id: user.id,
-        is_sharing: true,
-        lat: lat,
-        lng: lng,
-        heading: heading != null ? heading : null,
-        started_at: new Date(shareStartedAt).toISOString(),
-        last_moved_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      });
-      lastSent = { lat: lat, lng: lng, at: now };
+      var res = await sb.from('party_presence').upsert(payload, { onConflict: 'map_id,user_id' });
+      if (res.error) {
+        console.warn('presence push failed', res.error);
+        try {
+          if (window.showAppCopyToast) {
+            showAppCopyToast('<span class="act">Share location failed</span><br>' +
+              esc(res.error.message || 'Could not update party location'));
+          }
+        } catch (eT) {}
+        return false;
+      }
+      lastSent = { lat: lat, lng: lng, heading: hdg, at: now };
+      if (headingTurned) lastHeadingPushAt = now;
+      return true;
     } catch (e) {
       console.warn('presence push', e);
+      return false;
+    }
+  }
+
+  function stopPartyHeadingWatch() {
+    if (!headingWatchOn || !headingOrientHandler) return;
+    try { window.removeEventListener('deviceorientationabsolute', headingOrientHandler, true); } catch (e0) {}
+    try { window.removeEventListener('deviceorientation', headingOrientHandler, true); } catch (e1) {}
+    headingWatchOn = false;
+    headingOrientHandler = null;
+  }
+
+  function startPartyHeadingWatch() {
+    if (headingWatchOn) return;
+    headingOrientHandler = function (e) {
+      if (!e) return;
+      var raw = null;
+      if (typeof e.webkitCompassHeading === 'number' && !isNaN(e.webkitCompassHeading)) {
+        raw = e.webkitCompassHeading; // iOS: degrees from true/magnetic north
+      } else if (typeof e.alpha === 'number' && !isNaN(e.alpha)) {
+        raw = (360 - e.alpha) % 360;
+      }
+      raw = normalizeHeading(raw);
+      if (raw == null) return;
+      lastFacingHeading = raw;
+      try { window.deviceHeadingDeg = raw; } catch (eW) {}
+      // Push facing update while sharing (even if standing still)
+      if (sharing && lastSent.lat != null) {
+        var now = Date.now();
+        if (now - lastHeadingPushAt >= HEADING_PUSH_MS) {
+          if (lastSent.heading == null || headingDelta(lastSent.heading, raw) >= HEADING_PUSH_DEG) {
+            pushPresence(lastSent.lat, lastSent.lng, raw, false);
+          }
+        }
+      }
+    };
+    try { window.addEventListener('deviceorientationabsolute', headingOrientHandler, true); } catch (eA) {}
+    try { window.addEventListener('deviceorientation', headingOrientHandler, true); } catch (eR) {}
+    headingWatchOn = true;
+  }
+
+  function requestOrientationPermissionIfNeeded() {
+    return new Promise(function (resolve) {
+      try {
+        if (typeof DeviceOrientationEvent !== 'undefined' &&
+            typeof DeviceOrientationEvent.requestPermission === 'function') {
+          DeviceOrientationEvent.requestPermission()
+            .then(function (state) { resolve(state === 'granted'); })
+            .catch(function () { resolve(false); });
+          return;
+        }
+      } catch (e) {
+        resolve(false);
+        return;
+      }
+      resolve(true);
+    });
+  }
+
+  /** Called from main app compass updates (and our own orientation watch). */
+  function onDeviceHeading(heading) {
+    heading = normalizeHeading(heading);
+    if (heading == null) return;
+    lastFacingHeading = heading;
+    if (sharing && lastSent.lat != null) {
+      var now = Date.now();
+      if (now - lastHeadingPushAt >= HEADING_PUSH_MS &&
+          (lastSent.heading == null || headingDelta(lastSent.heading, heading) >= HEADING_PUSH_DEG)) {
+        pushPresence(lastSent.lat, lastSent.lng, heading, false);
+      }
     }
   }
 
   function startSharing() {
     var vs = C.getViewState && C.getViewState();
-    if (!vs || vs.mode !== 'shared') {
-      alert('Share location only works on a shared map. Open a shared map first.');
+    if (!vs || vs.mode !== 'shared' || !vs.sharedMapId) {
+      alert('Share location only works on a shared map. Open a shared map first (Settings → My Maps → View).');
       return;
     }
     if (!navigator.geolocation) {
       alert('Geolocation not available on this device.');
       return;
     }
+    if (!getSb() || !getUser()) {
+      alert('Sign in required to share location with your party.');
+      return;
+    }
+    // Ensure map reference for peers who pull while we share
+    var m = getMap();
+    if (m) {
+      try { window.map = m; } catch (eM) {}
+    }
+
     sharing = true;
     shareStartedAt = Date.now();
-    lastSent = { lat: null, lng: null, at: 0 };
-    try { localStorage.setItem(PRESENCE_KEY, JSON.stringify({ on: true, started: shareStartedAt, mapId: vs.sharedMapId })); } catch (e) {}
+    lastSent = { lat: null, lng: null, heading: null, at: 0 };
+    lastHeadingPushAt = 0;
+    try {
+      localStorage.setItem(PRESENCE_KEY, JSON.stringify({
+        on: true,
+        started: shareStartedAt,
+        mapId: vs.sharedMapId
+      }));
+    } catch (e) {}
     updateShareLocBtn();
+
+    // iOS: compass permission must be requested from this user tap
+    requestOrientationPermissionIfNeeded().then(function (ok) {
+      startPartyHeadingWatch();
+      // Also ask main app compass stack if available
+      try {
+        if (typeof ensureDeviceOrientationPermission === 'function') {
+          ensureDeviceOrientationPermission().then(function () {
+            if (typeof startDeviceHeadingWatch === 'function') startDeviceHeadingWatch();
+          });
+        } else if (typeof startDeviceHeadingWatch === 'function') {
+          startDeviceHeadingWatch();
+        }
+      } catch (eH) {}
+      if (!ok) {
+        try {
+          if (window.showAppCopyToast) {
+            showAppCopyToast('<span class="act">Compass optional</span><br>Location will still share; facing may use GPS course.');
+          }
+        } catch (eT) {}
+      }
+    });
+
     if (presenceWatch != null) {
       try { navigator.geolocation.clearWatch(presenceWatch); } catch (e2) {}
     }
     presenceWatch = navigator.geolocation.watchPosition(function (pos) {
       var lat = pos.coords.latitude, lng = pos.coords.longitude;
-      var heading = pos.coords.heading;
-      if (heading == null || isNaN(heading)) {
-        try { if (typeof deviceHeadingDeg !== 'undefined') heading = deviceHeadingDeg; } catch (eH) {}
+      // GPS course when moving; otherwise device compass
+      var gpsH = pos.coords.heading;
+      var speed = pos.coords.speed; // m/s
+      var heading = null;
+      if (gpsH != null && !isNaN(gpsH) && speed != null && speed > 0.8) {
+        heading = gpsH; // course over ground while walking/driving
+      } else {
+        heading = resolveFacingHeading(gpsH);
       }
       pushPresence(lat, lng, heading, false);
     }, function (err) {
-      console.warn(err);
-    }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 });
+      console.warn('share location GPS error', err);
+      try {
+        if (window.showAppCopyToast) {
+          showAppCopyToast('<span class="act">Location error</span><br>Allow location access to share with party.');
+        }
+      } catch (e3) {}
+    }, { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 });
 
+    // Heartbeat with heading preserved + peer pull
     if (presenceTimer) clearInterval(presenceTimer);
     presenceTimer = setInterval(function () {
       if (!sharing) return;
@@ -284,16 +692,26 @@
         return;
       }
       pullPresence();
-      // still heartbeat if we have last coords
       if (lastSent.lat != null) {
-        pushPresence(lastSent.lat, lastSent.lng, null, false);
+        var h = resolveFacingHeading(lastSent.heading);
+        pushPresence(lastSent.lat, lastSent.lng, h, true);
       }
-    }, 10000);
+    }, HEARTBEAT_MS);
 
-    // immediate fix
+    // Immediate force push
     navigator.geolocation.getCurrentPosition(function (pos) {
-      pushPresence(pos.coords.latitude, pos.coords.longitude, pos.coords.heading, true);
-    }, function () {}, { enableHighAccuracy: true, timeout: 10000 });
+      var h0 = resolveFacingHeading(pos.coords.heading);
+      pushPresence(pos.coords.latitude, pos.coords.longitude, h0, true).then(function (ok) {
+        if (ok !== false && window.showAppCopyToast) {
+          showAppCopyToast('<span class="act">Sharing location</span><br>Party can see your position and facing direction.');
+        }
+      });
+    }, function (err) {
+      console.warn(err);
+      alert('Could not get your location. Check location permission and try again.');
+      stopSharing();
+    }, { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 });
+
     pullPresence();
   }
 
@@ -305,22 +723,30 @@
       presenceWatch = null;
     }
     if (presenceTimer) { clearInterval(presenceTimer); presenceTimer = null; }
+    stopPartyHeadingWatch();
     updateShareLocBtn();
     var vs = C.getViewState && C.getViewState();
-    var sb = window.__rsSb;
-    var user = window.__rsUser;
+    var sb = getSb();
+    var user = getUser();
     if (sb && user && vs && vs.sharedMapId) {
       try {
-        await sb.from('party_presence').upsert({
+        var res = await sb.from('party_presence').upsert({
           map_id: vs.sharedMapId,
           user_id: user.id,
           is_sharing: false,
           updated_at: new Date().toISOString()
-        });
+        }, { onConflict: 'map_id,user_id' });
+        if (res.error) console.warn('stop share presence', res.error);
       } catch (e3) {}
     }
     if (reason === 'auto') {
-      try { showAppCopyToast && showAppCopyToast('<span class="act">Location sharing ended</span><br>Auto-off after 1 hour.'); } catch (e4) {}
+      try {
+        showAppCopyToast && showAppCopyToast('<span class="act">Location sharing ended</span><br>Auto-off after 1 hour.');
+      } catch (e4) {}
+    } else {
+      try {
+        showAppCopyToast && showAppCopyToast('<span class="act">Stopped sharing location</span>');
+      } catch (e5) {}
     }
   }
 
@@ -332,7 +758,13 @@
   function updateShareLocBtn() {
     var btn = $('share-loc-btn');
     if (!btn) return;
-    btn.classList.toggle('is-sharing', !!sharing);
+    // Restart pulse animation cleanly when turning on
+    btn.classList.remove('is-sharing');
+    if (sharing) {
+      // force reflow so animation restarts
+      void btn.offsetWidth;
+      btn.classList.add('is-sharing');
+    }
     btn.setAttribute('aria-pressed', sharing ? 'true' : 'false');
     btn.title = sharing ? 'Sharing location with party (tap to stop)' : 'Share current location with party';
   }
@@ -527,146 +959,278 @@
     }
   }
 
+  /** Expanded map card in Settings → My Maps (selection ≠ active view until View). */
+  var mapsUiSelected = { kind: null, id: null };
+
+  function shareMapInviteText(mapRow) {
+    var code = mapRow && mapRow.code ? String(mapRow.code) : '';
+    var name = mapRow && mapRow.name ? String(mapRow.name) : 'Hunt map';
+    return 'Join my HuntSlayer map!\nMap: ' + name + '\nCode: ' + code +
+      '\nhttps://regslayer.com/?join=' + code;
+  }
+
+  function copyMapInvite(mapRow) {
+    var text = shareMapInviteText(mapRow);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        try {
+          if (window.showAppCopyToast) showAppCopyToast('<span class="act">Invite copied</span><br>Code ' + esc(mapRow.code || ''));
+          else alert('Copied:\n' + text);
+        } catch (e) { alert('Copied:\n' + text); }
+      }).catch(function () { window.prompt('Copy:', text); });
+    } else window.prompt('Copy:', text);
+  }
+
+  function buildPartyMembersHtml(members, vs, user) {
+    if (!members || !members.length) {
+      return '<p class="settings-hint">Only you on this map so far.</p>';
+    }
+    return members.map(function (m) {
+      var pref = partyPrefs[m.user_id] || {};
+      var nick = pref.nickname || '';
+      var col = pref.arrow_color || m.arrow_color || '#2563eb';
+      var show = pref.show_content !== false && !hiddenContentOwners[m.user_id];
+      var self = user && m.user_id === user.id;
+      return '<div class="party-member-row" data-uid="' + m.user_id + '">' +
+        '<div class="party-member-head">' +
+          '<span class="party-dot" style="background:' + esc(col) + '"></span>' +
+          '<strong>' + esc(memberLabel(m)) + '</strong>' +
+          (self ? ' <span class="settings-hint">(you)</span>' : '') +
+          (m.is_host ? ' · host' : '') +
+        '</div>' +
+        (!self ? (
+          '<label class="settings-row"><input type="checkbox" class="party-show-content" ' + (show ? 'checked' : '') + '>' +
+          '<span class="sr-text">Show their pins/areas on map</span></label>' +
+          '<div class="settings-inline-row"><input type="text" class="party-nick" placeholder="Nickname" value="' + esc(nick) + '">' +
+          '<input type="color" class="party-color" value="' + esc(col) + '" title="Arrow color" style="width:44px;height:36px;padding:0;border:none;">' +
+          '<button type="button" class="party-save">Save</button></div>'
+        ) : '') +
+      '</div>';
+    }).join('');
+  }
+
+  function wirePartyMemberRows(container, vs) {
+    if (!container || !vs) return;
+    container.querySelectorAll('.party-member-row').forEach(function (row) {
+      var uid = row.getAttribute('data-uid');
+      var save = row.querySelector('.party-save');
+      if (save) save.onclick = function () {
+        var nick = (row.querySelector('.party-nick') || {}).value || '';
+        var col = (row.querySelector('.party-color') || {}).value || '#2563eb';
+        savePartyPref(uid, { nickname: nick.trim() || null, arrow_color: col }).then(function () {
+          pullPresence();
+          refreshMapsUi();
+        });
+      };
+      var chk = row.querySelector('.party-show-content');
+      if (chk) chk.onchange = function () {
+        if (!chk.checked) hiddenContentOwners[uid] = true;
+        else delete hiddenContentOwners[uid];
+        try {
+          localStorage.setItem(HIDDEN_MEMBERS_KEY + ':' + vs.sharedMapId, JSON.stringify(hiddenContentOwners));
+        } catch (e) {}
+        savePartyPref(uid, { show_content: !!chk.checked });
+        applyContentOwnerFilter();
+      };
+    });
+  }
+
   async function refreshMapsUi() {
     updateBrandName();
     updateShareLocBtn();
+    var allBox = $('set-all-maps-list');
     var privBox = $('set-private-maps-list');
     var sharedBox = $('set-shared-maps-list');
-    var partyBox = $('set-party-members');
-    var partySec = $('set-party-section');
     var modeLabel = $('set-map-mode-label');
     var vs = C.getViewState && C.getViewState();
     if (modeLabel && vs) {
       if (vs.mode === 'shared') {
-        modeLabel.textContent = 'Viewing: ' + (vs.sharedMapName || 'Shared') + ' (' + (vs.sharedMapCode || '') + ')';
+        modeLabel.textContent = 'Viewing: ' + (vs.sharedMapName || 'Shared');
       } else {
         modeLabel.textContent = 'Viewing: ' + (vs.privateMapName || 'My Map') + ' (private)';
       }
     }
 
-    if (privBox) {
-      try {
-        var pmaps = await listPrivateMaps();
-        if (!pmaps.length) privBox.innerHTML = '<p class="settings-hint">No private maps yet.</p>';
-        else {
-          privBox.innerHTML = pmaps.map(function (m) {
-            var active = vs && (vs.mode === 'private' || vs.mode === 'personal') && vs.privateMapId === m.id;
-            return '<div class="settings-map-row' + (active ? ' is-active' : '') + '">' +
-              '<button type="button" class="settings-subbtn settings-map-open" data-pid="' + m.id + '">' +
-              esc(m.name) + (m.is_default ? ' · default' : '') + '</button></div>';
-          }).join('');
-          privBox.querySelectorAll('[data-pid]').forEach(function (btn) {
-            btn.onclick = function () {
-              var id = btn.getAttribute('data-pid');
-              var row = pmaps.find(function (x) { return x.id === id; });
-              openPrivateMapActions(row || { id: id, name: btn.textContent });
-            };
-          });
+    var pmaps = [];
+    var smaps = [];
+    try { pmaps = await listPrivateMaps(); } catch (eP) { pmaps = []; }
+    try {
+      if (C.listMySharedMaps) smaps = await C.listMySharedMaps();
+      if (!smaps || !smaps.length) {
+        var sb0 = window.__rsSb;
+        if (sb0) {
+          var r0 = await sb0.rpc('list_my_shared_maps');
+          smaps = r0.data || [];
         }
-      } catch (e) {
-        privBox.innerHTML = '<p class="settings-hint">Could not load private maps.</p>';
+      }
+    } catch (eS) { smaps = []; }
+
+    // Unified list: currently viewing first, then other private, then other shared
+    var cards = [];
+    pmaps.forEach(function (m) {
+      cards.push({
+        kind: 'private',
+        id: m.id,
+        name: m.name || 'Private map',
+        is_default: !!m.is_default,
+        active: !!(vs && (vs.mode === 'private' || vs.mode === 'personal') && vs.privateMapId === m.id),
+        raw: m
+      });
+    });
+    (smaps || []).forEach(function (m) {
+      cards.push({
+        kind: 'shared',
+        id: m.id,
+        name: m.name || 'Shared map',
+        code: m.code || '',
+        active: !!(vs && vs.mode === 'shared' && vs.sharedMapId === m.id),
+        raw: m
+      });
+    });
+    cards.sort(function (a, b) {
+      if (a.active !== b.active) return a.active ? -1 : 1;
+      if (a.kind !== b.kind) return a.kind === 'private' ? -1 : 1;
+      return String(a.name).localeCompare(String(b.name));
+    });
+
+    // Keep expansion on the active map if selection is empty
+    if (!mapsUiSelected.id && vs) {
+      if (vs.mode === 'shared' && vs.sharedMapId) {
+        mapsUiSelected = { kind: 'shared', id: vs.sharedMapId };
+      } else if (vs.privateMapId) {
+        mapsUiSelected = { kind: 'private', id: vs.privateMapId };
       }
     }
 
-    if (sharedBox && C.listMySharedMaps) {
-      try {
-        var maps = await (C.listMySharedMaps ? C.listMySharedMaps() : []);
-        // Prefer RPC via original — if not exposed, call rpc
-        if (!maps || !maps.length) {
-          var sb = window.__rsSb;
-          if (sb) {
-            var r = await sb.rpc('list_my_shared_maps');
-            maps = r.data || [];
-          }
-        }
-        if (!maps.length) sharedBox.innerHTML = '<p class="settings-hint">No shared maps yet.</p>';
-        else {
-          sharedBox.innerHTML = maps.map(function (m) {
-            var active = vs && vs.mode === 'shared' && vs.sharedMapId === m.id;
-            return '<div class="settings-map-row' + (active ? ' is-active' : '') + '">' +
-              '<button type="button" class="settings-subbtn settings-map-open" data-sid="' + m.id + '">' +
-              esc(m.name) + ' <span class="settings-map-code">' + esc(m.code) + '</span></button></div>';
-          }).join('');
-          sharedBox.querySelectorAll('[data-sid]').forEach(function (btn) {
-            btn.onclick = function () {
-              var id = btn.getAttribute('data-sid');
-              var row = maps.find(function (x) { return x.id === id; });
-              openSharedMapActions(row || { id: id, name: 'Map', code: '' });
-            };
-          });
-        }
-      } catch (e2) {
-        sharedBox.innerHTML = '<p class="settings-hint">Could not load shared maps.</p>';
+    async function partyDetailsHtml(card) {
+      if (card.kind !== 'shared') {
+        return '<p class="settings-hint">Private map — only you. Use Rename current map below if this is active.</p>' +
+          '<button type="button" class="settings-subbtn smc-rename" data-pid="' + card.id + '">Rename</button>';
       }
-    }
-
-    if (partySec && partyBox) {
-      if (vs && vs.mode === 'shared' && vs.sharedMapId) {
-        partySec.style.display = '';
+      var html = '<p class="smc-code">Invite code: <span>' + esc(card.code || '—') + '</span></p>';
+      // Party members only when this is the map currently open (prefs/presence are for active shared map)
+      if (vs && vs.mode === 'shared' && vs.sharedMapId === card.id) {
         await loadPartyPrefs(vs.sharedMapId);
         try {
           var members = await listMembers();
-          var user = window.__rsUser;
-          if (!members.length) partyBox.innerHTML = '<p class="settings-hint">Only you on this map so far.</p>';
-          else {
-            partyBox.innerHTML = members.map(function (m) {
-              var pref = partyPrefs[m.user_id] || {};
-              var nick = pref.nickname || '';
-              var col = pref.arrow_color || m.arrow_color || '#2563eb';
-              var show = pref.show_content !== false && !hiddenContentOwners[m.user_id];
-              var self = user && m.user_id === user.id;
-              return '<div class="party-member-row" data-uid="' + m.user_id + '">' +
-                '<div class="party-member-head">' +
-                  '<span class="party-dot" style="background:' + esc(col) + '"></span>' +
-                  '<strong>' + esc(memberLabel(m)) + '</strong>' +
-                  (self ? ' <span class="settings-hint">(you)</span>' : '') +
-                  (m.is_host ? ' · host' : '') +
-                '</div>' +
-                (!self ? (
-                  '<label class="settings-row"><input type="checkbox" class="party-show-content" ' + (show ? 'checked' : '') + '>' +
-                  '<span class="sr-text">Show their pins/areas on map</span></label>' +
-                  '<div class="settings-inline-row"><input type="text" class="party-nick" placeholder="Nickname" value="' + esc(nick) + '">' +
-                  '<input type="color" class="party-color" value="' + esc(col) + '" title="Arrow color" style="width:44px;height:36px;padding:0;border:none;">' +
-                  '<button type="button" class="party-save">Save</button></div>'
-                ) : '') +
-              '</div>';
-            }).join('');
-            partyBox.querySelectorAll('.party-member-row').forEach(function (row) {
-              var uid = row.getAttribute('data-uid');
-              var save = row.querySelector('.party-save');
-              if (save) save.onclick = function () {
-                var nick = (row.querySelector('.party-nick') || {}).value || '';
-                var col = (row.querySelector('.party-color') || {}).value || '#2563eb';
-                savePartyPref(uid, { nickname: nick.trim() || null, arrow_color: col }).then(function () {
-                  pullPresence();
-                  refreshMapsUi();
-                });
-              };
-              var chk = row.querySelector('.party-show-content');
-              if (chk) chk.onchange = function () {
-                if (!chk.checked) hiddenContentOwners[uid] = true;
-                else delete hiddenContentOwners[uid];
-                try {
-                  localStorage.setItem(HIDDEN_MEMBERS_KEY + ':' + vs.sharedMapId, JSON.stringify(hiddenContentOwners));
-                } catch (e) {}
-                savePartyPref(uid, { show_content: !!chk.checked });
-                applyContentOwnerFilter();
-              };
-            });
-          }
-        } catch (e3) {
-          partyBox.innerHTML = '<p class="settings-hint">Could not load party.</p>';
+          html += '<div class="settings-section-title" style="margin-top:8px;">Party</div>';
+          html += '<p class="settings-hint">Members on this shared map. Nicknames and colors are only for you.</p>';
+          html += '<div class="smc-party">' + buildPartyMembersHtml(members, vs, window.__rsUser) + '</div>';
+        } catch (eMem) {
+          html += '<p class="settings-hint">Could not load party.</p>';
         }
-        // presence pull when settings open
-        pullPresence();
       } else {
-        partySec.style.display = 'none';
-        partyBox.innerHTML = '';
-        clearPartyMarkers();
+        html += '<p class="settings-hint">Tap <strong>View</strong> to open this map and manage party members.</p>';
+      }
+      return html;
+    }
+
+    if (allBox) {
+      if (!cards.length) {
+        allBox.innerHTML = '<p class="settings-hint">No maps yet. Create a private or shared map below.</p>';
+      } else {
+        // Build shells first (async party html filled after)
+        allBox.innerHTML = cards.map(function (card) {
+          var expanded = mapsUiSelected.kind === card.kind && mapsUiSelected.id === card.id;
+          var badge = card.active ? 'Active' : (card.kind === 'shared' ? 'Shared' : (card.is_default ? 'Default' : 'Private'));
+          return '<div class="settings-map-card' +
+            (card.active ? ' is-active' : '') +
+            (expanded ? ' is-expanded' : '') +
+            '" data-kind="' + card.kind + '" data-id="' + card.id + '">' +
+            '<div class="settings-map-card-main">' +
+              '<button type="button" class="smc-name" data-kind="' + card.kind + '" data-id="' + card.id + '">' +
+                esc(card.name) +
+              '</button>' +
+              '<span class="smc-badge">' + esc(badge) + '</span>' +
+              '<div class="settings-map-card-actions">' +
+                '<button type="button" class="primary smc-view" data-kind="' + card.kind + '" data-id="' + card.id + '">View</button>' +
+                (card.kind === 'shared'
+                  ? '<button type="button" class="smc-share" data-id="' + card.id + '">Share</button>'
+                  : '') +
+              '</div>' +
+            '</div>' +
+            '<div class="settings-map-card-details" data-details-for="' + card.kind + ':' + card.id + '"></div>' +
+          '</div>';
+        }).join('');
+
+        // Fill details for expanded card(s)
+        for (var i = 0; i < cards.length; i++) {
+          var c = cards[i];
+          if (!(mapsUiSelected.kind === c.kind && mapsUiSelected.id === c.id)) continue;
+          var det = allBox.querySelector('[data-details-for="' + c.kind + ':' + c.id + '"]');
+          if (!det) continue;
+          det.innerHTML = await partyDetailsHtml(c);
+          wirePartyMemberRows(det, vs);
+          var ren = det.querySelector('.smc-rename');
+          if (ren) {
+            ren.onclick = function (ev) {
+              ev.stopPropagation();
+              var id = ren.getAttribute('data-pid');
+              var row = pmaps.find(function (x) { return x.id === id; }) || { id: id, name: '' };
+              var n = prompt('New name:', row.name || '');
+              if (!n || !n.trim()) return;
+              renamePrivate(id, n.trim()).then(refreshMapsUi).catch(function (e) { alert(e.message || e); });
+            };
+          }
+        }
+
+        allBox.querySelectorAll('.settings-map-card-main .smc-name, .settings-map-card-main').forEach(function (el) {
+          // Only wire name button for selection; avoid double-fire from main
+        });
+        allBox.querySelectorAll('.smc-name').forEach(function (btn) {
+          btn.onclick = function (ev) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            var kind = btn.getAttribute('data-kind');
+            var id = btn.getAttribute('data-id');
+            if (mapsUiSelected.kind === kind && mapsUiSelected.id === id) {
+              mapsUiSelected = { kind: null, id: null };
+            } else {
+              mapsUiSelected = { kind: kind, id: id };
+            }
+            refreshMapsUi();
+          };
+        });
+        allBox.querySelectorAll('.smc-view').forEach(function (btn) {
+          btn.onclick = function (ev) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            var kind = btn.getAttribute('data-kind');
+            var id = btn.getAttribute('data-id');
+            mapsUiSelected = { kind: kind, id: id };
+            if (kind === 'private') {
+              switchToPrivate(id).catch(function (e) { alert(e.message || e); });
+            } else if (C.switchToShared) {
+              C.switchToShared(id).then(function () {
+                refreshMapsUi();
+                pullPresence();
+              }).catch(function (e) { alert(e.message || e); });
+            }
+          };
+        });
+        allBox.querySelectorAll('.smc-share').forEach(function (btn) {
+          btn.onclick = function (ev) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            var id = btn.getAttribute('data-id');
+            var row = (smaps || []).find(function (x) { return x.id === id; });
+            if (row) copyMapInvite(row);
+          };
+        });
       }
     }
 
-    // overlay party section
+    // Legacy containers left empty (unified list above)
+    if (privBox) privBox.innerHTML = '';
+    if (sharedBox) sharedBox.innerHTML = '';
+
+    // Presence markers only while on a shared map
+    if (vs && vs.mode === 'shared' && vs.sharedMapId) {
+      pullPresence();
+    } else {
+      clearPartyMarkers();
+    }
+
     renderOverlayParty();
   }
 
@@ -1131,10 +1695,13 @@
 
   // Capture sb + user from auth client used by main module
   function bindClientRefs() {
-    // Create our own client with same keys if needed
+    // Prefer auth-sync's single shared client (same session / JWT)
+    try {
+      var c = getSb();
+      if (c) window.__rsSb = c;
+    } catch (e0) {}
     if (!window.__rsSb && window.supabase && window.supabase.createClient) {
       try {
-        // reuse session from existing
         var url = 'https://grvhmktqzrivbqbczkii.supabase.co';
         var key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdydmhta3RxenJpdmJxYmN6a2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3MDQ0MTIsImV4cCI6MjEwMTI4MDQxMn0.fFfrS-7w45IzxwOvvyYDB5ngLnyTz-Ru7XVL5LZXm4o';
         window.__rsSb = window.supabase.createClient(url, key, {
@@ -1142,10 +1709,12 @@
         });
       } catch (e) {}
     }
-    if (window.__rsSb) {
-      window.__rsSb.auth.getSession().then(function (res) {
+    var sb = getSb();
+    if (sb) {
+      window.__rsSb = sb;
+      sb.auth.getSession().then(function (res) {
         if (res.data && res.data.session) window.__rsUser = res.data.session.user;
-      });
+      }).catch(function () {});
     }
   }
 
@@ -1155,6 +1724,33 @@
   });
 
   // After auth
+  var partyPullInterval = null;
+  function ensurePartyPullLoop() {
+    if (partyPullInterval) return;
+    // Always pull when viewing a shared map — even if we are not sharing ourselves
+    // Faster poll so mobile clients see each other both ways
+    partyPullInterval = setInterval(function () {
+      var vs = C.getViewState && C.getViewState();
+      if (vs && vs.mode === 'shared' && vs.sharedMapId && document.visibilityState === 'visible') {
+        var m = getMap();
+        if (m && !window.map) {
+          try { window.map = m; } catch (e) {}
+        }
+        pullPresence();
+      }
+    }, PULL_MS);
+    // Extra pull when tab becomes visible (mobile backgrounding)
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'visible') {
+        setTimeout(function () { pullPresence(); }, 200);
+      }
+    });
+    // pageshow (bfcache restore on iOS)
+    window.addEventListener('pageshow', function () {
+      setTimeout(function () { pullPresence(); }, 300);
+    });
+  }
+
   function onReady() {
     bindClientRefs();
     wireExtraSettings();
@@ -1164,15 +1760,42 @@
     sharing = false;
     try { localStorage.removeItem(PRESENCE_KEY); } catch (e) {}
     updateShareLocBtn();
+    ensurePartyPullLoop();
     setTimeout(function () {
+      // Capture map if already created
+      try {
+        var m0 = getMap();
+        if (m0) window.map = m0;
+      } catch (e0) {}
       refreshMapsUi();
       pullPresence();
-      // presence poll when on shared (others' locations only; does not turn our share on)
-      setInterval(function () {
-        var vs = C.getViewState && C.getViewState();
-        if (vs && vs.mode === 'shared' && document.visibilityState === 'visible') pullPresence();
-      }, 12000);
-    }, 800);
+    }, 500);
+    // Retry after map typically mounts
+    [1200, 2500, 5000].forEach(function (ms) {
+      setTimeout(function () {
+        try {
+          var m = getMap();
+          if (m) window.map = m;
+        } catch (e1) {}
+        pullPresence();
+      }, ms);
+    });
+  }
+
+  // When main app finishes ensureMap, re-pull party markers
+  var _origEnsureMap = window.ensureMap;
+  if (typeof _origEnsureMap === 'function' && !_origEnsureMap._rsPartyHook) {
+    window.ensureMap = function () {
+      return _origEnsureMap.apply(this, arguments).then(function (m) {
+        try {
+          if (m) window.map = m;
+          else if (getMap()) window.map = getMap();
+        } catch (e) {}
+        setTimeout(function () { pullPresence(); }, 50);
+        return m;
+      });
+    };
+    window.ensureMap._rsPartyHook = true;
   }
 
   if (C.authReady && C.authReady.then) {
@@ -1194,7 +1817,9 @@
     createPrivateMap: createPrivateMap,
     switchToPrivate: switchToPrivate,
     isSharing: function () { return sharing; },
-    stampOwner: stampOwner
+    stampOwner: stampOwner,
+    pullPresence: pullPresence,
+    onDeviceHeading: onDeviceHeading
   };
 
   // Multi-map on create pin: inject checkboxes after save forms appear — hook savePinFromMap

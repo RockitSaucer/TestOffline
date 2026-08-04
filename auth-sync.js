@@ -767,7 +767,7 @@
     var modeLabel = $('set-map-mode-label');
     if (modeLabel) {
       if (viewState.mode === 'shared') {
-        modeLabel.textContent = 'Viewing: ' + (viewState.sharedMapName || 'Shared') + ' (' + (viewState.sharedMapCode || '------') + ')';
+        modeLabel.textContent = 'Viewing: ' + (viewState.sharedMapName || 'Shared');
       } else {
         modeLabel.textContent = 'Viewing: ' + (viewState.privateMapName || 'My Map') + ' (private)';
       }
@@ -778,7 +778,7 @@
     if (sync) {
       if (offlineMode) sync.textContent = 'Offline mode — cloud sync paused';
       else if (!isOnline()) sync.textContent = 'No connection — saving locally';
-      else if (dirty) sync.textContent = 'Local save pending cloud uploadâ€¦';
+      else if (dirty) sync.textContent = 'Local save pending cloud upload…';
       else sync.textContent = 'Cloud sync ready';
     }
     updateSettingsMapsList();
@@ -788,15 +788,22 @@
     var sync = $('set-sync-status');
     if (!sync) return;
     if (offlineMode) { sync.textContent = 'Offline mode — cloud sync paused'; return; }
-    if (state === 'syncing') sync.textContent = 'Uploading to cloudâ€¦';
-    else if (state === 'pending') sync.textContent = 'Waiting to upload (will retry when online)â€¦';
+    if (state === 'syncing') sync.textContent = 'Uploading to cloud…';
+    else if (state === 'pending') sync.textContent = 'Waiting to upload (will retry when online)…';
     else if (state === 'ok') sync.textContent = 'Synced with cloud';
   }
 
   async function updateSettingsMapsList() {
-    var box = $('set-shared-maps-list');
+    // Unified My Maps list is rendered by party-maps refreshMapsUi (set-all-maps-list).
+    try {
+      if (window.RegSlayerParty && typeof window.RegSlayerParty.refreshMapsUi === 'function') {
+        await window.RegSlayerParty.refreshMapsUi();
+        return;
+      }
+    } catch (e0) {}
+    var box = $('set-all-maps-list') || $('set-shared-maps-list');
     if (!box || !sessionUser) return;
-    box.innerHTML = '<p class="settings-hint">Loading mapsâ€¦</p>';
+    box.innerHTML = '<p class="settings-hint">Loading maps…</p>';
     try {
       var maps = await listMySharedMaps();
       if (!maps.length) {
@@ -808,7 +815,7 @@
         var active = viewState.mode === 'shared' && viewState.sharedMapId === m.id;
         html += '<div class="settings-map-row' + (active ? ' is-active' : '') + '">';
         html += '<button type="button" class="settings-map-open" data-mid="' + m.id + '">' +
-          esc(m.name) + ' <span class="settings-map-code">' + esc(m.code) + '</span></button>';
+          esc(m.name) + '</button>';
         html += '</div>';
       });
       box.innerHTML = html;

@@ -1,19 +1,17 @@
 # TestOffline agent notes
 
-## Pin & tool icons (read this before changing map pins or toolbar tools)
+**Current snapshot:** **V1.01 Beta** (`APP_VERSION = '1.01-beta'`)  
+Snapshot of Hunt-Slayer production features at restructure kickoff (context + canvas shell work starts from this baseline on TestOffline unless otherwise directed).
+
+## Pin & tool icons
 
 **Full procedure:** [`docs/PIN_AND_TOOL_ICONS.md`](docs/PIN_AND_TOOL_ICONS.md)
 
-When the user asks for **new pins**, **more pin icons**, or pin art “like the ones we have,” follow that doc exactly:
-
-1. Sources: `Desktop/HuntApp/button icons/Layers naked/` (unless they give another folder)
-2. Run: `python tools/process_pin_icons.py`
-3. Wire new entries into `PIN_ICON_CATALOG` in `index.html` from `icons/pins/_catalog.json`
-4. Defaults: white disc, natural glyph, body color = image color; no white background; no pin-in-pin
-5. Bump `SHELL_CACHE` in `sw.js`
-
-Tool icons: `tools/process_tool_icons.py` + `HuntApp/button icons/Tool Icons/` — same isolation idea; measure/draw yellow, track red, layers larger/thicker light glyph.
+1. Sources: `Desktop/HuntApp/button icons/Layers naked/` (pins), `Tool Icons/` (toolbar)
+2. Run: `python tools/process_pin_icons.py` / `process_tool_icons.py`
+3. Wire `PIN_ICON_CATALOG` in `index.html`
+4. Bump `SHELL_CACHE` in `sw.js`
 
 ## Scope
 
-Work stays in **TestOffline** unless the user explicitly asks to promote into Hunt-Slayer / HuntApp baseline HTML.
+Work stays in **TestOffline** unless the user explicitly asks to promote into Hunt-Slayer / production.

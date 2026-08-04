@@ -1,5 +1,5 @@
 /**
- * REG SLAYER — TestOffline engine
+ * REG SLAYER — offline engine
  * Offline map packs (2 mi radius), weather/water stale cache, connection UI.
  * Does not change online behavior when network is healthy.
  */
